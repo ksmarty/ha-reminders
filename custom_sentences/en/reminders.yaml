@@ -1,0 +1,84 @@
+# HA Reminders — Assist sentence templates (English)
+#
+# HACS cannot install custom_sentences for you; copy this file once into your
+# Home Assistant config directory:
+#
+#   config/custom_sentences/en/reminders.yaml
+#
+# ...or run:  scripts/install_custom_sentences.sh
+#
+# Then reload Assist (or restart HA) to pick the sentences up.
+
+language: en
+
+lists:
+  title:
+    wildcard: true
+  zone:
+    wildcard: true
+  time:
+    wildcard: true
+  minutes:
+    range:
+      from: 1
+      to: 10080
+  number:
+    wildcard: true
+
+intents:
+  ReminderCreate:
+    data:
+      - sentences:
+          - "remind me to {title} when I get {zone}"
+          - "remind me to {title} when I get to {zone}"
+          - "remind me to {title} when I arrive at {zone}"
+          - "create a reminder to {title} when I get {zone}"
+          - "create a reminder to {title} when I get to {zone}"
+          - "create a reminder to {title} when I arrive at {zone}"
+        slots:
+          direction: enter
+      - sentences:
+          - "remind me to {title} when I leave {zone}"
+          - "remind me to {title} when I go to {zone}"
+          - "create a reminder to {title} when I leave {zone}"
+          - "create a reminder to {title} when I go to {zone}"
+        slots:
+          direction: leave
+      - sentences:
+          - "remind me to {title} in {minutes} minutes"
+          - "create a reminder to {title} in {minutes} minutes"
+          - "set a reminder to {title} in {minutes} minutes"
+      - sentences:
+          - "remind me to {title} at {time}"
+          - "create a reminder to {title} at {time}"
+          - "set a reminder to {title} at {time}"
+
+  ReminderList:
+    data:
+      - sentences:
+          - "list my reminders"
+          - "what are my reminders"
+          - "show my reminders"
+
+  ReminderComplete:
+    data:
+      - sentences:
+          - "complete reminder {title}"
+          - "mark reminder {title} as complete"
+          - "mark reminder {title} as done"
+          - "mark {title} as done"
+
+  ReminderDelete:
+    data:
+      - sentences:
+          - "delete reminder {title}"
+          - "remove reminder {title}"
+          - "delete reminder number {number}"
+          - "remove reminder number {number}"
+
+  ReminderSnooze:
+    data:
+      - sentences:
+          - "snooze reminder {title} for {minutes} minutes"
+          - "snooze reminder {title} for {minutes}"
+          - "snooze reminder {title}"

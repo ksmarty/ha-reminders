@@ -1,0 +1,6 @@
+{
+  "name": "HA Reminders",
+  "homeassistant": "2024.6.0",
+  "hacs": "2.0.0",
+  "render_readme": true
+}

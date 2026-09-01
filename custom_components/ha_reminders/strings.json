@@ -1,0 +1,44 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "HA Reminders",
+        "description": "Set the global defaults used when new reminders are created. Every value can be overridden per reminder.",
+        "data": {
+          "default_notify_service": "Default notification service",
+          "default_user_name": "Default user name",
+          "default_snooze_delays": "Default snooze delays (minutes, comma separated)",
+          "default_wait_time_if_no_action": "Resend delay when the notification is ignored (minutes)",
+          "default_notification_count": "Maximum number of notification repeats",
+          "default_snooze_text": "Snooze action text (${time} is replaced)",
+          "default_acknowledge_action_title": "Acknowledge action title",
+          "default_person_entity_ids": "Person entities used by zone reminders created via voice"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "HA Reminders is already configured. Remove the existing entry first if you want to reconfigure it."
+    },
+    "error": {
+      "invalid_snooze_delays": "Snooze delays must be a comma separated list of positive integers."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "HA Reminders",
+        "description": "Update the global defaults used when new reminders are created.",
+        "data": {
+          "default_notify_service": "Default notification service",
+          "default_user_name": "Default user name",
+          "default_snooze_delays": "Default snooze delays (minutes, comma separated)",
+          "default_wait_time_if_no_action": "Resend delay when the notification is ignored (minutes)",
+          "default_notification_count": "Maximum number of notification repeats",
+          "default_snooze_text": "Snooze action text (${time} is replaced)",
+          "default_acknowledge_action_title": "Acknowledge action title",
+          "default_person_entity_ids": "Person entities used by zone reminders created via voice"
+        }
+      }
+    }
+  }
+}

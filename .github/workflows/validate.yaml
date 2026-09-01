@@ -1,0 +1,44 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    name: Python checks (pytest + compile)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install pytest
+        run: pip install pytest
+
+      - name: Compile integration
+        run: python -m compileall -q custom_components/ha_reminders
+
+      - name: Run unit tests
+        run: python -m pytest
+
+  hacs:
+    # The HACS workflow boots a Home Assistant container to validate the
+    # repository; only run it on main to keep CI fast.
+    if: github.ref == 'refs/heads/main'
+    name: HACS validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: HACS action
+        uses: hacs/action@main
+        with:
+          category: integration
+          token: ${{ secrets.GITHUB_TOKEN }}
