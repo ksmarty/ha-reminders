@@ -74,10 +74,6 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
     # Public accessors
     # ------------------------------------------------------------------
     @property
-    def data(self) -> list[Reminder]:
-        return self._reminders
-
-    @property
     def options(self) -> dict[str, Any]:
         return dict(self._options)
 
@@ -283,11 +279,12 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         """Publish current data to listeners (sensors, scheduler)."""
         self.async_set_updated_data(self._reminders)
 
-    def async_shutdown(self) -> None:
+    async def async_shutdown(self) -> None:
         """Stop the scheduler and drop coordinator state."""
         if self._scheduler is not None:
             self._scheduler.async_shutdown()
             self._scheduler = None
+        await super().async_shutdown()
 
     # ------------------------------------------------------------------
     # Internals

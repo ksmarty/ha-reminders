@@ -83,7 +83,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     coordinator = hass.data[DOMAIN].get("coordinator")
     if coordinator is not None:
-        coordinator.async_shutdown()
+        await coordinator.async_shutdown()
     hass.data[DOMAIN].pop("coordinator", None)
 
     try:
