@@ -55,6 +55,8 @@ export class ReminderEditor extends LitElement {
 
   @state() private _error = "";
 
+  @state() private _notifyServices: string[] = [];
+
   static styles = css`
     .editor {
       max-width: 560px;
@@ -96,6 +98,19 @@ export class ReminderEditor extends LitElement {
       this._draft = this._draftFrom(this.reminder);
       this._error = "";
       this._saving = false;
+      void this._loadNotifyServices();
+    }
+  }
+
+  private async _loadNotifyServices(): Promise<void> {
+    try {
+      const services = await this.hass.callWS({ type: "get_services" });
+      const domains = Object.keys(services).filter(
+        (domain) => services[domain]?.notify,
+      );
+      this._notifyServices = domains.sort();
+    } catch {
+      this._notifyServices = [];
     }
   }
 
@@ -264,13 +279,25 @@ export class ReminderEditor extends LitElement {
             ></ha-textfield>
           </div>
           <div class="row">
-            <ha-textfield
+            <ha-select
               label="Notification service"
-              helper="e.g. mobile_app_pixel_8"
               .value=${d.notify_service}
-              @input=${(ev: Event) =>
-                this._set("notify_service", (ev.target as HTMLInputElement).value)}
-            ></ha-textfield>
+              @selected=${(ev: Event) =>
+                this._set(
+                  "notify_service",
+                  (ev.target as HTMLSelectElement).value || "",
+                )}
+              @closed=${(ev: Event) => ev.stopPropagation()}
+            >
+              <mwc-list-item value=""></mwc-list-item>
+              ${[...new Set([...this._notifyServices, d.notify_service])]
+                .filter((service) => service)
+                .map(
+                  (service) => html`
+                    <mwc-list-item value=${service}>${service}</mwc-list-item>
+                  `,
+                )}
+            </ha-select>
             <ha-textfield
               label="User name"
               .value=${d.user_name}

@@ -62,6 +62,9 @@ export interface HomeAssistant {
     service: string,
     serviceData?: Record<string, unknown>,
   ): Promise<HassServiceResponse>;
+  callWS(message: Record<string, unknown>): Promise<{
+    [domain: string]: { [service: string]: unknown };
+  }>;
 }
 
 export interface CardConfig {

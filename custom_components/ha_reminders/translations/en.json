@@ -10,7 +10,7 @@
           "default_snooze_delays": "Default snooze delays (minutes, comma separated)",
           "default_wait_time_if_no_action": "Resend delay when the notification is ignored (minutes)",
           "default_notification_count": "Maximum number of notification repeats",
-          "default_snooze_text": "Snooze action text (${time} is replaced)",
+          "default_snooze_text": "Snooze action text ($'{time}' is replaced)",
           "default_acknowledge_action_title": "Acknowledge action title",
           "default_person_entity_ids": "Person entities used by zone reminders created via voice"
         }
@@ -34,7 +34,7 @@
           "default_snooze_delays": "Default snooze delays (minutes, comma separated)",
           "default_wait_time_if_no_action": "Resend delay when the notification is ignored (minutes)",
           "default_notification_count": "Maximum number of notification repeats",
-          "default_snooze_text": "Snooze action text (${time} is replaced)",
+          "default_snooze_text": "Snooze action text ($'{time}' is replaced)",
           "default_acknowledge_action_title": "Acknowledge action title",
           "default_person_entity_ids": "Person entities used by zone reminders created via voice"
         }
