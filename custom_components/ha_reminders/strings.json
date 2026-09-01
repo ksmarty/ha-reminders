@@ -3,16 +3,16 @@
     "step": {
       "user": {
         "title": "HA Reminders",
-        "description": "Set the global defaults used when new reminders are created. Every value can be overridden per reminder.",
+        "description": "Defaults applied whenever a new reminder is created. Each reminder can override every one of these values.",
         "data": {
           "default_notify_service": "Default notification service",
-          "default_user_name": "Default user name",
+          "default_user_name": "Default user name (who the reminder is for)",
           "default_snooze_delays": "Default snooze delays (minutes, comma separated)",
           "default_wait_time_if_no_action": "Resend delay when the notification is ignored (minutes)",
           "default_notification_count": "Maximum number of notification repeats",
-          "default_snooze_text": "Snooze action text ($'{time}' is replaced)",
+          "default_snooze_text": "Snooze action text (${time} is replaced)",
           "default_acknowledge_action_title": "Acknowledge action title",
-          "default_person_entity_ids": "Person entities used by zone reminders created via voice"
+          "default_person_entity_ids": "Persons watched by voice-created zone reminders"
         }
       }
     },
@@ -27,16 +27,16 @@
     "step": {
       "init": {
         "title": "HA Reminders",
-        "description": "Update the global defaults used when new reminders are created.",
+        "description": "Defaults applied whenever a new reminder is created. Each reminder can override every one of these values.",
         "data": {
           "default_notify_service": "Default notification service",
-          "default_user_name": "Default user name",
+          "default_user_name": "Default user name (who the reminder is for)",
           "default_snooze_delays": "Default snooze delays (minutes, comma separated)",
           "default_wait_time_if_no_action": "Resend delay when the notification is ignored (minutes)",
           "default_notification_count": "Maximum number of notification repeats",
-          "default_snooze_text": "Snooze action text ($'{time}' is replaced)",
+          "default_snooze_text": "Snooze action text (${time} is replaced)",
           "default_acknowledge_action_title": "Acknowledge action title",
-          "default_person_entity_ids": "Person entities used by zone reminders created via voice"
+          "default_person_entity_ids": "Persons watched by voice-created zone reminders"
         }
       }
     }

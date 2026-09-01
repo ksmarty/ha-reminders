@@ -300,6 +300,7 @@ export class ReminderEditor extends LitElement {
             </ha-select>
             <ha-textfield
               label="User name"
+              helper="Who this reminder is for — shown in group acknowledgement messages"
               .value=${d.user_name}
               @input=${(ev: Event) =>
                 this._set("user_name", (ev.target as HTMLInputElement).value)}

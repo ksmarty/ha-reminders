@@ -766,6 +766,7 @@ let u = class extends z {
             </ha-select>
             <ha-textfield
               label="User name"
+              helper="Who this reminder is for — shown in group acknowledgement messages"
               .value=${i.user_name}
               @input=${(t) => this._set("user_name", t.target.value)}
             ></ha-textfield>

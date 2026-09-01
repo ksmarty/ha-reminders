@@ -129,9 +129,29 @@ actions:
       one_shot: true
 ```
 
-> Note for `user_name` and `notify_service`: `user_name` appears in the
-> notification group completion message; `notify_service` accepts the blueprint
-> convention (`mobile_app_pixel_8`) or an explicit `notify.*` reference.
+> Note for `user_name` and `notify_service`: `user_name` is who the reminder
+> is for — it is embedded in the notification action strings and shown in the
+> message the rest of a notification group receives when someone acknowledges
+> (e.g. `Kyle acknowledged: Take out the trash`). `notify_service` accepts the
+> blueprint convention (`mobile_app_pixel_8`) or an explicit `notify.*`
+> reference.
+
+### Global defaults (config entry)
+
+The **Settings → Devices & Services → HA Reminders** entry holds defaults
+applied to every new reminder; anything you leave unset falls back to them,
+and every value can still be overridden per reminder:
+
+- **Default notification service** — dropdown of all installed `notify`
+  services (`mobile_app_*`, `notify` groups, …). `No default` means each
+  reminder must pick its own service.
+- **Default user name** — who reminders are for by default (shown in
+  notification-group acknowledgement messages).
+- **Default snooze delays / resend delay / max repeats / snooze text /
+  acknowledge action title** — notification behavior defaults.
+- **Persons watched by voice-created zone reminders** — when you create a
+  zone reminder via Assist ("remind me to … when I leave work"), the persons
+  to watch; empty falls back to all `person.*` entities.
 
 ### Notification behavior (blueprint parity)
 

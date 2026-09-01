@@ -71,6 +71,11 @@ def test_defaults_form_serializes() -> None:
     assert by_name["default_notify_service"]["type"] == "select"
     assert by_name["default_person_entity_ids"]["type"] == "multi_select"
 
+    # The empty default must be labeled, not rendered as a blank entry.
+    notify_options = by_name["default_notify_service"]["options"]
+    assert notify_options[0][0] == ""
+    assert notify_options[0][1] == "No default"
+
 
 def test_options_form_serializes_with_stale_defaults() -> None:
     """Already-configured values stay serializable even if entities are gone."""

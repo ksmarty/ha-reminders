@@ -95,6 +95,10 @@ class RemindersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Keep an already-configured value selectable even if the service
             # is temporarily unavailable.
             notify_services = [current_notify] + notify_services
+        notify_options: dict[str, str] = {"": "No default"}
+        notify_options.update(
+            {service: service for service in notify_services}
+        )
 
         persons = self._person_options()
         for existing in as_list(options.get(CONF_DEFAULT_PERSON_ENTITY_IDS)):
@@ -111,7 +115,7 @@ class RemindersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema: dict[vol.Optional, Any] = {
             vol.Optional(
                 CONF_DEFAULT_NOTIFY_SERVICE, default=current_notify
-            ): vol.In([""] + notify_services),
+            ): vol.In(notify_options),
             vol.Optional(
                 CONF_DEFAULT_USER_NAME,
                 default=options.get(CONF_DEFAULT_USER_NAME, DEFAULT_USER_NAME),
