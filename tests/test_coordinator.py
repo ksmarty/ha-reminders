@@ -35,7 +35,10 @@ async def _run(tmp_path) -> None:
 
     from homeassistant.helpers import frame  # noqa: PLC0415
 
-    frame.async_setup(hass)
+    if hasattr(frame, "async_setup"):
+        # Newer HA requires the frame helper to be wired up for report_usage;
+        # older releases manage it internally.
+        frame.async_setup(hass)
     try:
         coordinator = ReminderCoordinator(hass, {})
         # Regression (v1.0.4): constructing the coordinator must not crash —
