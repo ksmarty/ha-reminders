@@ -1,20 +1,23 @@
 """Tests for the notification action protocol (blueprint-compatible encoding).
 
-`notify.py` imports `homeassistant.core` only for type annotations, so we stub
-that module before importing to keep the tests runnable without an HA runtime.
+`notify.py` imports `homeassistant.core` only for type annotations. When a
+Home Assistant runtime is not installed (plain `pip install pytest`), we stub
+that module before importing; with HA installed the real module is used.
 """
 
 from __future__ import annotations
 
+import importlib.util
 import sys
 import types
 
-# Stub the homeassistant namespace before importing the integration.
-_ha = types.ModuleType("homeassistant")
-_ha_core = types.ModuleType("homeassistant.core")
-_ha_core.HomeAssistant = object  # type: ignore[attr-defined]
-sys.modules.setdefault("homeassistant", _ha)
-sys.modules["homeassistant.core"] = _ha_core
+if importlib.util.find_spec("homeassistant") is None:
+    # Fallback for dev machines without a Home Assistant runtime.
+    _ha = types.ModuleType("homeassistant")
+    _ha_core = types.ModuleType("homeassistant.core")
+    _ha_core.HomeAssistant = object  # type: ignore[attr-defined]
+    sys.modules.setdefault("homeassistant", _ha)
+    sys.modules["homeassistant.core"] = _ha_core
 
 import pytest  # noqa: E402
 

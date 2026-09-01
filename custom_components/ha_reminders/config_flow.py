@@ -118,7 +118,7 @@ class RemindersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ): str,
             vol.Optional(
                 CONF_DEFAULT_SNOOZE_DELAYS, default=stored_delays
-            ): vol.All(str, _parse_snooze_delays),
+            ): str,
             vol.Optional(
                 CONF_DEFAULT_WAIT_TIME_IF_NO_ACTION,
                 default=options.get(
@@ -166,18 +166,18 @@ class RemindersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
-                options = dict(_default_options())
-                options.update(user_input)
-                options[CONF_DEFAULT_SNOOZE_DELAYS] = _format_snooze_delays(
-                    _parse_snooze_delays(
-                        user_input.get(CONF_DEFAULT_SNOOZE_DELAYS, "")
-                    )
-                )
-                return self.async_create_entry(
-                    title="HA Reminders", data={}, options=options
+                delays = _parse_snooze_delays(
+                    user_input.get(CONF_DEFAULT_SNOOZE_DELAYS, "")
                 )
             except vol.Invalid:
                 errors["base"] = "invalid_snooze_delays"
+            else:
+                options = dict(_default_options())
+                options.update(user_input)
+                options[CONF_DEFAULT_SNOOZE_DELAYS] = _format_snooze_delays(delays)
+                return self.async_create_entry(
+                    title="HA Reminders", data={}, options=options
+                )
 
         return self.async_show_form(
             step_id="user",
@@ -205,15 +205,15 @@ class RemindersOptionsFlow(config_entries.OptionsFlow):
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
-                options.update(user_input)
-                options[CONF_DEFAULT_SNOOZE_DELAYS] = _format_snooze_delays(
-                    _parse_snooze_delays(
-                        user_input.get(CONF_DEFAULT_SNOOZE_DELAYS, "")
-                    )
+                delays = _parse_snooze_delays(
+                    user_input.get(CONF_DEFAULT_SNOOZE_DELAYS, "")
                 )
-                return self.async_create_entry(title="", data=options)
             except vol.Invalid:
                 errors["base"] = "invalid_snooze_delays"
+            else:
+                options.update(user_input)
+                options[CONF_DEFAULT_SNOOZE_DELAYS] = _format_snooze_delays(delays)
+                return self.async_create_entry(title="", data=options)
 
         return self.async_show_form(
             step_id="init",
