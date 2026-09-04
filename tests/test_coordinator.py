@@ -74,6 +74,16 @@ async def _run(tmp_path) -> None:
         coordinator.set_scheduler(scheduler)
         await scheduler.async_reschedule()
 
+        # The service schemas accept a sensor entity id in place of the
+        # reminder id (the dev-tools entity picker returns entity ids).
+        hass.states.async_set(
+            f"sensor.ha_reminder_take_out_the_trash_{reminder_id[:8]}",
+            "scheduled",
+            {"reminder_id": reminder_id},
+        )
+        entity_id = f"sensor.ha_reminder_take_out_the_trash_{reminder_id[:8]}"
+        assert coordinator.get(entity_id) is coordinator.get(reminder_id)
+
         await coordinator.async_delete(reminder_id)
         assert coordinator.get(reminder_id) is None
     finally:

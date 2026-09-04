@@ -82,7 +82,7 @@ _REMINDER_FIELDS = {
     vol.Optional(FIELD_TIME_WINDOW_START): str,
     vol.Optional(FIELD_TIME_WINDOW_END): str,
     vol.Optional(FIELD_ACKNOWLEDGE_ACTION_TITLE): str,
-    vol.Optional(FIELD_ACKNOWLEDGE_ACTIONS): list,
+    vol.Optional(FIELD_ACKNOWLEDGE_ACTIONS): vol.Any(list, dict),
     vol.Optional(FIELD_SNOOZE_DELAYS): vol.Any(
         [vol.All(vol.Coerce(int), vol.Range(min=1))], str
     ),

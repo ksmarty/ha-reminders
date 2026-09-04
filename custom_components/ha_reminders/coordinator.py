@@ -78,8 +78,17 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         return dict(self._options)
 
     def get(self, reminder_id: str) -> Reminder | None:
-        """Return a reminder by id."""
-        return next((r for r in self._reminders if r.id == reminder_id), None)
+        """Return a reminder by id (also accepts its sensor entity id)."""
+        reminder = next((r for r in self._reminders if r.id == reminder_id), None)
+        if reminder is None and reminder_id.startswith("sensor."):
+            state = self.hass.states.get(reminder_id)
+            if state is not None:
+                resolved = state.attributes.get(ATTR_REMINDER_ID)
+                if isinstance(resolved, str):
+                    reminder = next(
+                        (r for r in self._reminders if r.id == resolved), None
+                    )
+        return reminder
 
     def runtime_of(self, reminder_id: str) -> dict[str, Any]:
         """Return the mutable runtime state dict for a reminder."""

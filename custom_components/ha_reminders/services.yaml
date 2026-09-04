@@ -1,0 +1,361 @@
+# Service UI descriptions for HA Reminders.
+#
+# These selector definitions drive the UI form in Development Tools → Actions
+# (and the automation "Perform action" editor). The voluptuous schemas in
+# services.py still validate each call.
+
+create:
+  name: Create reminder
+  description: Create a reminder and return its id.
+  fields:
+    title:
+      required: true
+      example: Take out the trash
+      selector:
+        text: {}
+    message:
+      required: true
+      example: The bins go out tonight!
+      selector:
+        text:
+          multiline: true
+    subtitle:
+      selector:
+        text: {}
+    enabled:
+      default: true
+      selector:
+        boolean: {}
+    notify_service:
+      example: mobile_app_pixel_8
+      selector:
+        text: {}
+    user_name:
+      example: Kyle
+      selector:
+        text: {}
+    trigger_type:
+      default: time
+      selector:
+        select:
+          options:
+            - label: At a fixed time
+              value: time
+            - label: When I enter a zone
+              value: zone_enter
+            - label: When I leave a zone
+              value: zone_leave
+    start_date:
+      selector:
+        date: {}
+    stop_date:
+      selector:
+        date: {}
+    time:
+      selector:
+        time: {}
+    every_x_days:
+      default: 1
+      selector:
+        number:
+          min: 1
+          mode: box
+    exclude_days_of_week:
+      selector:
+        select:
+          multiple: true
+          custom_value: false
+          options:
+            - label: Monday
+              value: "0"
+            - label: Tuesday
+              value: "1"
+            - label: Wednesday
+              value: "2"
+            - label: Thursday
+              value: "3"
+            - label: Friday
+              value: "4"
+            - label: Saturday
+              value: "5"
+            - label: Sunday
+              value: "6"
+    zone_entity_id:
+      selector:
+        entity:
+          domain: zone
+    person_entity_ids:
+      selector:
+        entity:
+          domain: person
+          multiple: true
+    time_window_start:
+      selector:
+        time: {}
+    time_window_end:
+      selector:
+        time: {}
+    acknowledge_action_title:
+      default: Mark as done
+      selector:
+        text: {}
+    acknowledge_actions:
+      selector:
+        object: {}
+    snooze_delays:
+      example: "5,15,30,45,60"
+      selector:
+        text: {}
+    snooze_text:
+      default: Snooze for ${time}
+      selector:
+        text: {}
+    wait_time_if_no_action:
+      default: 15
+      selector:
+        number:
+          min: 1
+          mode: box
+    notification_count:
+      default: 100
+      selector:
+        number:
+          min: 1
+          mode: box
+    color:
+      example: "#ff0000"
+      selector:
+        text: {}
+    channel:
+      selector:
+        text: {}
+    channel_importance:
+      default: ""
+      selector:
+        select:
+          options:
+            - label: Default
+              value: ""
+            - label: Min
+              value: min
+            - label: Low
+              value: low
+            - label: High
+              value: high
+            - label: Max
+              value: max
+    notification_group:
+      selector:
+        text: {}
+    one_shot:
+      default: false
+      selector:
+        boolean: {}
+    acknowledge_notification_title:
+      default: Someone acknowledged the notification
+      selector:
+        text: {}
+    acknowledge_notification_body:
+      selector:
+        text:
+          multiline: true
+
+update:
+  name: Update reminder
+  description: Update an existing reminder (listed fields are replaced).
+  fields:
+    reminder_id:
+      required: true
+      selector:
+        entity:
+          domain: sensor
+    title:
+      selector:
+        text: {}
+    message:
+      selector:
+        text:
+          multiline: true
+    subtitle:
+      selector:
+        text: {}
+    enabled:
+      selector:
+        boolean: {}
+    notify_service:
+      selector:
+        text: {}
+    user_name:
+      selector:
+        text: {}
+    trigger_type:
+      selector:
+        select:
+          options:
+            - label: At a fixed time
+              value: time
+            - label: When I enter a zone
+              value: zone_enter
+            - label: When I leave a zone
+              value: zone_leave
+    start_date:
+      selector:
+        date: {}
+    stop_date:
+      selector:
+        date: {}
+    time:
+      selector:
+        time: {}
+    every_x_days:
+      selector:
+        number:
+          min: 1
+          mode: box
+    exclude_days_of_week:
+      selector:
+        select:
+          multiple: true
+          custom_value: false
+          options:
+            - label: Monday
+              value: "0"
+            - label: Tuesday
+              value: "1"
+            - label: Wednesday
+              value: "2"
+            - label: Thursday
+              value: "3"
+            - label: Friday
+              value: "4"
+            - label: Saturday
+              value: "5"
+            - label: Sunday
+              value: "6"
+    zone_entity_id:
+      selector:
+        entity:
+          domain: zone
+    person_entity_ids:
+      selector:
+        entity:
+          domain: person
+          multiple: true
+    time_window_start:
+      selector:
+        time: {}
+    time_window_end:
+      selector:
+        time: {}
+    acknowledge_action_title:
+      selector:
+        text: {}
+    acknowledge_actions:
+      selector:
+        object: {}
+    snooze_delays:
+      selector:
+        text: {}
+    snooze_text:
+      selector:
+        text: {}
+    wait_time_if_no_action:
+      selector:
+        number:
+          min: 1
+          mode: box
+    notification_count:
+      selector:
+        number:
+          min: 1
+          mode: box
+    color:
+      selector:
+        text: {}
+    channel:
+      selector:
+        text: {}
+    channel_importance:
+      selector:
+        select:
+          options:
+            - label: Default
+              value: ""
+            - label: Min
+              value: min
+            - label: Low
+              value: low
+            - label: High
+              value: high
+            - label: Max
+              value: max
+    notification_group:
+      selector:
+        text: {}
+    one_shot:
+      selector:
+        boolean: {}
+    acknowledge_notification_title:
+      selector:
+        text: {}
+    acknowledge_notification_body:
+      selector:
+        text:
+          multiline: true
+
+delete:
+  name: Delete reminder
+  description: Delete a reminder.
+  fields:
+    reminder_id:
+      required: true
+      selector:
+        entity:
+          domain: sensor
+
+list:
+  name: List reminders
+  description: List all reminders with their runtime status.
+
+snooze:
+  name: Snooze reminder
+  description: Snooze a reminder notification for a number of minutes.
+  fields:
+    reminder_id:
+      required: true
+      selector:
+        entity:
+          domain: sensor
+    minutes:
+      required: true
+      selector:
+        number:
+          min: 1
+          mode: box
+
+complete:
+  name: Complete reminder
+  description: Acknowledge a reminder (runs its acknowledge actions and notifies the rest of the group).
+  fields:
+    reminder_id:
+      required: true
+      selector:
+        entity:
+          domain: sensor
+    user_name:
+      selector:
+        text: {}
+
+set_enabled:
+  name: Set reminder enabled
+  description: Enable or disable a reminder.
+  fields:
+    reminder_id:
+      required: true
+      selector:
+        entity:
+          domain: sensor
+    enabled:
+      required: true
+      selector:
+        boolean: {}
