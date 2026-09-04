@@ -77,6 +77,22 @@ def test_defaults_form_serializes() -> None:
     assert notify_options[0][1] == "No default"
 
 
+def test_options_flow_schema_serializes() -> None:
+    """Options flow (Configure button) builds and serializes its schema."""
+    from custom_components.ha_reminders.config_flow import (  # noqa: PLC0415
+        RemindersOptionsFlow,
+    )
+
+    entry = SimpleNamespace(options=_default_options())
+    flow = RemindersOptionsFlow(entry)
+    flow.hass = _FakeHass()  # type: ignore[attr-defined]
+    schema = flow._options_schema(entry.options)  # noqa: SLF001
+    serialized = _serialize_schema(schema)
+    by_name = {field["name"]: field for field in serialized}
+    assert by_name["default_notify_service"]["type"] == "select"
+    assert by_name["default_person_entity_ids"]["type"] == "multi_select"
+
+
 def test_options_form_serializes_with_stale_defaults() -> None:
     """Already-configured values stay serializable even if entities are gone."""
     flow = RemindersConfigFlow()

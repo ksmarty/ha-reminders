@@ -64,10 +64,8 @@ def _default_options() -> dict[str, Any]:
     }
 
 
-class RemindersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle the single config entry for HA Reminders."""
-
-    VERSION = 1
+class _DefaultsForm:
+    """Shared defaults-form schema building for the config and options flows."""
 
     def _notify_services(self) -> list[str]:
         """Return every domain that offers a `notify` service."""
@@ -160,6 +158,12 @@ class RemindersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ] = str
         return vol.Schema(schema)
 
+
+class RemindersConfigFlow(config_entries.ConfigFlow, _DefaultsForm, domain=DOMAIN):
+    """Handle the single config entry for HA Reminders."""
+
+    VERSION = 1
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -196,7 +200,7 @@ class RemindersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return RemindersOptionsFlow(config_entry)
 
 
-class RemindersOptionsFlow(config_entries.OptionsFlow):
+class RemindersOptionsFlow(config_entries.OptionsFlow, _DefaultsForm):
     """Options flow: edit the global defaults."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
