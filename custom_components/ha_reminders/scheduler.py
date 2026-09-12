@@ -31,9 +31,45 @@ KIND_SNOOZE = "snooze"
 KIND_ROLLOVER = "rollover"
 
 
-def _is_in_zone(state: State | None, zone_entity_id: str) -> bool:
+def zone_state_is_in(
+    state_value: str | None,
+    zone_entity_id: str,
+    zone_friendly_name: str | None = None,
+) -> bool:
+    """Return True when a person/tracker state value means "inside the zone".
+
+    Home Assistant reports the zone a tracker is in as the zone's *name*, not
+    its entity id: `home` for `zone.home` (STATE_HOME) and the zone's friendly
+    name otherwise. The zone entity id itself is also accepted so manually set
+    states (Developer Tools → States) and integrations that use the entity id
+    both work.
+    """
+    if not state_value:
+        return False
+    value = str(state_value).strip().casefold()
+    if not value or value in {"unknown", "unavailable", "not_home", "none"}:
+        return False
+
+    object_id = zone_entity_id.split(".", 1)[-1]
+    candidates = {
+        zone_entity_id.strip().casefold(),
+        object_id.casefold(),
+        object_id.replace("_", " ").casefold(),
+    }
+    if zone_friendly_name:
+        candidates.add(zone_friendly_name.strip().casefold())
+    return value in candidates
+
+
+def _is_in_zone(
+    state: State | None,
+    zone_entity_id: str,
+    zone_friendly_name: str | None = None,
+) -> bool:
     """True when a person state is currently inside the given zone."""
-    return bool(state is not None and state.state == zone_entity_id)
+    if state is None:
+        return False
+    return zone_state_is_in(state.state, zone_entity_id, zone_friendly_name)
 
 
 class ReminderScheduler:
@@ -150,6 +186,14 @@ class ReminderScheduler:
     # ------------------------------------------------------------------
     # Zone triggers
     # ------------------------------------------------------------------
+    def _zone_friendly_name(self, zone_entity_id: str) -> str | None:
+        """Return the zone's friendly name (HA reports it as the tracker state)."""
+        zone_state = self._hass.states.get(zone_entity_id)
+        if zone_state is None:
+            return None
+        friendly_name = zone_state.attributes.get("friendly_name")
+        return str(friendly_name) if friendly_name else None
+
     async def _ensure_zone_listener(self, persons: set[str]) -> None:
         """Make sure the state listener covers exactly the persons in use."""
         if persons == self._zone_persons:
@@ -176,7 +220,9 @@ class ReminderScheduler:
         for person in reminder.person_entity_ids:
             if person not in membership:
                 membership[person] = _is_in_zone(
-                    self._hass.states.get(person), reminder.zone_entity_id or ""
+                    self._hass.states.get(person),
+                    reminder.zone_entity_id or "",
+                    self._zone_friendly_name(reminder.zone_entity_id or ""),
                 )
 
     async def _handle_zone_event(self, event: Event) -> None:
@@ -193,7 +239,11 @@ class ReminderScheduler:
             runtime = self._coordinator.runtime_of(reminder.id)
             membership = runtime.setdefault("zone_membership", {})
             was_in = membership.get(entity_id, False)
-            is_in = _is_in_zone(new_state, reminder.zone_entity_id or "")
+            is_in = _is_in_zone(
+                new_state,
+                reminder.zone_entity_id or "",
+                self._zone_friendly_name(reminder.zone_entity_id or ""),
+            )
             if was_in == is_in:
                 continue
             membership[entity_id] = is_in
