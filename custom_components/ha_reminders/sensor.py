@@ -6,6 +6,7 @@ loading data itself, so list/status updates are reactive for free.
 
 from __future__ import annotations
 
+import inspect
 import logging
 from typing import Any
 
@@ -43,11 +44,12 @@ async def async_setup_entry(
                 new_entities.append(sensors[reminder_id])
 
         if new_entities:
-
-            async def _add() -> None:
-                await async_add_entities(new_entities)
-
-            hass.async_create_task(_add())
+            # HA passes a sync scheduling callback here (`_async_schedule_add_entities`)
+            # which returns None — awaiting it blindly raises TypeError. Only
+            # await when a version actually hands us an awaitable.
+            result = async_add_entities(new_entities)
+            if inspect.isawaitable(result):
+                hass.async_create_task(result)
 
         for reminder_id in list(sensors):
             if reminder_id not in by_id:
