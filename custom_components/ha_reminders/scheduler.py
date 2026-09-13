@@ -121,7 +121,12 @@ class ReminderScheduler:
             if reminder.is_zone_trigger():
                 persons.update(reminder.person_entity_ids)
                 self._init_zone_membership(reminder, runtime)
-                runtime["next_fire"] = None
+                # Zone reminders have no scheduled occurrence, but an active
+                # cycle (snooze / resend) still needs its timer.
+                event, kind = self._pending_cycle_event(runtime, now_local)
+                runtime["next_fire"] = event
+                if event is not None:
+                    self._start_timer(reminder.id, event, kind)
                 continue
 
             event, kind = self._next_time_event(reminder, runtime, now_local)
@@ -140,10 +145,11 @@ class ReminderScheduler:
 
         await self._ensure_zone_listener(persons)
 
-    def _next_time_event(
-        self, reminder: Reminder, runtime: dict[str, Any], now_local: datetime
+    @staticmethod
+    def _pending_cycle_event(
+        runtime: dict[str, Any], now_local: datetime
     ) -> tuple[datetime | None, str]:
-        """Pick the next timer target for a time reminder."""
+        """Return a pending snooze/resend timer for an active cycle."""
         snooze_until = runtime.get("snooze_until")
         if snooze_until is not None:
             if snooze_until > now_local:
@@ -155,6 +161,16 @@ class ReminderScheduler:
             if next_resend > now_local:
                 return next_resend, KIND_RESEND
             runtime.pop("next_resend", None)
+
+        return None, KIND_OCCURRENCE
+
+    def _next_time_event(
+        self, reminder: Reminder, runtime: dict[str, Any], now_local: datetime
+    ) -> tuple[datetime | None, str]:
+        """Pick the next timer target for a time reminder."""
+        event, kind = self._pending_cycle_event(runtime, now_local)
+        if event is not None:
+            return event, kind
 
         if reminder.one_shot and runtime.get("completed"):
             return None, KIND_OCCURRENCE

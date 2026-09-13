@@ -11,7 +11,7 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
@@ -199,14 +199,20 @@ async def async_setup_services(
         return {}
 
     handlers = [
-        (SERVICE_CREATE, _create, SCHEMA_CREATE),
-        (SERVICE_UPDATE, _update, SCHEMA_UPDATE),
-        (SERVICE_DELETE, _delete, SCHEMA_DELETE),
-        (SERVICE_LIST, _list, SCHEMA_LIST),
-        (SERVICE_SNOOZE, _snooze, SCHEMA_SNOOZE),
-        (SERVICE_COMPLETE, _complete, SCHEMA_COMPLETE),
-        (SERVICE_SET_ENABLED, _set_enabled, SCHEMA_SET_ENABLED),
+        (SERVICE_CREATE, _create, SCHEMA_CREATE, SupportsResponse.OPTIONAL),
+        (SERVICE_UPDATE, _update, SCHEMA_UPDATE, SupportsResponse.NONE),
+        (SERVICE_DELETE, _delete, SCHEMA_DELETE, SupportsResponse.NONE),
+        (SERVICE_LIST, _list, SCHEMA_LIST, SupportsResponse.OPTIONAL),
+        (SERVICE_SNOOZE, _snooze, SCHEMA_SNOOZE, SupportsResponse.NONE),
+        (SERVICE_COMPLETE, _complete, SCHEMA_COMPLETE, SupportsResponse.NONE),
+        (SERVICE_SET_ENABLED, _set_enabled, SCHEMA_SET_ENABLED, SupportsResponse.NONE),
     ]
-    for name, handler, schema in handlers:
-        hass.services.async_register(DOMAIN, name, handler, schema=schema)
-    return [name for name, _, _ in handlers]
+    for name, handler, schema, supports_response in handlers:
+        hass.services.async_register(
+            DOMAIN,
+            name,
+            handler,
+            schema=schema,
+            supports_response=supports_response,
+        )
+    return [name for name, _, _, _ in handlers]
