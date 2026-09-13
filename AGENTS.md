@@ -124,6 +124,10 @@ both.
   `custom_components/ha_reminders/brand/`, repo description + topics set,
   valid `hacs.json`/`manifest.json`.
 
+Never put backticks in a shell-quoted string (commit messages, notes
+passed with `-m`/`--notes`): bash performs command substitution on them. Write
+release notes to a file with the Write tool and use `--notes-file` instead.
+
 Release steps (after user approval):
 1. Bump `custom_components/ha_reminders/manifest.json` `version`.
 2. Commit "Bump version to X.Y.Z", wait for green CI on `main`.
