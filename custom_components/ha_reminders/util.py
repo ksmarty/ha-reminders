@@ -106,13 +106,27 @@ def parse_time_text(value: str) -> dtime | None:
     return None
 
 
-def parse_spoken_number(value: str) -> int | None:
-    """Parse a spoken or numeric value (`two`, `second`, `3`) into an int."""
+def parse_spoken_number(value: Any) -> int | None:
+    """Parse a spoken or numeric value (`two`, `second`, `3`, 30.0) into an int.
+
+    Slot lists backed by a numeric `range:` deliver real numbers (e.g. 30.0)
+    rather than strings, so both shapes must be accepted.
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return int(value) if value >= 0 else None
+
     text = str(value or "").strip().lower()
     if not text:
         return None
-    if text.isdigit():
-        return int(text)
+    try:
+        number = int(float(text))
+    except ValueError:
+        pass
+    else:
+        # Negative values are never meaningful as durations or indices.
+        return number if number >= 0 else None
     if text in _NUMBER_WORDS:
         return _NUMBER_WORDS[text]
     if text in _ORDINAL_WORDS:

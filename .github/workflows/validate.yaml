@@ -18,7 +18,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install test dependencies
-        run: pip install pytest homeassistant
+        run: pip install pytest homeassistant hassil
 
       - name: Compile integration
         run: python -m compileall -q custom_components/ha_reminders

@@ -13,6 +13,7 @@ from __future__ import annotations
 import difflib
 import logging
 from datetime import timedelta
+from collections.abc import Mapping
 from typing import Any
 
 import voluptuous as vol
@@ -158,26 +159,45 @@ class _ReminderIntent(intent.IntentHandler):
         )
 
 
+def _slot_value(slots: Mapping[str, Any], name: str) -> Any:
+    """Return a slot's spoken value.
+
+    Home Assistant wraps every slot as ``{"value": ..., "text": ...}`` (see
+    `IntentHandler._slot_schema`), so handlers must not assume plain strings.
+    """
+    slot = slots.get(name)
+    if isinstance(slot, Mapping):
+        slot = slot.get("value", slot.get("text"))
+    return slot
+
+
+def _slot_text(slots: Mapping[str, Any], name: str) -> str:
+    """Return a slot's value as trimmed text ("" when absent)."""
+    value = _slot_value(slots, name)
+    return "" if value is None else str(value).strip()
+
+
 class ReminderCreateIntent(_ReminderIntent):
     """Create a time or zone based reminder."""
 
     intent_type = "ReminderCreate"
-    slot_schema = vol.Schema(
-        {
-            vol.Required("title"): str,
+
+    @property
+    def slot_schema(self) -> dict:
+        """Slot schema (HA wraps each value as {"value": ..., "text": ...})."""
+        return {
+            vol.Required("title"): vol.Any(str, int, float),
             vol.Optional("direction"): str,
             vol.Optional("zone"): str,
-            vol.Optional("minutes"): str,
-            vol.Optional("time"): str,
-        },
-        extra=vol.ALLOW_EXTRA,
-    )
+            vol.Optional("minutes"): vol.Any(str, int, float),
+            vol.Optional("time"): vol.Any(str, int, float),
+        }
 
     async def async_handle(self, intent_obj: intent.Intent) -> intent.IntentResponse:
         hass = intent_obj.hass
         coordinator = self._coordinator(hass)
-        slots = intent_obj.slots
-        title = str(slots.get("title", "")).strip()
+        slots = self.async_validate_slots(intent_obj.slots)
+        title = _slot_text(slots, "title")
         if not title:
             raise intent.IntentHandleError("I need something to remind you about.")
 
@@ -188,8 +208,8 @@ class ReminderCreateIntent(_ReminderIntent):
         }
         speech = ""
 
-        if direction := str(slots.get("direction") or "").strip():
-            zone_text = str(slots.get("zone") or "").strip()
+        if direction := _slot_text(slots, "direction"):
+            zone_text = _slot_text(slots, "zone")
             zone_entity_id = self._resolve_zone(hass, zone_text)
             payload["zone_entity_id"] = zone_entity_id
             if direction == "enter":
@@ -205,8 +225,8 @@ class ReminderCreateIntent(_ReminderIntent):
                     f"{zone_text}."
                 )
             coordinator.apply_voice_defaults(payload)
-        elif minutes := str(slots.get("minutes") or "").strip():
-            duration = parse_spoken_number(minutes)
+        elif (minutes_value := _slot_value(slots, "minutes")) is not None:
+            duration = parse_spoken_number(minutes_value)
             if duration is None or duration < 1:
                 raise intent.IntentHandleError(
                     "I could not understand the duration. Please say something "
@@ -226,7 +246,7 @@ class ReminderCreateIntent(_ReminderIntent):
             speech = (
                 f"Got it. I will remind you to {title} in {duration} minutes."
             )
-        elif time_text := str(slots.get("time") or "").strip():
+        elif time_text := _slot_text(slots, "time"):
             fire_time = parse_time_text(time_text)
             if fire_time is None:
                 raise intent.IntentHandleError(
@@ -266,6 +286,7 @@ class ReminderListIntent(_ReminderIntent):
     intent_type = "ReminderList"
 
     async def async_handle(self, intent_obj: intent.Intent) -> intent.IntentResponse:
+        self.async_validate_slots(intent_obj.slots)
         coordinator = self._coordinator(intent_obj.hass)
         pending = [r for r in coordinator.data if r.enabled]
         if not pending:
@@ -284,16 +305,15 @@ class ReminderCompleteIntent(_ReminderIntent):
     """Mark a reminder as done."""
 
     intent_type = "ReminderComplete"
-    slot_schema = vol.Schema(
-        {
-            vol.Required("title"): str,
-        },
-        extra=vol.ALLOW_EXTRA,
-    )
+
+    @property
+    def slot_schema(self) -> dict:
+        return {vol.Required("title"): vol.Any(str, int, float)}
 
     async def async_handle(self, intent_obj: intent.Intent) -> intent.IntentResponse:
+        slots = self.async_validate_slots(intent_obj.slots)
         reminder = self._resolve_reminder_by_title(
-            intent_obj.hass, str(intent_obj.slots.get("title", ""))
+            intent_obj.hass, _slot_text(slots, "title")
         )
         await self._coordinator(intent_obj.hass).async_complete(reminder.id)
         response = intent_obj.create_response()
@@ -305,19 +325,19 @@ class ReminderDeleteIntent(_ReminderIntent):
     """Delete a reminder."""
 
     intent_type = "ReminderDelete"
-    slot_schema = vol.Schema(
-        {
-            vol.Optional("title"): str,
-            vol.Optional("number"): str,
-        },
-        extra=vol.ALLOW_EXTRA,
-    )
+
+    @property
+    def slot_schema(self) -> dict:
+        return {
+            vol.Optional("title"): vol.Any(str, int, float),
+            vol.Optional("number"): vol.Any(str, int, float),
+        }
 
     async def async_handle(self, intent_obj: intent.Intent) -> intent.IntentResponse:
         hass = intent_obj.hass
-        slots = intent_obj.slots
-        number = str(slots.get("number") or "").strip()
-        title = str(slots.get("title") or "").strip()
+        slots = self.async_validate_slots(intent_obj.slots)
+        number = _slot_text(slots, "number")
+        title = _slot_text(slots, "title")
         if number:
             reminder = self._resolve_reminder_by_number(hass, number)
         elif title:
@@ -337,22 +357,19 @@ class ReminderSnoozeIntent(_ReminderIntent):
     """Snooze a reminder."""
 
     intent_type = "ReminderSnooze"
-    slot_schema = vol.Schema(
-        {
-            vol.Required("title"): str,
-            vol.Optional("minutes"): str,
-        },
-        extra=vol.ALLOW_EXTRA,
-    )
+
+    @property
+    def slot_schema(self) -> dict:
+        return {
+            vol.Required("title"): vol.Any(str, int, float),
+            vol.Optional("minutes"): vol.Any(str, int, float),
+        }
 
     async def async_handle(self, intent_obj: intent.Intent) -> intent.IntentResponse:
         hass = intent_obj.hass
-        reminder = self._resolve_reminder_by_title(
-            hass, str(intent_obj.slots.get("title", ""))
-        )
-        minutes = parse_spoken_number(
-            str(intent_obj.slots.get("minutes") or "")
-        )
+        slots = self.async_validate_slots(intent_obj.slots)
+        reminder = self._resolve_reminder_by_title(hass, _slot_text(slots, "title"))
+        minutes = parse_spoken_number(_slot_value(slots, "minutes"))
         if minutes is None or minutes < 1:
             minutes = 15
         await self._coordinator(hass).async_snooze(reminder.id, minutes)
