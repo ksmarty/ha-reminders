@@ -130,6 +130,7 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
             raise HomeAssistantError(str(err)) from err
         self._reminders.append(reminder)
         self._runtime[reminder.id] = {}
+        self._warn_if_broadcast_target(reminder)
         await self._persist_and_refresh()
         _LOGGER.debug("Created reminder %s (%s)", reminder.id, reminder.title)
         return reminder.id
@@ -151,6 +152,7 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
             raise HomeAssistantError(str(err)) from err
         index = self._reminders.index(reminder)
         self._reminders[index] = updated
+        self._warn_if_broadcast_target(updated)
         await self._persist_and_refresh()
 
     async def async_delete(self, reminder_id: str) -> None:
@@ -346,6 +348,24 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         if not payload.get("notify_service"):
             defaults["notify_service"] = options.get(CONF_DEFAULT_NOTIFY_SERVICE)
         return {k: v for k, v in defaults.items() if v is not None}
+
+    def _warn_if_broadcast_target(self, reminder: Reminder) -> None:
+        """Warn when a reminder would notify every device (generic target)."""
+        if self.would_broadcast(reminder):
+            _LOGGER.warning(
+                "Reminder '%s' targets the generic notify service '%s', which "
+                "notifies every device. Set notify_service to a specific "
+                "service, e.g. 'notify.mobile_app_pixel_8'.",
+                reminder.title,
+                reminder.notify_service,
+            )
+
+    def would_broadcast(self, reminder: Reminder) -> bool:
+        """Return True when the reminder's notify target is not device specific."""
+        domain, service = notify.resolve_notify_target(
+            reminder.notify_service, self.hass.services.has_service
+        )
+        return notify.is_generic_notify_target(domain, service)
 
     def _rebuild_person_map(self) -> None:
         person_map: dict[str, list[Reminder]] = {}

@@ -274,7 +274,15 @@ class ReminderCreateIntent(_ReminderIntent):
                 "\"... when I get home\"."
             )
 
-        await coordinator.async_create(payload)
+        reminder_id = await coordinator.async_create(payload)
+        created = coordinator.get(reminder_id)
+        if created is not None and coordinator.would_broadcast(created):
+            speech += (
+                " Note: your default notification service notifies every "
+                "device. Set a specific one in the integration options to "
+                "reach a single device."
+            )
+
         response = intent_obj.create_response()
         response.async_set_speech(speech)
         return response

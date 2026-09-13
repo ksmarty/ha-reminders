@@ -5,16 +5,16 @@
  */
 const I = globalThis, Z = I.ShadowRoot && (I.ShadyCSS === void 0 || I.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, K = Symbol(), G = /* @__PURE__ */ new WeakMap();
 let he = class {
-  constructor(e, t, s) {
+  constructor(e, i, s) {
     if (this._$cssResult$ = !0, s !== K) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
-    this.cssText = e, this.t = t;
+    this.cssText = e, this.t = i;
   }
   get styleSheet() {
     let e = this.o;
-    const t = this.t;
+    const i = this.t;
     if (Z && e === void 0) {
-      const s = t !== void 0 && t.length === 1;
-      s && (e = G.get(t)), e === void 0 && ((this.o = e = new CSSStyleSheet()).replaceSync(this.cssText), s && G.set(t, e));
+      const s = i !== void 0 && i.length === 1;
+      s && (e = G.get(i)), e === void 0 && ((this.o = e = new CSSStyleSheet()).replaceSync(this.cssText), s && G.set(i, e));
     }
     return e;
   }
@@ -22,59 +22,59 @@ let he = class {
     return this.cssText;
   }
 };
-const $e = (i) => new he(typeof i == "string" ? i : i + "", void 0, K), ce = (i, ...e) => {
-  const t = i.length === 1 ? i[0] : e.reduce((s, o, n) => s + ((r) => {
+const ge = (t) => new he(typeof t == "string" ? t : t + "", void 0, K), de = (t, ...e) => {
+  const i = t.length === 1 ? t[0] : e.reduce((s, o, n) => s + ((r) => {
     if (r._$cssResult$ === !0) return r.cssText;
     if (typeof r == "number") return r;
     throw Error("Value passed to 'css' function must be a 'css' function result: " + r + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-  })(o) + i[n + 1], i[0]);
-  return new he(t, i, K);
-}, me = (i, e) => {
-  if (Z) i.adoptedStyleSheets = e.map((t) => t instanceof CSSStyleSheet ? t : t.styleSheet);
-  else for (const t of e) {
+  })(o) + t[n + 1], t[0]);
+  return new he(i, t, K);
+}, ye = (t, e) => {
+  if (Z) t.adoptedStyleSheets = e.map((i) => i instanceof CSSStyleSheet ? i : i.styleSheet);
+  else for (const i of e) {
     const s = document.createElement("style"), o = I.litNonce;
-    o !== void 0 && s.setAttribute("nonce", o), s.textContent = t.cssText, i.appendChild(s);
+    o !== void 0 && s.setAttribute("nonce", o), s.textContent = i.cssText, t.appendChild(s);
   }
-}, Q = Z ? (i) => i : (i) => i instanceof CSSStyleSheet ? ((e) => {
-  let t = "";
-  for (const s of e.cssRules) t += s.cssText;
-  return $e(t);
-})(i) : i;
+}, Q = Z ? (t) => t : (t) => t instanceof CSSStyleSheet ? ((e) => {
+  let i = "";
+  for (const s of e.cssRules) i += s.cssText;
+  return ge(i);
+})(t) : t;
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: ve, defineProperty: ge, getOwnPropertyDescriptor: ye, getOwnPropertyNames: we, getOwnPropertySymbols: be, getPrototypeOf: xe } = Object, y = globalThis, X = y.trustedTypes, Ae = X ? X.emptyScript : "", Se = y.reactiveElementPolyfillSupport, k = (i, e) => i, B = { toAttribute(i, e) {
+const { is: $e, defineProperty: ve, getOwnPropertyDescriptor: we, getOwnPropertyNames: be, getOwnPropertySymbols: Ae, getPrototypeOf: Se } = Object, v = globalThis, X = v.trustedTypes, xe = X ? X.emptyScript : "", Ee = v.reactiveElementPolyfillSupport, U = (t, e) => t, W = { toAttribute(t, e) {
   switch (e) {
     case Boolean:
-      i = i ? Ae : null;
+      t = t ? xe : null;
       break;
     case Object:
     case Array:
-      i = i == null ? i : JSON.stringify(i);
+      t = t == null ? t : JSON.stringify(t);
   }
-  return i;
-}, fromAttribute(i, e) {
-  let t = i;
+  return t;
+}, fromAttribute(t, e) {
+  let i = t;
   switch (e) {
     case Boolean:
-      t = i !== null;
+      i = t !== null;
       break;
     case Number:
-      t = i === null ? null : Number(i);
+      i = t === null ? null : Number(t);
       break;
     case Object:
     case Array:
       try {
-        t = JSON.parse(i);
+        i = JSON.parse(t);
       } catch {
-        t = null;
+        i = null;
       }
   }
-  return t;
-} }, J = (i, e) => !ve(i, e), ee = { attribute: !0, type: String, converter: B, reflect: !1, useDefault: !1, hasChanged: J };
-Symbol.metadata ?? (Symbol.metadata = Symbol("metadata")), y.litPropertyMetadata ?? (y.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
+  return i;
+} }, J = (t, e) => !$e(t, e), ee = { attribute: !0, type: String, converter: W, reflect: !1, useDefault: !1, hasChanged: J };
+Symbol.metadata ?? (Symbol.metadata = Symbol("metadata")), v.litPropertyMetadata ?? (v.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
 let E = class extends HTMLElement {
   static addInitializer(e) {
     this._$Ei(), (this.l ?? (this.l = [])).push(e);
@@ -82,17 +82,17 @@ let E = class extends HTMLElement {
   static get observedAttributes() {
     return this.finalize(), this._$Eh && [...this._$Eh.keys()];
   }
-  static createProperty(e, t = ee) {
-    if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
-      const s = Symbol(), o = this.getPropertyDescriptor(e, s, t);
-      o !== void 0 && ge(this.prototype, e, o);
+  static createProperty(e, i = ee) {
+    if (i.state && (i.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((i = Object.create(i)).wrapped = !0), this.elementProperties.set(e, i), !i.noAccessor) {
+      const s = Symbol(), o = this.getPropertyDescriptor(e, s, i);
+      o !== void 0 && ve(this.prototype, e, o);
     }
   }
-  static getPropertyDescriptor(e, t, s) {
-    const { get: o, set: n } = ye(this.prototype, e) ?? { get() {
-      return this[t];
+  static getPropertyDescriptor(e, i, s) {
+    const { get: o, set: n } = we(this.prototype, e) ?? { get() {
+      return this[i];
     }, set(r) {
-      this[t] = r;
+      this[i] = r;
     } };
     return { get: o, set(r) {
       const l = o?.call(this);
@@ -103,38 +103,38 @@ let E = class extends HTMLElement {
     return this.elementProperties.get(e) ?? ee;
   }
   static _$Ei() {
-    if (this.hasOwnProperty(k("elementProperties"))) return;
-    const e = xe(this);
+    if (this.hasOwnProperty(U("elementProperties"))) return;
+    const e = Se(this);
     e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
   }
   static finalize() {
-    if (this.hasOwnProperty(k("finalized"))) return;
-    if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(k("properties"))) {
-      const t = this.properties, s = [...we(t), ...be(t)];
-      for (const o of s) this.createProperty(o, t[o]);
+    if (this.hasOwnProperty(U("finalized"))) return;
+    if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(U("properties"))) {
+      const i = this.properties, s = [...be(i), ...Ae(i)];
+      for (const o of s) this.createProperty(o, i[o]);
     }
     const e = this[Symbol.metadata];
     if (e !== null) {
-      const t = litPropertyMetadata.get(e);
-      if (t !== void 0) for (const [s, o] of t) this.elementProperties.set(s, o);
+      const i = litPropertyMetadata.get(e);
+      if (i !== void 0) for (const [s, o] of i) this.elementProperties.set(s, o);
     }
     this._$Eh = /* @__PURE__ */ new Map();
-    for (const [t, s] of this.elementProperties) {
-      const o = this._$Eu(t, s);
-      o !== void 0 && this._$Eh.set(o, t);
+    for (const [i, s] of this.elementProperties) {
+      const o = this._$Eu(i, s);
+      o !== void 0 && this._$Eh.set(o, i);
     }
     this.elementStyles = this.finalizeStyles(this.styles);
   }
   static finalizeStyles(e) {
-    const t = [];
+    const i = [];
     if (Array.isArray(e)) {
       const s = new Set(e.flat(1 / 0).reverse());
-      for (const o of s) t.unshift(Q(o));
-    } else e !== void 0 && t.push(Q(e));
-    return t;
+      for (const o of s) i.unshift(Q(o));
+    } else e !== void 0 && i.push(Q(e));
+    return i;
   }
-  static _$Eu(e, t) {
-    const s = t.attribute;
+  static _$Eu(e, i) {
+    const s = i.attribute;
     return s === !1 ? void 0 : typeof s == "string" ? s : typeof e == "string" ? e.toLowerCase() : void 0;
   }
   constructor() {
@@ -150,13 +150,13 @@ let E = class extends HTMLElement {
     this._$EO?.delete(e);
   }
   _$E_() {
-    const e = /* @__PURE__ */ new Map(), t = this.constructor.elementProperties;
-    for (const s of t.keys()) this.hasOwnProperty(s) && (e.set(s, this[s]), delete this[s]);
+    const e = /* @__PURE__ */ new Map(), i = this.constructor.elementProperties;
+    for (const s of i.keys()) this.hasOwnProperty(s) && (e.set(s, this[s]), delete this[s]);
     e.size > 0 && (this._$Ep = e);
   }
   createRenderRoot() {
     const e = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions);
-    return me(e, this.constructor.elementStyles), e;
+    return ye(e, this.constructor.elementStyles), e;
   }
   connectedCallback() {
     this.renderRoot ?? (this.renderRoot = this.createRenderRoot()), this.enableUpdating(!0), this._$EO?.forEach((e) => e.hostConnected?.());
@@ -166,42 +166,42 @@ let E = class extends HTMLElement {
   disconnectedCallback() {
     this._$EO?.forEach((e) => e.hostDisconnected?.());
   }
-  attributeChangedCallback(e, t, s) {
+  attributeChangedCallback(e, i, s) {
     this._$AK(e, s);
   }
-  _$ET(e, t) {
+  _$ET(e, i) {
     const s = this.constructor.elementProperties.get(e), o = this.constructor._$Eu(e, s);
     if (o !== void 0 && s.reflect === !0) {
-      const n = (s.converter?.toAttribute !== void 0 ? s.converter : B).toAttribute(t, s.type);
+      const n = (s.converter?.toAttribute !== void 0 ? s.converter : W).toAttribute(i, s.type);
       this._$Em = e, n == null ? this.removeAttribute(o) : this.setAttribute(o, n), this._$Em = null;
     }
   }
-  _$AK(e, t) {
+  _$AK(e, i) {
     const s = this.constructor, o = s._$Eh.get(e);
     if (o !== void 0 && this._$Em !== o) {
-      const n = s.getPropertyOptions(o), r = typeof n.converter == "function" ? { fromAttribute: n.converter } : n.converter?.fromAttribute !== void 0 ? n.converter : B;
+      const n = s.getPropertyOptions(o), r = typeof n.converter == "function" ? { fromAttribute: n.converter } : n.converter?.fromAttribute !== void 0 ? n.converter : W;
       this._$Em = o;
-      const l = r.fromAttribute(t, n.type);
+      const l = r.fromAttribute(i, n.type);
       this[o] = l ?? this._$Ej?.get(o) ?? l, this._$Em = null;
     }
   }
-  requestUpdate(e, t, s, o = !1, n) {
+  requestUpdate(e, i, s, o = !1, n) {
     if (e !== void 0) {
       const r = this.constructor;
-      if (o === !1 && (n = this[e]), s ?? (s = r.getPropertyOptions(e)), !((s.hasChanged ?? J)(n, t) || s.useDefault && s.reflect && n === this._$Ej?.get(e) && !this.hasAttribute(r._$Eu(e, s)))) return;
-      this.C(e, t, s);
+      if (o === !1 && (n = this[e]), s ?? (s = r.getPropertyOptions(e)), !((s.hasChanged ?? J)(n, i) || s.useDefault && s.reflect && n === this._$Ej?.get(e) && !this.hasAttribute(r._$Eu(e, s)))) return;
+      this.C(e, i, s);
     }
     this.isUpdatePending === !1 && (this._$ES = this._$EP());
   }
-  C(e, t, { useDefault: s, reflect: o, wrapped: n }, r) {
-    s && !(this._$Ej ?? (this._$Ej = /* @__PURE__ */ new Map())).has(e) && (this._$Ej.set(e, r ?? t ?? this[e]), n !== !0 || r !== void 0) || (this._$AL.has(e) || (this.hasUpdated || s || (t = void 0), this._$AL.set(e, t)), o === !0 && this._$Em !== e && (this._$Eq ?? (this._$Eq = /* @__PURE__ */ new Set())).add(e));
+  C(e, i, { useDefault: s, reflect: o, wrapped: n }, r) {
+    s && !(this._$Ej ?? (this._$Ej = /* @__PURE__ */ new Map())).has(e) && (this._$Ej.set(e, r ?? i ?? this[e]), n !== !0 || r !== void 0) || (this._$AL.has(e) || (this.hasUpdated || s || (i = void 0), this._$AL.set(e, i)), o === !0 && this._$Em !== e && (this._$Eq ?? (this._$Eq = /* @__PURE__ */ new Set())).add(e));
   }
   async _$EP() {
     this.isUpdatePending = !0;
     try {
       await this._$ES;
-    } catch (t) {
-      Promise.reject(t);
+    } catch (i) {
+      Promise.reject(i);
     }
     const e = this.scheduleUpdate();
     return e != null && await e, !this.isUpdatePending;
@@ -223,18 +223,18 @@ let E = class extends HTMLElement {
       }
     }
     let e = !1;
-    const t = this._$AL;
+    const i = this._$AL;
     try {
-      e = this.shouldUpdate(t), e ? (this.willUpdate(t), this._$EO?.forEach((s) => s.hostUpdate?.()), this.update(t)) : this._$EM();
+      e = this.shouldUpdate(i), e ? (this.willUpdate(i), this._$EO?.forEach((s) => s.hostUpdate?.()), this.update(i)) : this._$EM();
     } catch (s) {
       throw e = !1, this._$EM(), s;
     }
-    e && this._$AE(t);
+    e && this._$AE(i);
   }
   willUpdate(e) {
   }
   _$AE(e) {
-    this._$EO?.forEach((t) => t.hostUpdated?.()), this.hasUpdated || (this.hasUpdated = !0, this.firstUpdated(e)), this.updated(e);
+    this._$EO?.forEach((i) => i.hostUpdated?.()), this.hasUpdated || (this.hasUpdated = !0, this.firstUpdated(e)), this.updated(e);
   }
   _$EM() {
     this._$AL = /* @__PURE__ */ new Map(), this.isUpdatePending = !1;
@@ -249,84 +249,84 @@ let E = class extends HTMLElement {
     return !0;
   }
   update(e) {
-    this._$Eq && (this._$Eq = this._$Eq.forEach((t) => this._$ET(t, this[t]))), this._$EM();
+    this._$Eq && (this._$Eq = this._$Eq.forEach((i) => this._$ET(i, this[i]))), this._$EM();
   }
   updated(e) {
   }
   firstUpdated(e) {
   }
 };
-E.elementStyles = [], E.shadowRootOptions = { mode: "open" }, E[k("elementProperties")] = /* @__PURE__ */ new Map(), E[k("finalized")] = /* @__PURE__ */ new Map(), Se?.({ ReactiveElement: E }), (y.reactiveElementVersions ?? (y.reactiveElementVersions = [])).push("2.1.2");
+E.elementStyles = [], E.shadowRootOptions = { mode: "open" }, E[U("elementProperties")] = /* @__PURE__ */ new Map(), E[U("finalized")] = /* @__PURE__ */ new Map(), Ee?.({ ReactiveElement: E }), (v.reactiveElementVersions ?? (v.reactiveElementVersions = [])).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const N = globalThis, te = (i) => i, q = N.trustedTypes, ie = q ? q.createPolicy("lit-html", { createHTML: (i) => i }) : void 0, de = "$lit$", g = `lit$${Math.random().toFixed(9).slice(2)}$`, _e = "?" + g, Ee = `<${_e}>`, S = document, U = () => S.createComment(""), R = (i) => i === null || typeof i != "object" && typeof i != "function", Y = Array.isArray, ze = (i) => Y(i) || typeof i?.[Symbol.iterator] == "function", F = `[ 	
-\f\r]`, O = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, se = /-->/g, oe = />/g, x = RegExp(`>|${F}(?:([^\\s"'>=/]+)(${F}*=${F}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), ne = /'/g, re = /"/g, pe = /^(?:script|style|textarea|title)$/i, Ce = (i) => (e, ...t) => ({ _$litType$: i, strings: e, values: t }), _ = Ce(1), C = Symbol.for("lit-noChange"), c = Symbol.for("lit-nothing"), ae = /* @__PURE__ */ new WeakMap(), A = S.createTreeWalker(S, 129);
-function ue(i, e) {
-  if (!Y(i) || !i.hasOwnProperty("raw")) throw Error("invalid template strings array");
+const O = globalThis, te = (t) => t, q = O.trustedTypes, ie = q ? q.createPolicy("lit-html", { createHTML: (t) => t }) : void 0, _e = "$lit$", $ = `lit$${Math.random().toFixed(9).slice(2)}$`, pe = "?" + $, ze = `<${pe}>`, x = document, N = () => x.createComment(""), R = (t) => t === null || typeof t != "object" && typeof t != "function", Y = Array.isArray, Ce = (t) => Y(t) || typeof t?.[Symbol.iterator] == "function", V = `[ 	
+\f\r]`, T = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, se = /-->/g, oe = />/g, A = RegExp(`>|${V}(?:([^\\s"'>=/]+)(${V}*=${V}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g"), ne = /'/g, re = /"/g, ue = /^(?:script|style|textarea|title)$/i, ke = (t) => (e, ...i) => ({ _$litType$: t, strings: e, values: i }), g = ke(1), C = Symbol.for("lit-noChange"), h = Symbol.for("lit-nothing"), ae = /* @__PURE__ */ new WeakMap(), S = x.createTreeWalker(x, 129);
+function fe(t, e) {
+  if (!Y(t) || !t.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return ie !== void 0 ? ie.createHTML(e) : e;
 }
-const Pe = (i, e) => {
-  const t = i.length - 1, s = [];
-  let o, n = e === 2 ? "<svg>" : e === 3 ? "<math>" : "", r = O;
-  for (let l = 0; l < t; l++) {
-    const a = i[l];
-    let d, p, h = -1, m = 0;
-    for (; m < a.length && (r.lastIndex = m, p = r.exec(a), p !== null); ) m = r.lastIndex, r === O ? p[1] === "!--" ? r = se : p[1] !== void 0 ? r = oe : p[2] !== void 0 ? (pe.test(p[2]) && (o = RegExp("</" + p[2], "g")), r = x) : p[3] !== void 0 && (r = x) : r === x ? p[0] === ">" ? (r = o ?? O, h = -1) : p[1] === void 0 ? h = -2 : (h = r.lastIndex - p[2].length, d = p[1], r = p[3] === void 0 ? x : p[3] === '"' ? re : ne) : r === re || r === ne ? r = x : r === se || r === oe ? r = O : (r = x, o = void 0);
-    const v = r === x && i[l + 1].startsWith("/>") ? " " : "";
-    n += r === O ? a + Ee : h >= 0 ? (s.push(d), a.slice(0, h) + de + a.slice(h) + g + v) : a + g + (h === -2 ? l : v);
+const Pe = (t, e) => {
+  const i = t.length - 1, s = [];
+  let o, n = e === 2 ? "<svg>" : e === 3 ? "<math>" : "", r = T;
+  for (let l = 0; l < i; l++) {
+    const a = t[l];
+    let d, _, c = -1, m = 0;
+    for (; m < a.length && (r.lastIndex = m, _ = r.exec(a), _ !== null); ) m = r.lastIndex, r === T ? _[1] === "!--" ? r = se : _[1] !== void 0 ? r = oe : _[2] !== void 0 ? (ue.test(_[2]) && (o = RegExp("</" + _[2], "g")), r = A) : _[3] !== void 0 && (r = A) : r === A ? _[0] === ">" ? (r = o ?? T, c = -1) : _[1] === void 0 ? c = -2 : (c = r.lastIndex - _[2].length, d = _[1], r = _[3] === void 0 ? A : _[3] === '"' ? re : ne) : r === re || r === ne ? r = A : r === se || r === oe ? r = T : (r = A, o = void 0);
+    const y = r === A && t[l + 1].startsWith("/>") ? " " : "";
+    n += r === T ? a + ze : c >= 0 ? (s.push(d), a.slice(0, c) + _e + a.slice(c) + $ + y) : a + $ + (c === -2 ? l : y);
   }
-  return [ue(i, n + (i[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), s];
+  return [fe(t, n + (t[i] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), s];
 };
 class H {
-  constructor({ strings: e, _$litType$: t }, s) {
+  constructor({ strings: e, _$litType$: i }, s) {
     let o;
     this.parts = [];
     let n = 0, r = 0;
-    const l = e.length - 1, a = this.parts, [d, p] = Pe(e, t);
-    if (this.el = H.createElement(d, s), A.currentNode = this.el.content, t === 2 || t === 3) {
-      const h = this.el.content.firstChild;
-      h.replaceWith(...h.childNodes);
+    const l = e.length - 1, a = this.parts, [d, _] = Pe(e, i);
+    if (this.el = H.createElement(d, s), S.currentNode = this.el.content, i === 2 || i === 3) {
+      const c = this.el.content.firstChild;
+      c.replaceWith(...c.childNodes);
     }
-    for (; (o = A.nextNode()) !== null && a.length < l; ) {
+    for (; (o = S.nextNode()) !== null && a.length < l; ) {
       if (o.nodeType === 1) {
-        if (o.hasAttributes()) for (const h of o.getAttributeNames()) if (h.endsWith(de)) {
-          const m = p[r++], v = o.getAttribute(h).split(g), W = /([.?@])?(.*)/.exec(m);
-          a.push({ type: 1, index: n, name: W[2], strings: v, ctor: W[1] === "." ? Oe : W[1] === "?" ? ke : W[1] === "@" ? Ne : V }), o.removeAttribute(h);
-        } else h.startsWith(g) && (a.push({ type: 6, index: n }), o.removeAttribute(h));
-        if (pe.test(o.tagName)) {
-          const h = o.textContent.split(g), m = h.length - 1;
+        if (o.hasAttributes()) for (const c of o.getAttributeNames()) if (c.endsWith(_e)) {
+          const m = _[r++], y = o.getAttribute(c).split($), L = /([.?@])?(.*)/.exec(m);
+          a.push({ type: 1, index: n, name: L[2], strings: y, ctor: L[1] === "." ? Ue : L[1] === "?" ? Oe : L[1] === "@" ? Me : F }), o.removeAttribute(c);
+        } else c.startsWith($) && (a.push({ type: 6, index: n }), o.removeAttribute(c));
+        if (ue.test(o.tagName)) {
+          const c = o.textContent.split($), m = c.length - 1;
           if (m > 0) {
             o.textContent = q ? q.emptyScript : "";
-            for (let v = 0; v < m; v++) o.append(h[v], U()), A.nextNode(), a.push({ type: 2, index: ++n });
-            o.append(h[m], U());
+            for (let y = 0; y < m; y++) o.append(c[y], N()), S.nextNode(), a.push({ type: 2, index: ++n });
+            o.append(c[m], N());
           }
         }
-      } else if (o.nodeType === 8) if (o.data === _e) a.push({ type: 2, index: n });
+      } else if (o.nodeType === 8) if (o.data === pe) a.push({ type: 2, index: n });
       else {
-        let h = -1;
-        for (; (h = o.data.indexOf(g, h + 1)) !== -1; ) a.push({ type: 7, index: n }), h += g.length - 1;
+        let c = -1;
+        for (; (c = o.data.indexOf($, c + 1)) !== -1; ) a.push({ type: 7, index: n }), c += $.length - 1;
       }
       n++;
     }
   }
-  static createElement(e, t) {
-    const s = S.createElement("template");
+  static createElement(e, i) {
+    const s = x.createElement("template");
     return s.innerHTML = e, s;
   }
 }
-function P(i, e, t = i, s) {
+function k(t, e, i = t, s) {
   if (e === C) return e;
-  let o = s !== void 0 ? t._$Co?.[s] : t._$Cl;
+  let o = s !== void 0 ? i._$Co?.[s] : i._$Cl;
   const n = R(e) ? void 0 : e._$litDirective$;
-  return o?.constructor !== n && (o?._$AO?.(!1), n === void 0 ? o = void 0 : (o = new n(i), o._$AT(i, t, s)), s !== void 0 ? (t._$Co ?? (t._$Co = []))[s] = o : t._$Cl = o), o !== void 0 && (e = P(i, o._$AS(i, e.values), o, s)), e;
+  return o?.constructor !== n && (o?._$AO?.(!1), n === void 0 ? o = void 0 : (o = new n(t), o._$AT(t, i, s)), s !== void 0 ? (i._$Co ?? (i._$Co = []))[s] = o : i._$Cl = o), o !== void 0 && (e = k(t, o._$AS(t, e.values), o, s)), e;
 }
 class Te {
-  constructor(e, t) {
-    this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
+  constructor(e, i) {
+    this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = i;
   }
   get parentNode() {
     return this._$AM.parentNode;
@@ -335,34 +335,34 @@ class Te {
     return this._$AM._$AU;
   }
   u(e) {
-    const { el: { content: t }, parts: s } = this._$AD, o = (e?.creationScope ?? S).importNode(t, !0);
-    A.currentNode = o;
-    let n = A.nextNode(), r = 0, l = 0, a = s[0];
+    const { el: { content: i }, parts: s } = this._$AD, o = (e?.creationScope ?? x).importNode(i, !0);
+    S.currentNode = o;
+    let n = S.nextNode(), r = 0, l = 0, a = s[0];
     for (; a !== void 0; ) {
       if (r === a.index) {
         let d;
-        a.type === 2 ? d = new D(n, n.nextSibling, this, e) : a.type === 1 ? d = new a.ctor(n, a.name, a.strings, this, e) : a.type === 6 && (d = new Me(n, this, e)), this._$AV.push(d), a = s[++l];
+        a.type === 2 ? d = new D(n, n.nextSibling, this, e) : a.type === 1 ? d = new a.ctor(n, a.name, a.strings, this, e) : a.type === 6 && (d = new Ne(n, this, e)), this._$AV.push(d), a = s[++l];
       }
-      r !== a?.index && (n = A.nextNode(), r++);
+      r !== a?.index && (n = S.nextNode(), r++);
     }
-    return A.currentNode = S, o;
+    return S.currentNode = x, o;
   }
   p(e) {
-    let t = 0;
-    for (const s of this._$AV) s !== void 0 && (s.strings !== void 0 ? (s._$AI(e, s, t), t += s.strings.length - 2) : s._$AI(e[t])), t++;
+    let i = 0;
+    for (const s of this._$AV) s !== void 0 && (s.strings !== void 0 ? (s._$AI(e, s, i), i += s.strings.length - 2) : s._$AI(e[i])), i++;
   }
 }
 class D {
   get _$AU() {
     return this._$AM?._$AU ?? this._$Cv;
   }
-  constructor(e, t, s, o) {
-    this.type = 2, this._$AH = c, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = s, this.options = o, this._$Cv = o?.isConnected ?? !0;
+  constructor(e, i, s, o) {
+    this.type = 2, this._$AH = h, this._$AN = void 0, this._$AA = e, this._$AB = i, this._$AM = s, this.options = o, this._$Cv = o?.isConnected ?? !0;
   }
   get parentNode() {
     let e = this._$AA.parentNode;
-    const t = this._$AM;
-    return t !== void 0 && e?.nodeType === 11 && (e = t.parentNode), e;
+    const i = this._$AM;
+    return i !== void 0 && e?.nodeType === 11 && (e = i.parentNode), e;
   }
   get startNode() {
     return this._$AA;
@@ -370,8 +370,8 @@ class D {
   get endNode() {
     return this._$AB;
   }
-  _$AI(e, t = this) {
-    e = P(this, e, t), R(e) ? e === c || e == null || e === "" ? (this._$AH !== c && this._$AR(), this._$AH = c) : e !== this._$AH && e !== C && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : ze(e) ? this.k(e) : this._(e);
+  _$AI(e, i = this) {
+    e = k(this, e, i), R(e) ? e === h || e == null || e === "" ? (this._$AH !== h && this._$AR(), this._$AH = h) : e !== this._$AH && e !== C && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : Ce(e) ? this.k(e) : this._(e);
   }
   O(e) {
     return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -380,29 +380,29 @@ class D {
     this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
   }
   _(e) {
-    this._$AH !== c && R(this._$AH) ? this._$AA.nextSibling.data = e : this.T(S.createTextNode(e)), this._$AH = e;
+    this._$AH !== h && R(this._$AH) ? this._$AA.nextSibling.data = e : this.T(x.createTextNode(e)), this._$AH = e;
   }
   $(e) {
-    const { values: t, _$litType$: s } = e, o = typeof s == "number" ? this._$AC(e) : (s.el === void 0 && (s.el = H.createElement(ue(s.h, s.h[0]), this.options)), s);
-    if (this._$AH?._$AD === o) this._$AH.p(t);
+    const { values: i, _$litType$: s } = e, o = typeof s == "number" ? this._$AC(e) : (s.el === void 0 && (s.el = H.createElement(fe(s.h, s.h[0]), this.options)), s);
+    if (this._$AH?._$AD === o) this._$AH.p(i);
     else {
       const n = new Te(o, this), r = n.u(this.options);
-      n.p(t), this.T(r), this._$AH = n;
+      n.p(i), this.T(r), this._$AH = n;
     }
   }
   _$AC(e) {
-    let t = ae.get(e.strings);
-    return t === void 0 && ae.set(e.strings, t = new H(e)), t;
+    let i = ae.get(e.strings);
+    return i === void 0 && ae.set(e.strings, i = new H(e)), i;
   }
   k(e) {
     Y(this._$AH) || (this._$AH = [], this._$AR());
-    const t = this._$AH;
+    const i = this._$AH;
     let s, o = 0;
-    for (const n of e) o === t.length ? t.push(s = new D(this.O(U()), this.O(U()), this, this.options)) : s = t[o], s._$AI(n), o++;
-    o < t.length && (this._$AR(s && s._$AB.nextSibling, o), t.length = o);
+    for (const n of e) o === i.length ? i.push(s = new D(this.O(N()), this.O(N()), this, this.options)) : s = i[o], s._$AI(n), o++;
+    o < i.length && (this._$AR(s && s._$AB.nextSibling, o), i.length = o);
   }
-  _$AR(e = this._$AA.nextSibling, t) {
-    for (this._$AP?.(!1, !0, t); e !== this._$AB; ) {
+  _$AR(e = this._$AA.nextSibling, i) {
+    for (this._$AP?.(!1, !0, i); e !== this._$AB; ) {
       const s = te(e).nextSibling;
       te(e).remove(), e = s;
     }
@@ -411,81 +411,81 @@ class D {
     this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
   }
 }
-class V {
+class F {
   get tagName() {
     return this.element.tagName;
   }
   get _$AU() {
     return this._$AM._$AU;
   }
-  constructor(e, t, s, o, n) {
-    this.type = 1, this._$AH = c, this._$AN = void 0, this.element = e, this.name = t, this._$AM = o, this.options = n, s.length > 2 || s[0] !== "" || s[1] !== "" ? (this._$AH = Array(s.length - 1).fill(new String()), this.strings = s) : this._$AH = c;
+  constructor(e, i, s, o, n) {
+    this.type = 1, this._$AH = h, this._$AN = void 0, this.element = e, this.name = i, this._$AM = o, this.options = n, s.length > 2 || s[0] !== "" || s[1] !== "" ? (this._$AH = Array(s.length - 1).fill(new String()), this.strings = s) : this._$AH = h;
   }
-  _$AI(e, t = this, s, o) {
+  _$AI(e, i = this, s, o) {
     const n = this.strings;
     let r = !1;
-    if (n === void 0) e = P(this, e, t, 0), r = !R(e) || e !== this._$AH && e !== C, r && (this._$AH = e);
+    if (n === void 0) e = k(this, e, i, 0), r = !R(e) || e !== this._$AH && e !== C, r && (this._$AH = e);
     else {
       const l = e;
       let a, d;
-      for (e = n[0], a = 0; a < n.length - 1; a++) d = P(this, l[s + a], t, a), d === C && (d = this._$AH[a]), r || (r = !R(d) || d !== this._$AH[a]), d === c ? e = c : e !== c && (e += (d ?? "") + n[a + 1]), this._$AH[a] = d;
+      for (e = n[0], a = 0; a < n.length - 1; a++) d = k(this, l[s + a], i, a), d === C && (d = this._$AH[a]), r || (r = !R(d) || d !== this._$AH[a]), d === h ? e = h : e !== h && (e += (d ?? "") + n[a + 1]), this._$AH[a] = d;
     }
     r && !o && this.j(e);
   }
   j(e) {
-    e === c ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+    e === h ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
   }
 }
-class Oe extends V {
+class Ue extends F {
   constructor() {
     super(...arguments), this.type = 3;
   }
   j(e) {
-    this.element[this.name] = e === c ? void 0 : e;
+    this.element[this.name] = e === h ? void 0 : e;
   }
 }
-class ke extends V {
+class Oe extends F {
   constructor() {
     super(...arguments), this.type = 4;
   }
   j(e) {
-    this.element.toggleAttribute(this.name, !!e && e !== c);
+    this.element.toggleAttribute(this.name, !!e && e !== h);
   }
 }
-class Ne extends V {
-  constructor(e, t, s, o, n) {
-    super(e, t, s, o, n), this.type = 5;
+class Me extends F {
+  constructor(e, i, s, o, n) {
+    super(e, i, s, o, n), this.type = 5;
   }
-  _$AI(e, t = this) {
-    if ((e = P(this, e, t, 0) ?? c) === C) return;
-    const s = this._$AH, o = e === c && s !== c || e.capture !== s.capture || e.once !== s.once || e.passive !== s.passive, n = e !== c && (s === c || o);
+  _$AI(e, i = this) {
+    if ((e = k(this, e, i, 0) ?? h) === C) return;
+    const s = this._$AH, o = e === h && s !== h || e.capture !== s.capture || e.once !== s.once || e.passive !== s.passive, n = e !== h && (s === h || o);
     o && this.element.removeEventListener(this.name, this, s), n && this.element.addEventListener(this.name, this, e), this._$AH = e;
   }
   handleEvent(e) {
     typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
   }
 }
-class Me {
-  constructor(e, t, s) {
-    this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = s;
+class Ne {
+  constructor(e, i, s) {
+    this.element = e, this.type = 6, this._$AN = void 0, this._$AM = i, this.options = s;
   }
   get _$AU() {
     return this._$AM._$AU;
   }
   _$AI(e) {
-    P(this, e);
+    k(this, e);
   }
 }
-const Ue = N.litHtmlPolyfillSupport;
-Ue?.(H, D), (N.litHtmlVersions ?? (N.litHtmlVersions = [])).push("3.3.3");
-const Re = (i, e, t) => {
-  const s = t?.renderBefore ?? e;
+const Re = O.litHtmlPolyfillSupport;
+Re?.(H, D), (O.litHtmlVersions ?? (O.litHtmlVersions = [])).push("3.3.3");
+const He = (t, e, i) => {
+  const s = i?.renderBefore ?? e;
   let o = s._$litPart$;
   if (o === void 0) {
-    const n = t?.renderBefore ?? null;
-    s._$litPart$ = o = new D(e.insertBefore(U(), n), n, void 0, t ?? {});
+    const n = i?.renderBefore ?? null;
+    s._$litPart$ = o = new D(e.insertBefore(N(), n), n, void 0, i ?? {});
   }
-  return o._$AI(i), o;
+  return o._$AI(t), o;
 };
 /**
  * @license
@@ -498,13 +498,13 @@ class z extends E {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
   createRenderRoot() {
-    var t;
+    var i;
     const e = super.createRenderRoot();
-    return (t = this.renderOptions).renderBefore ?? (t.renderBefore = e.firstChild), e;
+    return (i = this.renderOptions).renderBefore ?? (i.renderBefore = e.firstChild), e;
   }
   update(e) {
-    const t = this.render();
-    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Re(t, this.renderRoot, this.renderOptions);
+    const i = this.render();
+    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = He(i, this.renderRoot, this.renderOptions);
   }
   connectedCallback() {
     super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -517,592 +517,434 @@ class z extends E {
   }
 }
 z._$litElement$ = !0, z.finalized = !0, M.litElementHydrateSupport?.({ LitElement: z });
-const He = M.litElementPolyfillSupport;
-He?.({ LitElement: z });
+const De = M.litElementPolyfillSupport;
+De?.({ LitElement: z });
 (M.litElementVersions ?? (M.litElementVersions = [])).push("4.2.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const fe = (i) => (e, t) => {
-  t !== void 0 ? t.addInitializer(() => {
-    customElements.define(i, e);
-  }) : customElements.define(i, e);
+const me = (t) => (e, i) => {
+  i !== void 0 ? i.addInitializer(() => {
+    customElements.define(t, e);
+  }) : customElements.define(t, e);
 };
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const De = { attribute: !0, type: String, converter: B, reflect: !1, hasChanged: J }, je = (i = De, e, t) => {
-  const { kind: s, metadata: o } = t;
+const je = { attribute: !0, type: String, converter: W, reflect: !1, hasChanged: J }, Le = (t = je, e, i) => {
+  const { kind: s, metadata: o } = i;
   let n = globalThis.litPropertyMetadata.get(o);
-  if (n === void 0 && globalThis.litPropertyMetadata.set(o, n = /* @__PURE__ */ new Map()), s === "setter" && ((i = Object.create(i)).wrapped = !0), n.set(t.name, i), s === "accessor") {
-    const { name: r } = t;
+  if (n === void 0 && globalThis.litPropertyMetadata.set(o, n = /* @__PURE__ */ new Map()), s === "setter" && ((t = Object.create(t)).wrapped = !0), n.set(i.name, t), s === "accessor") {
+    const { name: r } = i;
     return { set(l) {
       const a = e.get.call(this);
-      e.set.call(this, l), this.requestUpdate(r, a, i, !0, l);
+      e.set.call(this, l), this.requestUpdate(r, a, t, !0, l);
     }, init(l) {
-      return l !== void 0 && this.C(r, void 0, i, l), l;
+      return l !== void 0 && this.C(r, void 0, t, l), l;
     } };
   }
   if (s === "setter") {
-    const { name: r } = t;
+    const { name: r } = i;
     return function(l) {
       const a = this[r];
-      e.call(this, l), this.requestUpdate(r, a, i, !0, l);
+      e.call(this, l), this.requestUpdate(r, a, t, !0, l);
     };
   }
   throw Error("Unsupported decorator location: " + s);
 };
-function j(i) {
-  return (e, t) => typeof t == "object" ? je(i, e, t) : ((s, o, n) => {
+function j(t) {
+  return (e, i) => typeof i == "object" ? Le(t, e, i) : ((s, o, n) => {
     const r = o.hasOwnProperty(n);
     return o.constructor.createProperty(n, s), r ? Object.getOwnPropertyDescriptor(o, n) : void 0;
-  })(i, e, t);
+  })(t, e, i);
 }
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-function $(i) {
-  return j({ ...i, state: !0, attribute: !1 });
+function f(t) {
+  return j({ ...t, state: !0, attribute: !1 });
 }
-const T = "ha_reminders";
-async function We(i, e) {
-  const t = await i.callService(T, "create", e);
-  return String(t?.reminder_id ?? "");
+const P = "ha_reminders";
+async function Be(t, e) {
+  const i = await t.callService(P, "create", e);
+  return String(i?.reminder_id ?? "");
 }
-async function Le(i, e, t) {
-  await i.callService(T, "update", {
+async function Ie(t, e, i) {
+  await t.callService(P, "update", {
     reminder_id: e,
-    ...t
+    ...i
   });
 }
-async function Ie(i, e) {
-  await i.callService(T, "delete", { reminder_id: e });
+async function We(t, e) {
+  await t.callService(P, "delete", { reminder_id: e });
 }
-async function Be(i, e, t) {
-  await i.callService(T, "snooze", {
+async function qe(t, e, i) {
+  await t.callService(P, "snooze", {
     reminder_id: e,
-    minutes: t
+    minutes: i
   });
 }
-async function qe(i, e) {
-  await i.callService(T, "complete", { reminder_id: e });
+async function Fe(t, e) {
+  await t.callService(P, "complete", { reminder_id: e });
 }
-async function Ve(i, e, t) {
-  await i.callService(T, "set_enabled", {
+async function Ve(t, e, i) {
+  await t.callService(P, "set_enabled", {
     reminder_id: e,
-    enabled: t
+    enabled: i
   });
 }
-var Fe = Object.defineProperty, Ze = Object.getOwnPropertyDescriptor, w = (i, e, t, s) => {
-  for (var o = s > 1 ? void 0 : s ? Ze(e, t) : e, n = i.length - 1, r; n >= 0; n--)
-    (r = i[n]) && (o = (s ? r(e, t, o) : r(o)) || o);
-  return s && o && Fe(e, t, o), o;
+var Ze = Object.defineProperty, Ke = Object.getOwnPropertyDescriptor, w = (t, e, i, s) => {
+  for (var o = s > 1 ? void 0 : s ? Ke(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+    (r = t[n]) && (o = (s ? r(e, i, o) : r(o)) || o);
+  return s && o && Ze(e, i, o), o;
 };
-const Ke = [
-  { value: 0, label: "Mon" },
-  { value: 1, label: "Tue" },
-  { value: 2, label: "Wed" },
-  { value: 3, label: "Thu" },
-  { value: 4, label: "Fri" },
-  { value: 5, label: "Sat" },
-  { value: 6, label: "Sun" }
-];
-let u = class extends z {
+const le = [
+  { value: "0", label: "Monday" },
+  { value: "1", label: "Tuesday" },
+  { value: "2", label: "Wednesday" },
+  { value: "3", label: "Thursday" },
+  { value: "4", label: "Friday" },
+  { value: "5", label: "Saturday" },
+  { value: "6", label: "Sunday" }
+], Je = {
+  title: "Title",
+  subtitle: "Subtitle",
+  message: "Message",
+  notify_service: "Notification service",
+  user_name: "User name (who the reminder is for)",
+  trigger_type: "Trigger",
+  one_shot: "Only once",
+  time: "Time",
+  every_x_days: "Repeat every N days",
+  start_date: "Start date",
+  stop_date: "Stop date",
+  exclude_days_of_week: "Exclude these days",
+  zone_entity_id: "Zone",
+  person_entity_ids: "Watch these persons",
+  time_window_start: "Only fire from",
+  time_window_end: "Only fire until",
+  acknowledge_action_title: "Acknowledge action title",
+  snooze_delays: "Snooze delays (minutes, comma separated)",
+  snooze_text: "Snooze action text",
+  wait_time_if_no_action: "Resend after (minutes)",
+  notification_count: "Maximum notifications",
+  color: "Color (Android)",
+  channel: "Channel (Android)",
+  channel_importance: "Channel importance",
+  notification_group: "Notification group",
+  acknowledge_notification_title: "Completion title (group)",
+  acknowledge_notification_body: "Completion message (group)"
+};
+let p = class extends z {
   constructor() {
-    super(...arguments), this.reminder = null, this.open = !1, this._draft = null, this._saving = !1, this._error = "", this._notifyServices = [];
+    super(...arguments), this.reminder = null, this.open = !1, this._data = {}, this._saving = !1, this._error = "", this._notifyServices = [];
   }
-  willUpdate(i) {
-    i.has("open") && this.open && (this._draft = this._draftFrom(this.reminder), this._error = "", this._saving = !1, this._loadNotifyServices());
+  willUpdate(t) {
+    t.has("open") && this.open && (this._data = this._dataFrom(this.reminder), this._error = "", this._saving = !1, this._loadNotifyServices());
+  }
+  _time(t) {
+    return t ? t.length === 5 ? `${t}:00` : t : "";
+  }
+  _dataFrom(t) {
+    return {
+      title: t?.title ?? "",
+      subtitle: t?.subtitle ?? "",
+      message: t?.message ?? "",
+      notify_service: t?.notify_service ?? "",
+      user_name: t?.user_name ?? "",
+      trigger_type: t?.trigger_type ?? "time",
+      one_shot: t?.one_shot ?? !1,
+      time: this._time(t?.time),
+      every_x_days: t?.every_x_days ?? 1,
+      start_date: t?.start_date ?? "",
+      stop_date: t?.stop_date ?? "",
+      exclude_days_of_week: (t?.exclude_days_of_week ?? []).map(String),
+      zone_entity_id: t?.zone_entity_id ?? "",
+      person_entity_ids: t?.person_entity_ids ?? [],
+      time_window_start: this._time(t?.time_window_start),
+      time_window_end: this._time(t?.time_window_end),
+      acknowledge_action_title: t?.acknowledge_action_title ?? "Mark as done",
+      snooze_delays: (t?.snooze_delays ?? [5, 15, 30, 45, 60]).join(","),
+      snooze_text: t?.snooze_text ?? "Snooze for ${time}",
+      wait_time_if_no_action: t?.wait_time_if_no_action ?? 15,
+      notification_count: t?.notification_count ?? 100,
+      color: t?.color ?? "",
+      channel: t?.channel ?? "",
+      channel_importance: t?.channel_importance ?? "",
+      notification_group: t?.notification_group ?? "",
+      acknowledge_notification_title: t?.acknowledge_notification_title ?? "Someone acknowledged the notification",
+      acknowledge_notification_body: t?.acknowledge_notification_body ?? ""
+    };
   }
   async _loadNotifyServices() {
     try {
-      const i = await this.hass.callWS({ type: "get_services" }), e = /* @__PURE__ */ new Set(["notify", "persistent_notification", "send_message"]), t = /* @__PURE__ */ new Set();
-      Object.keys(i).forEach((s) => {
-        s === "notify" ? Object.keys(i[s] ?? {}).forEach((o) => {
-          e.has(o) || t.add(`notify.${o}`);
-        }) : i[s]?.notify && t.add(s);
-      }), this._notifyServices = [...t].sort();
+      const t = await this.hass.callWS({ type: "get_services" }), e = /* @__PURE__ */ new Set(["notify", "persistent_notification", "send_message"]), i = /* @__PURE__ */ new Set();
+      Object.keys(t).forEach((s) => {
+        s === "notify" ? Object.keys(t[s] ?? {}).forEach((o) => {
+          e.has(o) || i.add(`notify.${o}`);
+        }) : t[s]?.notify && i.add(s);
+      }), this._notifyServices = [...i].sort();
     } catch {
       this._notifyServices = [];
     }
   }
-  _draftFrom(i) {
+  _notifyField() {
+    const t = String(this._data.notify_service ?? "");
     return {
-      title: i?.title ?? "",
-      subtitle: i?.subtitle ?? "",
-      message: i?.message ?? "",
-      notify_service: i?.notify_service ?? "",
-      user_name: i?.user_name ?? "",
-      trigger_type: i?.trigger_type ?? "time",
-      start_date: i?.start_date ?? "",
-      stop_date: i?.stop_date ?? "",
-      time: i?.time ?? "",
-      every_x_days: i?.every_x_days ?? 1,
-      exclude_days_of_week: i?.exclude_days_of_week ?? [],
-      zone_entity_id: i?.zone_entity_id ?? "",
-      person_entity_ids: i?.person_entity_ids ?? [],
-      time_window_start: i?.time_window_start ?? "",
-      time_window_end: i?.time_window_end ?? "",
-      acknowledge_action_title: i?.acknowledge_action_title ?? "Mark as done",
-      snooze_delays: (i?.snooze_delays ?? [5, 15, 30, 45, 60]).join(","),
-      snooze_text: i?.snooze_text ?? "Snooze for ${time}",
-      wait_time_if_no_action: i?.wait_time_if_no_action ?? 15,
-      notification_count: i?.notification_count ?? 100,
-      color: i?.color ?? "",
-      channel: i?.channel ?? "",
-      channel_importance: i?.channel_importance ?? "",
-      notification_group: i?.notification_group ?? "",
-      one_shot: i?.one_shot ?? !1
+      name: "notify_service",
+      selector: { select: { mode: "dropdown", custom_value: !0, options: [.../* @__PURE__ */ new Set([...this._notifyServices, t])].filter(Boolean).map((i) => ({ value: i, label: i })) } }
     };
   }
-  _set(i, e) {
-    this._draft && (this._draft = { ...this._draft, [i]: e });
+  _schema() {
+    const e = (this._data.trigger_type ?? "time") !== "time", i = [
+      { name: "title", selector: { text: {} }, required: !0 },
+      { name: "message", selector: { text: { multiline: !0 } }, required: !0 },
+      { name: "subtitle", selector: { text: {} } },
+      this._notifyField(),
+      { name: "user_name", selector: { text: {} } },
+      {
+        name: "trigger_type",
+        selector: {
+          select: {
+            mode: "dropdown",
+            options: [
+              { value: "time", label: "At a fixed time" },
+              { value: "zone_enter", label: "When I enter a zone" },
+              { value: "zone_leave", label: "When I leave a zone" }
+            ]
+          }
+        }
+      },
+      { name: "one_shot", selector: { boolean: {} } }
+    ], s = e ? [
+      { name: "zone_entity_id", selector: { entity: { domain: "zone" } } },
+      {
+        name: "person_entity_ids",
+        selector: { entity: { domain: "person", multiple: !0 } }
+      },
+      { name: "time_window_start", selector: { time: {} } },
+      { name: "time_window_end", selector: { time: {} } },
+      { name: "start_date", selector: { date: {} } },
+      { name: "stop_date", selector: { date: {} } },
+      { name: "exclude_days_of_week", selector: { select: { multiple: !0, options: le } } }
+    ] : [
+      { name: "time", selector: { time: {} } },
+      { name: "every_x_days", selector: { number: { min: 1, mode: "box" } } },
+      { name: "start_date", selector: { date: {} } },
+      { name: "stop_date", selector: { date: {} } },
+      { name: "exclude_days_of_week", selector: { select: { multiple: !0, options: le } } }
+    ], o = [
+      { name: "acknowledge_action_title", selector: { text: {} } },
+      { name: "snooze_delays", selector: { text: {} } },
+      { name: "snooze_text", selector: { text: {} } },
+      { name: "wait_time_if_no_action", selector: { number: { min: 1, mode: "box" } } },
+      { name: "notification_count", selector: { number: { min: 1, mode: "box" } } },
+      {
+        name: "channel_importance",
+        selector: {
+          select: {
+            mode: "dropdown",
+            options: [
+              { value: "", label: "Default" },
+              { value: "min", label: "Min" },
+              { value: "low", label: "Low" },
+              { value: "high", label: "High" },
+              { value: "max", label: "Max" }
+            ]
+          }
+        }
+      },
+      { name: "channel", selector: { text: {} } },
+      { name: "color", selector: { text: {} } },
+      { name: "notification_group", selector: { text: {} } },
+      { name: "acknowledge_notification_title", selector: { text: {} } },
+      { name: "acknowledge_notification_body", selector: { text: { multiline: !0 } } }
+    ];
+    return [...i, ...s, ...o];
   }
-  _toggleWeekday(i) {
-    const e = new Set(this._draft?.exclude_days_of_week ?? []);
-    e.has(i) ? e.delete(i) : e.add(i), this._set("exclude_days_of_week", [...e].sort());
+  _valueChanged(t) {
+    t.stopPropagation(), this._data = { ...t.detail.value };
   }
-  _togglePerson(i) {
-    const e = new Set(this._draft?.person_entity_ids ?? []);
-    e.has(i) ? e.delete(i) : e.add(i), this._set("person_entity_ids", [...e].sort());
+  _validationError() {
+    const t = this._data;
+    if (!String(t.title ?? "").trim()) return "A title is required.";
+    if (!String(t.message ?? "").trim()) return "A message is required.";
+    if (t.trigger_type === "time") {
+      if (!t.time) return "Pick a time for the reminder.";
+    } else {
+      if (!t.zone_entity_id) return "Pick a zone to watch.";
+      if (!t.person_entity_ids?.length)
+        return "Pick at least one person to watch.";
+    }
+    return "";
+  }
+  _orUndefined(t) {
+    if (!(t === "" || t === null) && !(Array.isArray(t) && t.length === 0))
+      return t;
   }
   async _save() {
-    if (!this._draft || this._saving) return;
+    if (this._saving) return;
+    const t = this._validationError();
+    if (t) {
+      this._error = t;
+      return;
+    }
     this._saving = !0, this._error = "";
-    const i = this._draft, e = {
-      title: i.title,
-      subtitle: i.subtitle || void 0,
-      message: i.message,
-      notify_service: i.notify_service || void 0,
-      user_name: i.user_name || void 0,
-      trigger_type: i.trigger_type,
-      start_date: i.start_date || void 0,
-      stop_date: i.stop_date || void 0,
-      time: i.time || void 0,
-      every_x_days: i.every_x_days,
-      exclude_days_of_week: i.exclude_days_of_week,
-      zone_entity_id: i.zone_entity_id || void 0,
-      person_entity_ids: i.person_entity_ids,
-      time_window_start: i.time_window_start || void 0,
-      time_window_end: i.time_window_end || void 0,
-      acknowledge_action_title: i.acknowledge_action_title || void 0,
-      snooze_delays: i.snooze_delays.split(",").map((t) => parseInt(t, 10)).filter((t) => !Number.isNaN(t) && t > 0),
-      snooze_text: i.snooze_text || void 0,
-      wait_time_if_no_action: i.wait_time_if_no_action,
-      notification_count: i.notification_count,
-      color: i.color || void 0,
-      channel: i.channel || void 0,
-      channel_importance: i.channel_importance || void 0,
-      notification_group: i.notification_group || void 0,
-      one_shot: i.one_shot
+    const e = this._data, i = {
+      title: String(e.title).trim(),
+      message: String(e.message).trim(),
+      subtitle: this._orUndefined(e.subtitle),
+      notify_service: this._orUndefined(e.notify_service),
+      user_name: this._orUndefined(e.user_name),
+      trigger_type: e.trigger_type ?? "time",
+      one_shot: !!e.one_shot,
+      time: this._orUndefined(e.time),
+      every_x_days: e.every_x_days ?? 1,
+      start_date: this._orUndefined(e.start_date),
+      stop_date: this._orUndefined(e.stop_date),
+      exclude_days_of_week: e.exclude_days_of_week ?? [],
+      zone_entity_id: this._orUndefined(e.zone_entity_id),
+      person_entity_ids: e.person_entity_ids ?? [],
+      time_window_start: this._orUndefined(e.time_window_start),
+      time_window_end: this._orUndefined(e.time_window_end),
+      acknowledge_action_title: this._orUndefined(e.acknowledge_action_title),
+      snooze_delays: String(e.snooze_delays ?? "").split(",").map((s) => parseInt(s.trim(), 10)).filter((s) => !Number.isNaN(s) && s > 0),
+      snooze_text: this._orUndefined(e.snooze_text),
+      wait_time_if_no_action: e.wait_time_if_no_action,
+      notification_count: e.notification_count,
+      color: this._orUndefined(e.color),
+      channel: this._orUndefined(e.channel),
+      channel_importance: this._orUndefined(e.channel_importance),
+      notification_group: this._orUndefined(e.notification_group),
+      acknowledge_notification_title: this._orUndefined(
+        e.acknowledge_notification_title
+      ),
+      acknowledge_notification_body: this._orUndefined(
+        e.acknowledge_notification_body
+      )
     };
     try {
-      this.reminder ? await Le(this.hass, this.reminder.id, e) : await We(this.hass, e), this.dispatchEvent(new CustomEvent("saved")), this.open = !1;
-    } catch (t) {
-      this._error = t instanceof Error ? t.message : "Failed to save the reminder.";
+      this.reminder ? await Ie(this.hass, this.reminder.id, i) : await Be(this.hass, i), this.dispatchEvent(new CustomEvent("saved")), this.open = !1;
+    } catch (s) {
+      this._error = s instanceof Error ? s.message : "Failed to save the reminder.";
     } finally {
       this._saving = !1;
     }
   }
-  _zones() {
-    return Object.values(this.hass.states).filter((i) => i.entity_id.startsWith("zone.")).sort((i, e) => i.entity_id.localeCompare(e.entity_id));
-  }
-  _persons() {
-    return Object.values(this.hass.states).filter((i) => i.entity_id.startsWith("person.")).sort((i, e) => i.entity_id.localeCompare(e.entity_id));
-  }
-  _zoneLabel(i) {
-    return this.hass.states[i]?.attributes.friendly_name ?? i.replace("zone.", "");
-  }
   render() {
-    if (!this._draft) return c;
-    const i = this._draft, e = i.trigger_type !== "time";
-    return _`
+    return g`
       <ha-dialog
         open="${this.open}"
         .heading=${this.reminder ? "Edit reminder" : "New reminder"}
-        @closed=${() => this.open = !1}
+        @closed=${() => {
+      this.open = !1, this.dispatchEvent(new CustomEvent("closed"));
+    }}
       >
         <div class="editor">
-          <div class="row">
-            <ha-textfield
-              class="full"
-              label="Title *"
-              .value=${i.title}
-              @input=${(t) => this._set("title", t.target.value)}
-            ></ha-textfield>
-          </div>
-          <div class="row">
-            <ha-textfield
-              label="Subtitle"
-              .value=${i.subtitle}
-              @input=${(t) => this._set("subtitle", t.target.value)}
-            ></ha-textfield>
-            <ha-textfield
-              label="Message *"
-              .value=${i.message}
-              @input=${(t) => this._set("message", t.target.value)}
-            ></ha-textfield>
-          </div>
-          <div class="row">
-            <ha-select
-              label="Notification service"
-              .value=${i.notify_service}
-              @selected=${(t) => this._set(
-      "notify_service",
-      t.target.value || ""
-    )}
-              @closed=${(t) => t.stopPropagation()}
-            >
-              <mwc-list-item value=""></mwc-list-item>
-              ${[.../* @__PURE__ */ new Set([...this._notifyServices, i.notify_service])].filter((t) => t).map(
-      (t) => _`
-                    <mwc-list-item value=${t}>${t}</mwc-list-item>
-                  `
-    )}
-            </ha-select>
-            <ha-textfield
-              label="User name"
-              helper="Who this reminder is for — shown in group acknowledgement messages"
-              .value=${i.user_name}
-              @input=${(t) => this._set("user_name", t.target.value)}
-            ></ha-textfield>
-          </div>
-          <div class="row">
-            <ha-select
-              label="Trigger"
-              .value=${i.trigger_type}
-              @selected=${(t) => this._set(
-      "trigger_type",
-      t.target.value || "time"
-    )}
-              @closed=${(t) => t.stopPropagation()}
-            >
-              <mwc-list-item value="time">At a fixed time</mwc-list-item>
-              <mwc-list-item value="zone_enter">When I enter a zone</mwc-list-item>
-              <mwc-list-item value="zone_leave">When I leave a zone</mwc-list-item>
-            </ha-select>
-            <ha-formfield label="Only once">
-              <ha-switch
-                .checked=${i.one_shot}
-                @change=${(t) => this._set("one_shot", t.target.checked)}
-              ></ha-switch>
-            </ha-formfield>
-          </div>
-
-          ${e ? _`
-                <div class="section">Zone trigger</div>
-                <div class="row">
-                  <ha-select
-                    label="Zone"
-                    .value=${i.zone_entity_id}
-                    @selected=${(t) => this._set(
-      "zone_entity_id",
-      t.target.value || ""
-    )}
-                    @closed=${(t) => t.stopPropagation()}
-                  >
-                    <mwc-list-item value=""></mwc-list-item>
-                    ${this._zones().map(
-      (t) => _`
-                        <mwc-list-item value=${t.entity_id}
-                          >${this._zoneLabel(t.entity_id)}</mwc-list-item
-                        >
-                      `
-    )}
-                  </ha-select>
-                </div>
-                <div class="section">Watch these persons</div>
-                ${this._persons().length ? _`<div class="days">
-                      ${this._persons().map(
-      (t) => _`
-                          <ha-formfield
-                            label=${String(
-        t.attributes.friendly_name ?? t.entity_id
-      )}
-                          >
-                            <ha-checkbox
-                              .checked=${i.person_entity_ids.includes(
-        t.entity_id
-      )}
-                              @change=${() => this._togglePerson(t.entity_id)}
-                            ></ha-checkbox>
-                          </ha-formfield>
-                        `
-    )}
-                    </div>` : _`<div>No person entities found.</div>`}
-                <div class="row">
-                  <ha-textfield
-                    label="Only fire between (start)"
-                    type="time"
-                    .value=${i.time_window_start}
-                    @input=${(t) => this._set(
-      "time_window_start",
-      t.target.value
-    )}
-                  ></ha-textfield>
-                  <ha-textfield
-                    label="and (end)"
-                    type="time"
-                    .value=${i.time_window_end}
-                    @input=${(t) => this._set(
-      "time_window_end",
-      t.target.value
-    )}
-                  ></ha-textfield>
-                </div>
-              ` : _`
-                <div class="section">Time trigger</div>
-                <div class="row">
-                  <ha-textfield
-                    label="Time *"
-                    type="time"
-                    .value=${i.time}
-                    @input=${(t) => this._set("time", t.target.value)}
-                  ></ha-textfield>
-                  <ha-textfield
-                    label="Every N days *"
-                    type="number"
-                    min="1"
-                    .value=${String(i.every_x_days)}
-                    @input=${(t) => this._set(
-      "every_x_days",
-      parseInt(t.target.value, 10) || 1
-    )}
-                  ></ha-textfield>
-                </div>
-                <div class="row">
-                  <ha-textfield
-                    label="Start date"
-                    type="date"
-                    .value=${i.start_date}
-                    @input=${(t) => this._set(
-      "start_date",
-      t.target.value
-    )}
-                  ></ha-textfield>
-                  <ha-textfield
-                    label="Stop date"
-                    type="date"
-                    .value=${i.stop_date}
-                    @input=${(t) => this._set(
-      "stop_date",
-      t.target.value
-    )}
-                  ></ha-textfield>
-                </div>
-                <div class="section">Exclude days</div>
-                <div class="days">
-                  ${Ke.map(
-      (t) => _`
-                      <ha-formfield label=${t.label}>
-                        <ha-checkbox
-                          .checked=${i.exclude_days_of_week.includes(t.value)}
-                          @change=${() => this._toggleWeekday(t.value)}
-                        ></ha-checkbox>
-                      </ha-formfield>
-                    `
-    )}
-                </div>
-              `}
-
-          <div class="section">Notification</div>
-          <div class="row">
-            <ha-textfield
-              label="Acknowledge action title"
-              .value=${i.acknowledge_action_title}
-              @input=${(t) => this._set(
-      "acknowledge_action_title",
-      t.target.value
-    )}
-            ></ha-textfield>
-            <ha-textfield
-              label="Snooze delays (minutes)"
-              helper="Comma separated, e.g. 5,15,30"
-              .value=${i.snooze_delays}
-              @input=${(t) => this._set("snooze_delays", t.target.value)}
-            ></ha-textfield>
-          </div>
-          <div class="row">
-            <ha-textfield
-              label="Wait before resend (min)"
-              type="number"
-              min="1"
-              .value=${String(i.wait_time_if_no_action)}
-              @input=${(t) => this._set(
-      "wait_time_if_no_action",
-      parseInt(t.target.value, 10) || 1
-    )}
-            ></ha-textfield>
-            <ha-textfield
-              label="Max notifications"
-              type="number"
-              min="1"
-              .value=${String(i.notification_count)}
-              @input=${(t) => this._set(
-      "notification_count",
-      parseInt(t.target.value, 10) || 1
-    )}
-            ></ha-textfield>
-          </div>
-          <div class="row">
-            <ha-textfield
-              label="Snooze text"
-              helper="\${time} is replaced by the delay"
-              .value=${i.snooze_text}
-              @input=${(t) => this._set("snooze_text", t.target.value)}
-            ></ha-textfield>
-            <ha-textfield
-              label="Notification group"
-              helper="Shared with other reminders"
-              .value=${i.notification_group}
-              @input=${(t) => this._set(
-      "notification_group",
-      t.target.value
-    )}
-            ></ha-textfield>
-          </div>
-          <div class="row">
-            <ha-textfield
-              label="Color (Android)"
-              .value=${i.color}
-              @input=${(t) => this._set("color", t.target.value)}
-            ></ha-textfield>
-            <ha-textfield
-              label="Channel (Android)"
-              .value=${i.channel}
-              @input=${(t) => this._set("channel", t.target.value)}
-            ></ha-textfield>
-            <ha-textfield
-              label="Channel importance"
-              .value=${i.channel_importance}
-              @input=${(t) => this._set(
-      "channel_importance",
-      t.target.value
-    )}
-            ></ha-textfield>
-          </div>
-
-          ${this._error ? _`<div class="error">${this._error}</div>` : c}
+          <ha-form
+            .hass=${this.hass}
+            .data=${this._data}
+            .schema=${this._schema()}
+            .computeLabel=${(t) => Je[t.name] ?? t.name}
+            @value-changed=${this._valueChanged}
+          ></ha-form>
+          ${this._error ? g`<div class="error">${this._error}</div>` : h}
         </div>
 
-        <mwc-button
+        <ha-button
           slot="primaryAction"
-          .disabled=${this._saving || !i.title || !i.message}
+          .disabled=${this._saving}
           @click=${this._save}
         >
           ${this.reminder ? "Save" : "Create"}
-        </mwc-button>
-        <mwc-button slot="secondaryAction" @click=${() => this.open = !1}>
+        </ha-button>
+        <ha-button slot="secondaryAction" @click=${() => this.open = !1}>
           Cancel
-        </mwc-button>
+        </ha-button>
       </ha-dialog>
     `;
   }
 };
-u.styles = ce`
+p.styles = de`
     .editor {
-      max-width: 560px;
-    }
-    .row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .row > * {
-      flex: 1 1 160px;
-      min-width: 140px;
-    }
-    .full {
-      flex-basis: 100%;
-    }
-    .days {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      align-items: center;
-      padding-top: 8px;
+      display: block;
+      min-width: min(560px, 80vw);
     }
     .error {
       color: var(--error-color, #db4437);
-      padding: 8px 0;
-    }
-    .section {
-      color: var(--secondary-text-color);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 16px 0 4px;
+      padding: 8px 0 0;
     }
   `;
 w([
   j({ attribute: !1 })
-], u.prototype, "hass", 2);
+], p.prototype, "hass", 2);
 w([
   j({ attribute: !1 })
-], u.prototype, "reminder", 2);
+], p.prototype, "reminder", 2);
 w([
   j({ type: Boolean })
-], u.prototype, "open", 2);
+], p.prototype, "open", 2);
 w([
-  $()
-], u.prototype, "_draft", 2);
+  f()
+], p.prototype, "_data", 2);
 w([
-  $()
-], u.prototype, "_saving", 2);
+  f()
+], p.prototype, "_saving", 2);
 w([
-  $()
-], u.prototype, "_error", 2);
+  f()
+], p.prototype, "_error", 2);
 w([
-  $()
-], u.prototype, "_notifyServices", 2);
-u = w([
-  fe("ha-reminders-editor")
-], u);
-var Je = Object.defineProperty, Ye = Object.getOwnPropertyDescriptor, b = (i, e, t, s) => {
-  for (var o = s > 1 ? void 0 : s ? Ye(e, t) : e, n = i.length - 1, r; n >= 0; n--)
-    (r = i[n]) && (o = (s ? r(e, t, o) : r(o)) || o);
-  return s && o && Je(e, t, o), o;
+  f()
+], p.prototype, "_notifyServices", 2);
+p = w([
+  me("ha-reminders-editor")
+], p);
+var Ye = Object.defineProperty, Ge = Object.getOwnPropertyDescriptor, b = (t, e, i, s) => {
+  for (var o = s > 1 ? void 0 : s ? Ge(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+    (r = t[n]) && (o = (s ? r(e, i, o) : r(o)) || o);
+  return s && o && Ye(e, i, o), o;
 };
-const Ge = {
+const Qe = {
   scheduled: "Scheduled",
   active: "Active",
   snoozed: "Snoozed",
   completed: "Completed",
   disabled: "Disabled"
 };
-function L(i) {
-  return i.status ?? "scheduled";
+function B(t) {
+  return t.status ?? "scheduled";
 }
-function le(i) {
-  return i ? i.replace("zone.", "").replace(/_/g, " ") : "";
+function ce(t) {
+  return t ? t.replace("zone.", "").replace(/_/g, " ") : "";
 }
-function Qe(i) {
-  if (!i) return "";
-  const e = new Date(i);
-  if (Number.isNaN(e.getTime())) return i;
-  const t = e.toDateString() === (/* @__PURE__ */ new Date()).toDateString();
+function Xe(t) {
+  if (!t) return "";
+  const e = new Date(t);
+  if (Number.isNaN(e.getTime())) return t;
+  const i = e.toDateString() === (/* @__PURE__ */ new Date()).toDateString();
   return e.toLocaleString(void 0, {
     month: "short",
     day: "numeric",
-    ...t ? {} : { weekday: "short" },
+    ...i ? {} : { weekday: "short" },
     hour: "2-digit",
     minute: "2-digit"
   });
 }
-let f = class extends z {
+let u = class extends z {
   constructor() {
     super(...arguments), this._config = {}, this._editorOpen = !1, this._editing = null, this._snoozeTarget = null, this._snoozeMinutes = 15, this._deleteArmed = null;
   }
-  setConfig(i) {
-    if (!i.type || i.type !== "ha-reminders-card")
+  setConfig(t) {
+    const e = String(t.type ?? "").replace(/^custom:/, "");
+    if (e && e !== "ha-reminders-card")
       throw new Error("Invalid card type");
-    this._config = { ...i };
+    this._config = { ...t };
   }
   getCardSize() {
     return 3;
@@ -1112,60 +954,60 @@ let f = class extends z {
   }
   _reminders() {
     return this.hass ? Object.values(this.hass.states).filter(
-      (i) => i.entity_id.startsWith("sensor.ha_reminder_") && typeof i.attributes.reminder_id == "string"
-    ).map((i) => i.attributes).sort((i, e) => {
-      const t = {
+      (t) => t.entity_id.startsWith("sensor.ha_reminder_") && typeof t.attributes.reminder_id == "string"
+    ).map((t) => t.attributes).sort((t, e) => {
+      const i = {
         active: 0,
         snoozed: 1,
         scheduled: 2,
         completed: 3,
         disabled: 4
       };
-      return (t[L(i)] ?? 9) - (t[L(e)] ?? 9);
+      return (i[B(t)] ?? 9) - (i[B(e)] ?? 9);
     }) : [];
   }
   _openNew() {
     this._editing = null, this._editorOpen = !0;
   }
-  _openEdit(i) {
-    this._editing = i, this._editorOpen = !0;
+  _openEdit(t) {
+    this._editing = t, this._editorOpen = !0;
   }
-  _openSnooze(i) {
-    this._snoozeTarget = i, this._snoozeMinutes = 15;
+  _openSnooze(t) {
+    this._snoozeTarget = t, this._snoozeMinutes = 15;
   }
   async _snooze() {
-    this._snoozeTarget && (await Be(
+    this._snoozeTarget && (await qe(
       this.hass,
       this._snoozeTarget.id,
       this._snoozeMinutes
     ), this._snoozeTarget = null);
   }
-  async _complete(i) {
-    await qe(this.hass, i.id);
+  async _complete(t) {
+    await Fe(this.hass, t.id);
   }
-  async _toggleEnabled(i, e) {
-    await Ve(this.hass, i.id, e);
+  async _toggleEnabled(t, e) {
+    await Ve(this.hass, t.id, e);
   }
-  _armDelete(i) {
-    if (this._deleteArmed === i.id) {
-      this._deleteArmed = null, this._deleteTimer !== void 0 && (window.clearTimeout(this._deleteTimer), this._deleteTimer = void 0), Ie(this.hass, i.id);
+  _armDelete(t) {
+    if (this._deleteArmed === t.id) {
+      this._deleteArmed = null, this._deleteTimer !== void 0 && (window.clearTimeout(this._deleteTimer), this._deleteTimer = void 0), We(this.hass, t.id);
       return;
     }
-    this._deleteArmed = i.id, this._deleteTimer !== void 0 && window.clearTimeout(this._deleteTimer), this._deleteTimer = window.setTimeout(() => {
+    this._deleteArmed = t.id, this._deleteTimer !== void 0 && window.clearTimeout(this._deleteTimer), this._deleteTimer = window.setTimeout(() => {
       this._deleteArmed = null, this._deleteTimer = void 0;
     }, 3e3);
   }
-  _triggerText(i) {
-    return i.trigger_type === "zone_enter" ? `When you enter ${le(i.zone_entity_id)}` : i.trigger_type === "zone_leave" ? `When you leave ${le(i.zone_entity_id)}` : Qe(i.next_fire) || "Scheduled";
+  _triggerText(t) {
+    return t.trigger_type === "zone_enter" ? `When you enter ${ce(t.zone_entity_id)}` : t.trigger_type === "zone_leave" ? `When you leave ${ce(t.zone_entity_id)}` : Xe(t.next_fire) || "Scheduled";
   }
-  _statusChip(i) {
-    const e = L(i);
-    return e === "disabled" ? c : _`<span class="chip ${e}">${Ge[e]}</span>`;
+  _statusChip(t) {
+    const e = B(t);
+    return e === "disabled" ? h : g`<span class="chip ${e}">${Qe[e]}</span>`;
   }
   render() {
-    if (!this.hass) return c;
-    const i = this._reminders(), e = this._config.title ?? "Reminders";
-    return _`
+    if (!this.hass) return h;
+    const t = this._reminders(), e = this._config.title ?? "Reminders";
+    return g`
       <ha-card class="card">
         <div class="header">
           <span class="title">${e}</span>
@@ -1177,56 +1019,56 @@ let f = class extends z {
           </ha-icon-button>
         </div>
 
-        ${i.length === 0 ? _`<div class="empty">No reminders yet — add one with +</div>` : i.map(
-      (t) => _`
+        ${t.length === 0 ? g`<div class="empty">No reminders yet — add one with +</div>` : t.map(
+      (i) => g`
                 <div class="row">
                   <ha-icon
-                    icon=${t.trigger_type === "time" ? "mdi:clock-outline" : t.trigger_type === "zone_enter" ? "mdi:home-import-outline" : "mdi:home-export-outline"}
+                    icon=${i.trigger_type === "time" ? "mdi:clock-outline" : i.trigger_type === "zone_enter" ? "mdi:home-import-outline" : "mdi:home-export-outline"}
                   ></ha-icon>
                   <div class="row-text">
-                    <div class="row-title">${t.title}</div>
+                    <div class="row-title">${i.title}</div>
                     <div class="row-sub">
-                      ${this._triggerText(t)}
-                      ${t.notified_count ? _` · notified ${t.notified_count}
+                      ${this._triggerText(i)}
+                      ${i.notified_count ? g` · notified ${i.notified_count}
                             ×` : ""}
                     </div>
                   </div>
-                  ${this._statusChip(t)}
+                  ${this._statusChip(i)}
                   <div class="actions">
-                    ${L(t) === "disabled" ? c : _`
+                    ${B(i) === "disabled" ? h : g`
                           <ha-icon-button
                             label="Complete"
-                            @click=${() => this._complete(t)}
+                            @click=${() => this._complete(i)}
                           >
                             <ha-icon icon="mdi:check"></ha-icon>
                           </ha-icon-button>
                           <ha-icon-button
                             label="Snooze"
-                            @click=${() => this._openSnooze(t)}
+                            @click=${() => this._openSnooze(i)}
                           >
                             <ha-icon icon="mdi:clock-outline"></ha-icon>
                           </ha-icon-button>
                         `}
                     <ha-icon-button
                       label="Edit"
-                      @click=${() => this._openEdit(t)}
+                      @click=${() => this._openEdit(i)}
                     >
                       <ha-icon icon="mdi:pencil"></ha-icon>
                     </ha-icon-button>
                     <ha-icon-button
                       class="danger"
-                      label=${this._deleteArmed === t.id ? "Confirm delete" : "Delete"}
-                      @click=${() => this._armDelete(t)}
+                      label=${this._deleteArmed === i.id ? "Confirm delete" : "Delete"}
+                      @click=${() => this._armDelete(i)}
                     >
                       <ha-icon
-                        icon=${this._deleteArmed === t.id ? "mdi:check" : "mdi:delete"}
+                        icon=${this._deleteArmed === i.id ? "mdi:check" : "mdi:delete"}
                       ></ha-icon>
                     </ha-icon-button>
                   </div>
                   <ha-switch
-                    .checked=${t.enabled}
+                    .checked=${i.enabled}
                     @change=${(s) => this._toggleEnabled(
-        t,
+        i,
         s.target.checked
       )}
                   ></ha-switch>
@@ -1248,40 +1090,38 @@ let f = class extends z {
         .heading=${this._snoozeTarget ? `Snooze "${this._snoozeTarget.title}"` : ""}
         @closed=${() => this._snoozeTarget = null}
       >
-        <ha-textfield
-          label="Minutes"
-          type="number"
-          min="1"
-          .value=${String(this._snoozeMinutes)}
-          @input=${(t) => this._snoozeMinutes = parseInt(
-      t.target.value,
-      10
-    ) || 15}
-        ></ha-textfield>
+        <ha-selector
+          .hass=${this.hass}
+          .selector=${{ number: { min: 1, mode: "box" } }}
+          .label=${"Minutes"}
+          .value=${this._snoozeMinutes}
+          @value-changed=${(i) => {
+      i.stopPropagation(), this._snoozeMinutes = Number(i.detail.value) || 15;
+    }}
+        ></ha-selector>
         <div class="snooze-quick">
           ${[5, 15, 30, 60].map(
-      (t) => _`
-              <mwc-button
-                outlined
-                @click=${() => this._snoozeMinutes = t}
-                >${t} min</mwc-button
+      (i) => g`
+              <ha-button
+                @click=${() => this._snoozeMinutes = i}
+                >${i} min</ha-button
               >
             `
     )}
         </div>
-        <mwc-button slot="primaryAction" @click=${this._snooze}
-          >Snooze</mwc-button
+        <ha-button slot="primaryAction" @click=${this._snooze}
+          >Snooze</ha-button
         >
-        <mwc-button
+        <ha-button
           slot="secondaryAction"
           @click=${() => this._snoozeTarget = null}
-          >Cancel</mwc-button
+          >Cancel</ha-button
         >
       </ha-dialog>
     `;
   }
 };
-f.styles = ce`
+u.styles = de`
     .card {
       font-family: var(--primary-font-family, inherit);
     }
@@ -1369,28 +1209,28 @@ f.styles = ce`
   `;
 b([
   j({ attribute: !1 })
-], f.prototype, "hass", 2);
+], u.prototype, "hass", 2);
 b([
-  $()
-], f.prototype, "_config", 2);
+  f()
+], u.prototype, "_config", 2);
 b([
-  $()
-], f.prototype, "_editorOpen", 2);
+  f()
+], u.prototype, "_editorOpen", 2);
 b([
-  $()
-], f.prototype, "_editing", 2);
+  f()
+], u.prototype, "_editing", 2);
 b([
-  $()
-], f.prototype, "_snoozeTarget", 2);
+  f()
+], u.prototype, "_snoozeTarget", 2);
 b([
-  $()
-], f.prototype, "_snoozeMinutes", 2);
+  f()
+], u.prototype, "_snoozeMinutes", 2);
 b([
-  $()
-], f.prototype, "_deleteArmed", 2);
-f = b([
-  fe("ha-reminders-card")
-], f);
+  f()
+], u.prototype, "_deleteArmed", 2);
+u = b([
+  me("ha-reminders-card")
+], u);
 window.customCards = window.customCards ?? [];
 window.customCards.push({
   type: "ha-reminders-card",
@@ -1398,5 +1238,5 @@ window.customCards.push({
   description: "View, edit, snooze and complete your reminders."
 });
 export {
-  f as HaRemindersCard
+  u as HaRemindersCard
 };

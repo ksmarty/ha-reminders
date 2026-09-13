@@ -152,7 +152,10 @@ export class HaRemindersCard extends LitElement {
   `;
 
   setConfig(config: CardConfig): void {
-    if (!config.type || config.type !== "ha-reminders-card") {
+    // Home Assistant passes custom card types through with the `custom:`
+    // prefix, so `custom:ha-reminders-card` is the normal case here.
+    const type = String(config.type ?? "").replace(/^custom:/, "");
+    if (type && type !== "ha-reminders-card") {
       throw new Error("Invalid card type");
     }
     this._config = { ...config };
@@ -361,35 +364,33 @@ export class HaRemindersCard extends LitElement {
           : ""}
         @closed=${() => (this._snoozeTarget = null)}
       >
-        <ha-textfield
-          label="Minutes"
-          type="number"
-          min="1"
-          .value=${String(this._snoozeMinutes)}
-          @input=${(ev: Event) =>
-            (this._snoozeMinutes = parseInt(
-              (ev.target as HTMLInputElement).value,
-              10,
-            ) || 15)}
-        ></ha-textfield>
+        <ha-selector
+          .hass=${this.hass}
+          .selector=${{ number: { min: 1, mode: "box" } }}
+          .label=${"Minutes"}
+          .value=${this._snoozeMinutes}
+          @value-changed=${(ev: CustomEvent) => {
+            ev.stopPropagation();
+            this._snoozeMinutes = Number(ev.detail.value) || 15;
+          }}
+        ></ha-selector>
         <div class="snooze-quick">
           ${[5, 15, 30, 60].map(
             (minutes) => html`
-              <mwc-button
-                outlined
+              <ha-button
                 @click=${() => (this._snoozeMinutes = minutes)}
-                >${minutes} min</mwc-button
+                >${minutes} min</ha-button
               >
             `,
           )}
         </div>
-        <mwc-button slot="primaryAction" @click=${this._snooze}
-          >Snooze</mwc-button
+        <ha-button slot="primaryAction" @click=${this._snooze}
+          >Snooze</ha-button
         >
-        <mwc-button
+        <ha-button
           slot="secondaryAction"
           @click=${() => (this._snoozeTarget = null)}
-          >Cancel</mwc-button
+          >Cancel</ha-button
         >
       </ha-dialog>
     `;
