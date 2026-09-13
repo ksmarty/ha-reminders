@@ -38,6 +38,7 @@ def _fake_hass(config_dir: str, http: _FakeHTTP | None) -> SimpleNamespace:
     return SimpleNamespace(
         config=SimpleNamespace(path=lambda *parts: os.path.join(config_dir, *parts)),
         http=http,
+        data={},
     )
 
 
@@ -68,7 +69,10 @@ def test_card_is_served_and_injected(tmp_path, monkeypatch) -> None:
     assert config.url_path == f"/{DOMAIN}"
     assert config.path == www
     assert config.cache_headers is False  # never serve a stale bundle
-    assert injected == [CARD_URL]
+    assert len(injected) == 1
+    assert injected[0].startswith(CARD_URL)
+    # A version stamp defeats proxy caching (Cloudflare caches .js for hours).
+    assert "?v=" in injected[0]
 
 
 def test_missing_bundle_does_not_register(tmp_path, monkeypatch) -> None:

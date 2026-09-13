@@ -1,31 +1,34 @@
-import { i as p, n as l, r as h, e as m, a as u, b as c } from "./reminder-list-2fMCkJ5M.js";
+import { i as u, n as l, r as m, e as f, a as p, b as c } from "./reminder-list-2fMCkJ5M.js";
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const f = (e) => (t, s) => {
+const g = (t) => (e, s) => {
   s !== void 0 ? s.addInitializer(() => {
-    customElements.define(e, t);
-  }) : customElements.define(e, t);
+    customElements.define(t, e);
+  }) : customElements.define(t, e);
 };
-var w = Object.defineProperty, g = Object.getOwnPropertyDescriptor, a = (e, t, s, n) => {
-  for (var r = n > 1 ? void 0 : n ? g(t, s) : t, o = e.length - 1, d; o >= 0; o--)
-    (d = e[o]) && (r = (n ? d(t, s, r) : d(r)) || r);
-  return n && r && w(t, s, r), r;
+var _ = Object.defineProperty, w = Object.getOwnPropertyDescriptor, n = (t, e, s, a) => {
+  for (var r = a > 1 ? void 0 : a ? w(e, s) : e, o = t.length - 1, d; o >= 0; o--)
+    (d = t[o]) && (r = (a ? d(e, s, r) : d(r)) || r);
+  return a && r && _(e, s, r), r;
 };
-let i = class extends u {
+let i = class extends p {
   constructor() {
     super(...arguments), this._config = {};
   }
-  setConfig(e) {
-    const t = String(e.type ?? "").replace(/^custom:/, "");
-    if (t && t !== "ha-reminders-card")
+  setConfig(t) {
+    const e = String(t.type ?? "").replace(/^custom:/, "");
+    if (e && e !== "ha-reminders-card")
       throw new Error("Invalid card type");
-    this._config = { ...e };
+    this._config = { ...t };
   }
   static getStubConfig() {
-    return {};
+    return { type: "custom:ha-reminders-card" };
+  }
+  static getConfigElement() {
+    return document.createElement("ha-reminders-card-editor");
   }
   getCardSize() {
     return 3;
@@ -47,7 +50,7 @@ let i = class extends u {
     ` : c``;
   }
 };
-i.styles = p`
+i.styles = u`
     .header {
       display: flex;
       align-items: center;
@@ -59,24 +62,62 @@ i.styles = p`
       font-weight: 500;
     }
   `;
-a([
+n([
   l({ attribute: !1 })
 ], i.prototype, "hass", 2);
-a([
-  h()
+n([
+  m()
 ], i.prototype, "_config", 2);
-a([
-  m("ha-reminders-list")
+n([
+  f("ha-reminders-list")
 ], i.prototype, "_list", 2);
-i = a([
-  f("ha-reminders-card")
+i = n([
+  g("ha-reminders-card")
 ], i);
 window.customCards = window.customCards ?? [];
-window.customCards.some((e) => e.type === "ha-reminders-card") || window.customCards.push({
+window.customCards.some((t) => t.type === "ha-reminders-card") || window.customCards.push({
   type: "ha-reminders-card",
   name: "HA Reminders",
   description: "View, edit, snooze and complete your reminders."
 });
+class h extends p {
+  constructor() {
+    super(...arguments), this._config = {};
+  }
+  setConfig(e) {
+    this._config = { ...e };
+  }
+  _valueChanged(e) {
+    e.stopPropagation();
+    const s = e.detail.value?.title ?? "";
+    this._config = { ...this._config, title: s }, this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        detail: { config: this._config },
+        bubbles: !0,
+        composed: !0
+      })
+    );
+  }
+  render() {
+    return c`
+      <ha-form
+        .hass=${this.hass}
+        .data=${{ title: this._config.title ?? "" }}
+        .schema=${[{ name: "title", selector: { text: {} } }]}
+        .computeLabel=${() => "Card title"}
+        @value-changed=${this._valueChanged}
+      ></ha-form>
+    `;
+  }
+}
+n([
+  l({ attribute: !1 })
+], h.prototype, "hass", 2);
+n([
+  m()
+], h.prototype, "_config", 2);
+customElements.get("ha-reminders-card-editor") || customElements.define("ha-reminders-card-editor", h);
 export {
-  i as HaRemindersCard
+  i as HaRemindersCard,
+  h as HaRemindersCardEditor
 };

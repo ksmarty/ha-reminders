@@ -31,6 +31,7 @@ PANEL_FILENAME = "ha-reminders-panel.js"
 PANEL_URL = f"/{DOMAIN}/{PANEL_FILENAME}"
 PANEL_ELEMENT = "ha-reminders-panel"
 PANEL_URL_PATH = DOMAIN.replace("_", "-")
+CARD_URL_KEY = "card_url"
 PANEL_TITLE = "Reminders"
 PANEL_ICON = "mdi:bell-ring-outline"
 
@@ -95,7 +96,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:
         from homeassistant.components.frontend import async_remove_panel, remove_extra_js_url
 
-        remove_extra_js_url(hass, CARD_URL)
+        if card_url := hass.data[DOMAIN].pop(CARD_URL_KEY, None):
+            remove_extra_js_url(hass, card_url)
         async_remove_panel(hass, PANEL_URL_PATH, warn_if_unknown=False)
     except Exception:  # noqa: BLE001 - best effort on unload
         _LOGGER.debug("Could not remove the card/panel frontend assets")
@@ -133,18 +135,33 @@ async def _async_setup_frontend(hass: HomeAssistant) -> None:
         _LOGGER.error("Could not serve the reminder card at %s: %s", CARD_URL, err)
         return
 
+    version = _integration_version(hass)
+    card_url = f"{CARD_URL}?v={version}"
+    panel_url = f"{PANEL_URL}?v={version}"
+
     try:
         from homeassistant.components.frontend import add_extra_js_url
 
-        add_extra_js_url(hass, CARD_URL)
-        _LOGGER.debug("Serving reminder card at %s", CARD_URL)
+        add_extra_js_url(hass, card_url)
+        _LOGGER.debug("Serving reminder card at %s", card_url)
     except Exception as err:  # noqa: BLE001
         _LOGGER.error("Could not inject the reminder card into the frontend: %s", err)
 
-    await _async_setup_panel(hass)
+    hass.data.setdefault(DOMAIN, {})[CARD_URL_KEY] = card_url
+    await _async_setup_panel(hass, panel_url)
 
 
-async def _async_setup_panel(hass: HomeAssistant) -> None:
+def _integration_version(hass: HomeAssistant) -> str:
+    """Version stamp for the frontend assets (cache busting)."""
+    try:
+        from homeassistant.loader import async_get_loaded_integration
+
+        return async_get_loaded_integration(hass, DOMAIN).version or "0"
+    except Exception:  # noqa: BLE001 - fall back to an uncached URL
+        return "0"
+
+
+async def _async_setup_panel(hass: HomeAssistant, panel_url: str) -> None:
     """Add the reminders sidebar panel."""
     try:
         from homeassistant.components import panel_custom
@@ -153,13 +170,13 @@ async def _async_setup_panel(hass: HomeAssistant) -> None:
         # Re-registering on reload would otherwise leave the old entry behind.
         async_remove_panel(hass, PANEL_URL_PATH, warn_if_unknown=False)
 
-        panel_custom.async_register_panel(
+        await panel_custom.async_register_panel(
             hass,
             frontend_url_path=PANEL_URL_PATH,
             webcomponent_name=PANEL_ELEMENT,
             sidebar_title=PANEL_TITLE,
             sidebar_icon=PANEL_ICON,
-            module_url=PANEL_URL,
+            module_url=panel_url,
             embed_iframe=False,
             require_admin=False,
         )

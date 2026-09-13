@@ -40,7 +40,11 @@ export class HaRemindersCard extends LitElement {
   }
 
   static getStubConfig(): Record<string, unknown> {
-    return {};
+    return { type: "custom:ha-reminders-card" };
+  }
+
+  static getConfigElement(): HTMLElement {
+    return document.createElement("ha-reminders-card-editor");
   }
 
   getCardSize(): number {
@@ -79,4 +83,47 @@ if (!window.customCards.some((card) => card.type === "ha-reminders-card")) {
     name: "HA Reminders",
     description: "View, edit, snooze and complete your reminders.",
   });
+}
+/**
+ * Visual editor shown in Lovelace's card editor. Without a config element Home
+ * Assistant reports "this card doesn't support the visual editor".
+ */
+export class HaRemindersCardEditor extends LitElement {
+  @property({ attribute: false }) hass!: HomeAssistant;
+
+  @state() private _config: CardConfig = {};
+
+  setConfig(config: CardConfig): void {
+    this._config = { ...config };
+  }
+
+  private _valueChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    const title = ev.detail.value?.title ?? "";
+    this._config = { ...this._config, title };
+    this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        detail: { config: this._config },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  protected render() {
+    return html`
+      <ha-form
+        .hass=${this.hass}
+        .data=${{ title: this._config.title ?? "" }}
+        .schema=${[{ name: "title", selector: { text: {} } }]}
+        .computeLabel=${() => "Card title"}
+        @value-changed=${this._valueChanged}
+      ></ha-form>
+    `;
+  }
+}
+
+// Guarded for the same reason as the other elements.
+if (!customElements.get("ha-reminders-card-editor")) {
+  customElements.define("ha-reminders-card-editor", HaRemindersCardEditor);
 }

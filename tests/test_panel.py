@@ -38,7 +38,9 @@ async def _run(tmp_path, monkeypatch):
 
     from homeassistant.components import panel_custom  # noqa: PLC0415
 
-    def fake_register(hass_, **kwargs):  # noqa: ANN001
+    async def fake_register(hass_, **kwargs):  # noqa: ANN001
+        # Deliberately async, like panel_custom.async_register_panel: a caller
+        # that forgets to await it leaves `registered` empty and fails here.
         registered.update(kwargs)
 
     monkeypatch.setattr(panel_custom, "async_register_panel", fake_register)
@@ -64,7 +66,8 @@ def test_panel_registered_with_module_url(tmp_path, monkeypatch) -> None:
 
     assert registered["frontend_url_path"] == integration.PANEL_URL_PATH
     assert registered["webcomponent_name"] == integration.PANEL_ELEMENT
-    assert registered["module_url"] == integration.PANEL_URL
+    assert str(registered["module_url"]).startswith(integration.PANEL_URL)
+    assert "?v=" in str(registered["module_url"]), "assets need cache busting"
     assert registered["sidebar_title"] == integration.PANEL_TITLE
     assert registered["sidebar_icon"] == integration.PANEL_ICON
     assert registered["embed_iframe"] is False
