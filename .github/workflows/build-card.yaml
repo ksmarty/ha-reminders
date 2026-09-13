@@ -27,6 +27,10 @@ jobs:
         working-directory: card
         run: npm run lint
 
+      - name: Unit tests
+        working-directory: card
+        run: npm test
+
       - name: Build
         working-directory: card
         run: npm run build

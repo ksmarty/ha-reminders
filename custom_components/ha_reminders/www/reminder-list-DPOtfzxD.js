@@ -3,7 +3,7 @@
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const W = globalThis, Z = W.ShadowRoot && (W.ShadyCSS === void 0 || W.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, K = Symbol(), X = /* @__PURE__ */ new WeakMap();
+const I = globalThis, Z = I.ShadowRoot && (I.ShadyCSS === void 0 || I.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, K = Symbol(), X = /* @__PURE__ */ new WeakMap();
 let ue = class {
   constructor(e, t, i) {
     if (this._$cssResult$ = !0, i !== K) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
@@ -32,7 +32,7 @@ const $e = (o) => new ue(typeof o == "string" ? o : o + "", void 0, K), pe = (o,
 }, ve = (o, e) => {
   if (Z) o.adoptedStyleSheets = e.map((t) => t instanceof CSSStyleSheet ? t : t.styleSheet);
   else for (const t of e) {
-    const i = document.createElement("style"), s = W.litNonce;
+    const i = document.createElement("style"), s = I.litNonce;
     s !== void 0 && i.setAttribute("nonce", s), i.textContent = t.cssText, o.appendChild(i);
   }
 }, ee = Z ? (o) => o : (o) => o instanceof CSSStyleSheet ? ((e) => {
@@ -45,7 +45,7 @@ const $e = (o) => new ue(typeof o == "string" ? o : o + "", void 0, K), pe = (o,
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: be, defineProperty: we, getOwnPropertyDescriptor: Ae, getOwnPropertyNames: Se, getOwnPropertySymbols: xe, getPrototypeOf: Ee } = Object, v = globalThis, te = v.trustedTypes, ze = te ? te.emptyScript : "", ke = v.reactiveElementPolyfillSupport, O = (o, e) => o, I = { toAttribute(o, e) {
+const { is: be, defineProperty: we, getOwnPropertyDescriptor: Ae, getOwnPropertyNames: Se, getOwnPropertySymbols: xe, getPrototypeOf: Ee } = Object, v = globalThis, te = v.trustedTypes, ze = te ? te.emptyScript : "", ke = v.reactiveElementPolyfillSupport, O = (o, e) => o, W = { toAttribute(o, e) {
   switch (e) {
     case Boolean:
       o = o ? ze : null;
@@ -73,7 +73,7 @@ const { is: be, defineProperty: we, getOwnPropertyDescriptor: Ae, getOwnProperty
       }
   }
   return t;
-} }, J = (o, e) => !be(o, e), ie = { attribute: !0, type: String, converter: I, reflect: !1, useDefault: !1, hasChanged: J };
+} }, J = (o, e) => !be(o, e), ie = { attribute: !0, type: String, converter: W, reflect: !1, useDefault: !1, hasChanged: J };
 Symbol.metadata ?? (Symbol.metadata = Symbol("metadata")), v.litPropertyMetadata ?? (v.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
 let x = class extends HTMLElement {
   static addInitializer(e) {
@@ -172,14 +172,14 @@ let x = class extends HTMLElement {
   _$ET(e, t) {
     const i = this.constructor.elementProperties.get(e), s = this.constructor._$Eu(e, i);
     if (s !== void 0 && i.reflect === !0) {
-      const n = (i.converter?.toAttribute !== void 0 ? i.converter : I).toAttribute(t, i.type);
+      const n = (i.converter?.toAttribute !== void 0 ? i.converter : W).toAttribute(t, i.type);
       this._$Em = e, n == null ? this.removeAttribute(s) : this.setAttribute(s, n), this._$Em = null;
     }
   }
   _$AK(e, t) {
     const i = this.constructor, s = i._$Eh.get(e);
     if (s !== void 0 && this._$Em !== s) {
-      const n = i.getPropertyOptions(s), r = typeof n.converter == "function" ? { fromAttribute: n.converter } : n.converter?.fromAttribute !== void 0 ? n.converter : I;
+      const n = i.getPropertyOptions(s), r = typeof n.converter == "function" ? { fromAttribute: n.converter } : n.converter?.fromAttribute !== void 0 ? n.converter : W;
       this._$Em = s;
       const l = r.fromAttribute(t, n.type);
       this[s] = l ?? this._$Ej?.get(s) ?? l, this._$Em = null;
@@ -525,7 +525,7 @@ Le?.({ LitElement: z });
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const Be = { attribute: !0, type: String, converter: I, reflect: !1, hasChanged: J }, We = (o = Be, e, t) => {
+const Be = { attribute: !0, type: String, converter: W, reflect: !1, hasChanged: J }, Ie = (o = Be, e, t) => {
   const { kind: i, metadata: s } = t;
   let n = globalThis.litPropertyMetadata.get(s);
   if (n === void 0 && globalThis.litPropertyMetadata.set(s, n = /* @__PURE__ */ new Map()), i === "setter" && ((o = Object.create(o)).wrapped = !0), n.set(t.name, o), i === "accessor") {
@@ -547,7 +547,7 @@ const Be = { attribute: !0, type: String, converter: I, reflect: !1, hasChanged:
   throw Error("Unsupported decorator location: " + i);
 };
 function L(o) {
-  return (e, t) => typeof t == "object" ? We(o, e, t) : ((i, s, n) => {
+  return (e, t) => typeof t == "object" ? Ie(o, e, t) : ((i, s, n) => {
     const r = s.hasOwnProperty(n);
     return s.constructor.createProperty(n, i), r ? Object.getOwnPropertyDescriptor(s, n) : void 0;
   })(o, e, t);
@@ -565,7 +565,7 @@ function m(o) {
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const Ie = (o, e, t) => (t.configurable = !0, t.enumerable = !0, Reflect.decorate && typeof e != "object" && Object.defineProperty(o, e, t), t);
+const We = (o, e, t) => (t.configurable = !0, t.enumerable = !0, Reflect.decorate && typeof e != "object" && Object.defineProperty(o, e, t), t);
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -574,7 +574,7 @@ const Ie = (o, e, t) => (t.configurable = !0, t.enumerable = !0, Reflect.decorat
 function nt(o, e) {
   return (t, i, s) => {
     const n = (r) => r.renderRoot?.querySelector(o) ?? null;
-    return Ie(t, i, { get() {
+    return We(t, i, { get() {
       return n(this);
     } });
   };
@@ -848,7 +848,7 @@ const he = [
   render() {
     return y`
       <ha-dialog
-        open="${this.open}"
+        .open=${this.open}
         .heading=${this.reminder ? "Edit reminder" : "New reminder"}
         @closed=${() => {
       this.open = !1, this.dispatchEvent(new CustomEvent("closed"));
@@ -956,9 +956,7 @@ function tt(o) {
   return `${e || "Scheduled"}${t}`;
 }
 function it(o) {
-  return o ? Object.values(o.states).filter(
-    (e) => e.entity_id.startsWith("sensor.ha_reminder_") && typeof e.attributes.reminder_id == "string"
-  ).map((e) => e.attributes).sort((e, t) => {
+  return o ? Object.values(o.states).filter((e) => typeof e.attributes.reminder_id == "string").map((e) => e.attributes).sort((e, t) => {
     const i = (de[E(e)] ?? 9) - (de[E(t)] ?? 9);
     return i !== 0 ? i : e.title.localeCompare(t.title);
   }) : [];
@@ -1060,7 +1058,7 @@ const Q = class Q extends z {
       ></ha-reminders-editor>
 
       <ha-dialog
-        open=${this._snoozeTarget !== null}
+        .open=${this._snoozeTarget !== null}
         .heading=${this._snoozeTarget ? `Snooze "${this._snoozeTarget.title}"` : ""}
         @closed=${() => this._snoozeTarget = null}
       >

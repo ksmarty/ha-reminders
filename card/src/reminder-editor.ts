@@ -340,7 +340,7 @@ export class ReminderEditor extends LitElement {
   protected render() {
     return html`
       <ha-dialog
-        open="${this.open}"
+        .open=${this.open}
         .heading=${this.reminder ? "Edit reminder" : "New reminder"}
         @closed=${() => {
           this.open = false;

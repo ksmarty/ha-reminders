@@ -71,11 +71,7 @@ export function triggerText(reminder: Reminder): string {
 export function collectReminders(hass: HomeAssistant | undefined): Reminder[] {
   if (!hass) return [];
   return Object.values(hass.states)
-    .filter(
-      (state) =>
-        state.entity_id.startsWith("sensor.ha_reminder_") &&
-        typeof state.attributes.reminder_id === "string",
-    )
+    .filter((state) => typeof state.attributes.reminder_id === "string")
     .map((state) => state.attributes as unknown as Reminder)
     .sort((a, b) => {
       const byStatus = (STATUS_ORDER[statusOf(a)] ?? 9) - (STATUS_ORDER[statusOf(b)] ?? 9);
@@ -300,7 +296,7 @@ export class ReminderList extends LitElement {
       ></ha-reminders-editor>
 
       <ha-dialog
-        open=${this._snoozeTarget !== null}
+        .open=${this._snoozeTarget !== null}
         .heading=${this._snoozeTarget ? `Snooze "${this._snoozeTarget.title}"` : ""}
         @closed=${() => (this._snoozeTarget = null)}
       >

@@ -91,7 +91,7 @@ explicitly overrides them.
 python3 -m compileall -q custom_components/ha_reminders
 
 # Card frontend
-cd card && npm run lint && npx tsc --noEmit -p tsconfig.json && npm run build
+cd card && npm run lint && npm test && npx tsc --noEmit -p tsconfig.json && npm run build
 
 # Local HA runtime repro (config-flow serialization etc.)
 #   .venv holds HA 2026.x on Python 3.14 (manual install)
@@ -145,6 +145,10 @@ Release steps (after user approval):
   empty forms. Keep field names aligned with the voluptuous schemas and
   validate against `homeassistant.helpers.service._SERVICES_SCHEMA`
   (`tests/test_services_yaml.py`).
+- **Frontend bindings** — bind element properties (`.open=${...}`,
+  `.checked=${...}`); a plain attribute binding renders the *string* "false",
+  which `ha-dialog` reads as open. Card/panel logic is covered by vitest
+  (`card/test`), which runs in CI.
 - **Frontend element churn** — use `ha-form`/`ha-selector` and `ha-button`
   rather than raw Polymer/mwc elements: `ha-textfield` and `mwc-button` were
   removed or deprecated upstream and silently rendered nothing. Custom
