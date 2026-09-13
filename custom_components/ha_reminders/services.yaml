@@ -359,3 +359,14 @@ set_enabled:
       required: true
       selector:
         boolean: {}
+install_sentences:
+  name: Install Assist sentences
+  description: >-
+    Copy the reminder voice templates into <config>/custom_sentences/<language>/
+    and reload Assist so they work immediately. Existing local edits are backed
+    up to reminders.yaml.bak.
+  fields:
+    language:
+      default: en
+      selector:
+        text: {}

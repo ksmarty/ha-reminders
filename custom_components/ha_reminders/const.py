@@ -107,5 +107,6 @@ SERVICE_LIST = "list"
 SERVICE_SNOOZE = "snooze"
 SERVICE_COMPLETE = "complete"
 SERVICE_SET_ENABLED = "set_enabled"
+SERVICE_INSTALL_SENTENCES = "install_sentences"
 
 SENSOR_PREFIX = f"{DOMAIN}_"

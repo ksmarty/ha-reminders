@@ -36,18 +36,31 @@ entities you can see and edit.
 3. Go to **Settings → Devices & Services → Add Integration → HA Reminders**
    and configure the global defaults (all overridable per reminder).
 
-### 1. Enable the voice sentences (one-time)
+### 1. Enable the voice sentences
 
-Custom sentence templates cannot be shipped by an integration — the default
-agent only loads them from your config directory. Copy them once:
+Home Assistant only loads custom sentences from
+`<config>/custom_sentences/<language>/`, so run the installer once — from
+**Developer Tools → Actions**:
+
+```yaml
+action: ha_reminders.install_sentences
+```
+
+It copies the templates into your config directory and reloads the
+conversation agent, so voice commands work immediately (no restart). Local
+edits are kept as `reminders.yaml.bak`. Re-run it after an update to pick up
+new phrasings.
+
+<details>
+<summary>Manual alternative</summary>
 
 ```bash
 HA_CONFIG=/path/to/your/config ./scripts/install_custom_sentences.sh
 ```
 
-or manually: copy `custom_sentences/en/reminders.yaml` from this repository to
-`<config>/custom_sentences/en/reminders.yaml`, then reload Assist (or restart
-HA).
+or copy `custom_sentences/en/reminders.yaml` from this repository to
+`<config>/custom_sentences/en/reminders.yaml` and restart Home Assistant.
+</details>
 
 ### 2. Add the dashboard card
 
@@ -73,6 +86,7 @@ The card is served by the integration itself — no manual
 | `ha_reminders.snooze` | Snooze a reminder (`reminder_id`, `minutes`). |
 | `ha_reminders.complete` | Acknowledge a reminder: runs its acknowledge actions and notifies the rest of the group (`reminder_id`, optional `user_name`). |
 | `ha_reminders.set_enabled` | Enable/disable a reminder (`reminder_id`, `enabled`). |
+| `ha_reminders.install_sentences` | Copy the Assist sentence templates into `<config>/custom_sentences/` and reload Assist (`language`, default `en`). |
 
 Full payload for `create`/`update`:
 

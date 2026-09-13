@@ -47,6 +47,7 @@ from .const import (
     FIELD_ZONE_ENTITY_ID,
     SERVICE_COMPLETE,
     SERVICE_CREATE,
+    SERVICE_INSTALL_SENTENCES,
     SERVICE_DELETE,
     SERVICE_LIST,
     SERVICE_SET_ENABLED,
@@ -54,6 +55,7 @@ from .const import (
     SERVICE_UPDATE,
     TRIGGER_TYPES,
 )
+from . import sentences
 from .coordinator import ReminderCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -144,6 +146,10 @@ SCHEMA_SET_ENABLED = vol.Schema(
 
 SCHEMA_LIST = vol.Schema({}, extra=vol.PREVENT_EXTRA)
 
+SCHEMA_INSTALL_SENTENCES = vol.Schema(
+    {vol.Optional("language"): str}, extra=vol.PREVENT_EXTRA
+)
+
 
 def _error(err: Exception) -> HomeAssistantError:
     """Normalize a ValueError into a service-call friendly error."""
@@ -192,6 +198,10 @@ async def async_setup_services(
         )
         return {}
 
+    async def _install_sentences(call: ServiceCall) -> dict[str, Any]:
+        language = call.data.get("language") or sentences.DEFAULT_LANGUAGE
+        return await sentences.async_install_sentences(hass, language)
+
     async def _set_enabled(call: ServiceCall) -> dict[str, Any]:
         await coordinator.async_set_enabled(
             call.data[FIELD_REMINDER_ID], bool(call.data[FIELD_ENABLED])
@@ -206,6 +216,12 @@ async def async_setup_services(
         (SERVICE_SNOOZE, _snooze, SCHEMA_SNOOZE, SupportsResponse.NONE),
         (SERVICE_COMPLETE, _complete, SCHEMA_COMPLETE, SupportsResponse.NONE),
         (SERVICE_SET_ENABLED, _set_enabled, SCHEMA_SET_ENABLED, SupportsResponse.NONE),
+        (
+            SERVICE_INSTALL_SENTENCES,
+            _install_sentences,
+            SCHEMA_INSTALL_SENTENCES,
+            SupportsResponse.OPTIONAL,
+        ),
     ]
     for name, handler, schema, supports_response in handlers:
         hass.services.async_register(
