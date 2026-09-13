@@ -61,6 +61,139 @@ const LABELS: Record<string, string> = {
 
 type FormData = Record<string, unknown>;
 
+const TRIGGER_OPTIONS = [
+  { value: "time", label: "At a fixed time" },
+  { value: "zone_enter", label: "When I enter a zone" },
+  { value: "zone_leave", label: "When I leave a zone" },
+];
+
+/** Fields shown for every reminder: enough for the common case. */
+export function basicFields(trigger: TriggerType, notifyField: Field): Field[] {
+  const fields: Field[] = [
+    { name: "title", selector: { text: {} }, required: true },
+    { name: "message", selector: { text: { multiline: true } }, required: true },
+    {
+      name: "trigger_type",
+      selector: { select: { mode: "dropdown", options: TRIGGER_OPTIONS } },
+    },
+  ];
+
+  if (trigger === "time") {
+    fields.push({ name: "time", selector: { time: {} } });
+  } else {
+    fields.push({ name: "zone_entity_id", selector: { entity: { domain: "zone" } } });
+    fields.push({
+      name: "person_entity_ids",
+      selector: { entity: { domain: "person", multiple: true } },
+    });
+  }
+
+  fields.push(notifyField);
+  return fields;
+}
+
+/** Everything else, tucked behind "Advanced settings". */
+export function advancedFields(trigger: TriggerType): Field[] {
+  const fields: Field[] = [
+    { name: "subtitle", selector: { text: {} } },
+    { name: "user_name", selector: { text: {} } },
+    { name: "one_shot", selector: { boolean: {} } },
+  ];
+
+  if (trigger === "time") {
+    fields.push({ name: "every_x_days", selector: { number: { min: 1, mode: "box" } } });
+  } else {
+    fields.push({ name: "time_window_start", selector: { time: {} } });
+    fields.push({ name: "time_window_end", selector: { time: {} } });
+  }
+
+  fields.push(
+    { name: "start_date", selector: { date: {} } },
+    { name: "stop_date", selector: { date: {} } },
+    {
+      name: "exclude_days_of_week",
+      selector: { select: { multiple: true, options: WEEKDAYS } },
+    },
+    { name: "acknowledge_action_title", selector: { text: {} } },
+    { name: "snooze_delays", selector: { text: {} } },
+    { name: "snooze_text", selector: { text: {} } },
+    { name: "wait_time_if_no_action", selector: { number: { min: 1, mode: "box" } } },
+    { name: "notification_count", selector: { number: { min: 1, mode: "box" } } },
+    {
+      name: "channel_importance",
+      selector: {
+        select: {
+          mode: "dropdown",
+          options: [
+            { value: "", label: "Default" },
+            { value: "min", label: "Min" },
+            { value: "low", label: "Low" },
+            { value: "high", label: "High" },
+            { value: "max", label: "Max" },
+          ],
+        },
+      },
+    },
+    { name: "channel", selector: { text: {} } },
+    { name: "color", selector: { text: {} } },
+    { name: "notification_group", selector: { text: {} } },
+    { name: "acknowledge_notification_title", selector: { text: {} } },
+    { name: "acknowledge_notification_body", selector: { text: { multiline: true } } },
+  );
+  return fields;
+}
+
+/**
+ * Whether a stored reminder uses any advanced setting — if so the advanced
+ * section opens by default so nothing is hidden from the user.
+ */
+export const DEFAULT_SNOOZE_DELAYS = [5, 15, 30, 45, 60];
+export const DEFAULT_USER_NAME = "Someone";
+export const DEFAULT_SNOOZE_TEXT = "Snooze for ${time}";
+export const DEFAULT_ACKNOWLEDGE_TITLE = "Mark as done";
+export const DEFAULT_ACK_NOTIFICATION_TITLE = "Someone acknowledged the notification";
+export const DEFAULT_WAIT_TIME = 15;
+export const DEFAULT_NOTIFICATION_COUNT = 1;
+
+/**
+ * Whether a stored reminder uses any advanced setting — if so the advanced
+ * section opens by default so nothing stays hidden from the user.
+ */
+export function hasAdvancedValues(reminder: Reminder | null): boolean {
+  if (!reminder) return false;
+
+  const snoozeDelays = reminder.snooze_delays?.length
+    ? reminder.snooze_delays
+    : DEFAULT_SNOOZE_DELAYS;
+  const userName = (reminder.user_name ?? "").trim();
+
+  return Boolean(
+    (reminder.subtitle ?? "").trim() ||
+      (userName && userName !== DEFAULT_USER_NAME) ||
+      reminder.one_shot ||
+      (reminder.every_x_days ?? 1) !== 1 ||
+      reminder.start_date ||
+      reminder.stop_date ||
+      (reminder.exclude_days_of_week ?? []).length > 0 ||
+      reminder.time_window_start ||
+      reminder.time_window_end ||
+      snoozeDelays.join(",") !== DEFAULT_SNOOZE_DELAYS.join(",") ||
+      (reminder.snooze_text ?? DEFAULT_SNOOZE_TEXT) !== DEFAULT_SNOOZE_TEXT ||
+      (reminder.acknowledge_action_title ?? DEFAULT_ACKNOWLEDGE_TITLE) !==
+        DEFAULT_ACKNOWLEDGE_TITLE ||
+      (reminder.wait_time_if_no_action ?? DEFAULT_WAIT_TIME) !== DEFAULT_WAIT_TIME ||
+      (reminder.notification_count ?? DEFAULT_NOTIFICATION_COUNT) !==
+        DEFAULT_NOTIFICATION_COUNT ||
+      (reminder.channel_importance ?? "") ||
+      (reminder.channel ?? "") ||
+      (reminder.color ?? "") ||
+      (reminder.notification_group ?? "") ||
+      (reminder.acknowledge_notification_title ?? DEFAULT_ACK_NOTIFICATION_TITLE) !==
+        DEFAULT_ACK_NOTIFICATION_TITLE ||
+      (reminder.acknowledge_notification_body ?? "").trim(),
+  );
+}
+
 export class ReminderEditor extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
 
@@ -76,6 +209,8 @@ export class ReminderEditor extends LitElement {
 
   @state() private _notifyServices: string[] = [];
 
+  @state() private _advancedOpen = false;
+
   static styles = css`
     .editor {
       display: block;
@@ -85,6 +220,11 @@ export class ReminderEditor extends LitElement {
       color: var(--error-color, #db4437);
       padding: 8px 0 0;
     }
+    ha-expansion-panel {
+      display: block;
+      margin-top: 12px;
+      --expansion-panel-content-padding: 4px 0 0 0;
+    }
   `;
 
   protected willUpdate(changed: Map<string, unknown>): void {
@@ -92,6 +232,7 @@ export class ReminderEditor extends LitElement {
       this._data = this._dataFrom(this.reminder);
       this._error = "";
       this._saving = false;
+      this._advancedOpen = hasAdvancedValues(this.reminder);
       void this._loadNotifyServices();
     }
   }
@@ -119,18 +260,19 @@ export class ReminderEditor extends LitElement {
       person_entity_ids: reminder?.person_entity_ids ?? [],
       time_window_start: this._time(reminder?.time_window_start),
       time_window_end: this._time(reminder?.time_window_end),
-      acknowledge_action_title: reminder?.acknowledge_action_title ?? "Mark as done",
-      snooze_delays: (reminder?.snooze_delays ?? [5, 15, 30, 45, 60]).join(","),
-      snooze_text: reminder?.snooze_text ?? "Snooze for ${time}",
-      wait_time_if_no_action: reminder?.wait_time_if_no_action ?? 15,
-      notification_count: reminder?.notification_count ?? 1,
+      acknowledge_action_title:
+        reminder?.acknowledge_action_title ?? DEFAULT_ACKNOWLEDGE_TITLE,
+      snooze_delays: (reminder?.snooze_delays ?? DEFAULT_SNOOZE_DELAYS).join(","),
+      snooze_text: reminder?.snooze_text ?? DEFAULT_SNOOZE_TEXT,
+      wait_time_if_no_action:
+        reminder?.wait_time_if_no_action ?? DEFAULT_WAIT_TIME,
+      notification_count: reminder?.notification_count ?? DEFAULT_NOTIFICATION_COUNT,
       color: reminder?.color ?? "",
       channel: reminder?.channel ?? "",
       channel_importance: reminder?.channel_importance ?? "",
       notification_group: reminder?.notification_group ?? "",
       acknowledge_notification_title:
-        reminder?.acknowledge_notification_title ??
-        "Someone acknowledged the notification",
+        reminder?.acknowledge_notification_title ?? DEFAULT_ACK_NOTIFICATION_TITLE,
       acknowledge_notification_body: reminder?.acknowledge_notification_body ?? "",
     };
   }
@@ -166,84 +308,6 @@ export class ReminderEditor extends LitElement {
       name: "notify_service",
       selector: { select: { mode: "dropdown", custom_value: true, options } },
     };
-  }
-
-  private _schema(): Field[] {
-    const trigger = (this._data.trigger_type as TriggerType) ?? "time";
-    const isZone = trigger !== "time";
-
-    const common: Field[] = [
-      { name: "title", selector: { text: {} }, required: true },
-      { name: "message", selector: { text: { multiline: true } }, required: true },
-      { name: "subtitle", selector: { text: {} } },
-      this._notifyField(),
-      { name: "user_name", selector: { text: {} } },
-      {
-        name: "trigger_type",
-        selector: {
-          select: {
-            mode: "dropdown",
-            options: [
-              { value: "time", label: "At a fixed time" },
-              { value: "zone_enter", label: "When I enter a zone" },
-              { value: "zone_leave", label: "When I leave a zone" },
-            ],
-          },
-        },
-      },
-      { name: "one_shot", selector: { boolean: {} } },
-    ];
-
-    const triggerFields: Field[] = isZone
-      ? [
-          { name: "zone_entity_id", selector: { entity: { domain: "zone" } } },
-          {
-            name: "person_entity_ids",
-            selector: { entity: { domain: "person", multiple: true } },
-          },
-          { name: "time_window_start", selector: { time: {} } },
-          { name: "time_window_end", selector: { time: {} } },
-          { name: "start_date", selector: { date: {} } },
-          { name: "stop_date", selector: { date: {} } },
-          { name: "exclude_days_of_week", selector: { select: { multiple: true, options: WEEKDAYS } } },
-        ]
-      : [
-          { name: "time", selector: { time: {} } },
-          { name: "every_x_days", selector: { number: { min: 1, mode: "box" } } },
-          { name: "start_date", selector: { date: {} } },
-          { name: "stop_date", selector: { date: {} } },
-          { name: "exclude_days_of_week", selector: { select: { multiple: true, options: WEEKDAYS } } },
-        ];
-
-    const notification: Field[] = [
-      { name: "acknowledge_action_title", selector: { text: {} } },
-      { name: "snooze_delays", selector: { text: {} } },
-      { name: "snooze_text", selector: { text: {} } },
-      { name: "wait_time_if_no_action", selector: { number: { min: 1, mode: "box" } } },
-      { name: "notification_count", selector: { number: { min: 1, mode: "box" } } },
-      {
-        name: "channel_importance",
-        selector: {
-          select: {
-            mode: "dropdown",
-            options: [
-              { value: "", label: "Default" },
-              { value: "min", label: "Min" },
-              { value: "low", label: "Low" },
-              { value: "high", label: "High" },
-              { value: "max", label: "Max" },
-            ],
-          },
-        },
-      },
-      { name: "channel", selector: { text: {} } },
-      { name: "color", selector: { text: {} } },
-      { name: "notification_group", selector: { text: {} } },
-      { name: "acknowledge_notification_title", selector: { text: {} } },
-      { name: "acknowledge_notification_body", selector: { text: { multiline: true } } },
-    ];
-
-    return [...common, ...triggerFields, ...notification];
   }
 
   private _valueChanged(ev: CustomEvent): void {
@@ -351,11 +415,32 @@ export class ReminderEditor extends LitElement {
           <ha-form
             .hass=${this.hass}
             .data=${this._data}
-            .schema=${this._schema()}
+            .schema=${basicFields(
+              (this._data.trigger_type as TriggerType) ?? "time",
+              this._notifyField(),
+            )}
             .computeLabel=${(schema: Field) =>
               LABELS[schema.name] ?? schema.name}
             @value-changed=${this._valueChanged}
           ></ha-form>
+
+          <ha-expansion-panel
+            .header=${"Advanced settings"}
+            .secondary=${this._advancedOpen ? "shown" : "optional"}
+            .expanded=${this._advancedOpen}
+          >
+            <ha-form
+              .hass=${this.hass}
+              .data=${this._data}
+              .schema=${advancedFields(
+                (this._data.trigger_type as TriggerType) ?? "time",
+              )}
+              .computeLabel=${(schema: Field) =>
+                LABELS[schema.name] ?? schema.name}
+              @value-changed=${this._valueChanged}
+            ></ha-form>
+          </ha-expansion-panel>
+
           ${this._error ? html`<div class="error">${this._error}</div>` : nothing}
         </div>
 
