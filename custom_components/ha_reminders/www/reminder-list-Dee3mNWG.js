@@ -866,16 +866,18 @@ const he = [
           ${this._error ? w`<div class="error">${this._error}</div>` : h}
         </div>
 
-        <ha-button
-          slot="primaryAction"
-          .disabled=${this._saving}
-          @click=${this._save}
-        >
-          ${this.reminder ? "Save" : "Create"}
-        </ha-button>
-        <ha-button slot="secondaryAction" @click=${() => this.open = !1}>
-          Cancel
-        </ha-button>
+        <ha-dialog-footer slot="footer">
+          <ha-button slot="secondaryAction" @click=${() => this.open = !1}>
+            Cancel
+          </ha-button>
+          <ha-button
+            slot="primaryAction"
+            .disabled=${this._saving}
+            @click=${this._save}
+          >
+            ${this.reminder ? "Save" : "Create"}
+          </ha-button>
+        </ha-dialog-footer>
       </ha-dialog>
     `;
   }
@@ -1073,10 +1075,14 @@ const Q = class Q extends E {
             `
     )}
         </div>
-        <ha-button slot="primaryAction" @click=${this._snooze}>Snooze</ha-button>
-        <ha-button slot="secondaryAction" @click=${() => this._snoozeTarget = null}
-          >Cancel</ha-button
-        >
+        <ha-dialog-footer slot="footer">
+          <ha-button
+            slot="secondaryAction"
+            @click=${() => this._snoozeTarget = null}
+            >Cancel</ha-button
+          >
+          <ha-button slot="primaryAction" @click=${this._snooze}>Snooze</ha-button>
+        </ha-dialog-footer>
       </ha-dialog>
 
       <ha-dialog
@@ -1085,10 +1091,14 @@ const Q = class Q extends E {
         @closed=${() => this._deleteTarget = null}
       >
         Delete “${this._deleteTarget?.title ?? ""}”?
-        <ha-button slot="primaryAction" @click=${this._delete}>Delete</ha-button>
-        <ha-button slot="secondaryAction" @click=${() => this._deleteTarget = null}
-          >Cancel</ha-button
-        >
+        <ha-dialog-footer slot="footer">
+          <ha-button
+            slot="secondaryAction"
+            @click=${() => this._deleteTarget = null}
+            >Cancel</ha-button
+          >
+          <ha-button slot="primaryAction" @click=${this._delete}>Delete</ha-button>
+        </ha-dialog-footer>
       </ha-dialog>
     `;
   }

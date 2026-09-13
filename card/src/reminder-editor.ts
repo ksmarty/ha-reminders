@@ -359,16 +359,18 @@ export class ReminderEditor extends LitElement {
           ${this._error ? html`<div class="error">${this._error}</div>` : nothing}
         </div>
 
-        <ha-button
-          slot="primaryAction"
-          .disabled=${this._saving}
-          @click=${this._save}
-        >
-          ${this.reminder ? "Save" : "Create"}
-        </ha-button>
-        <ha-button slot="secondaryAction" @click=${() => (this.open = false)}>
-          Cancel
-        </ha-button>
+        <ha-dialog-footer slot="footer">
+          <ha-button slot="secondaryAction" @click=${() => (this.open = false)}>
+            Cancel
+          </ha-button>
+          <ha-button
+            slot="primaryAction"
+            .disabled=${this._saving}
+            @click=${this._save}
+          >
+            ${this.reminder ? "Save" : "Create"}
+          </ha-button>
+        </ha-dialog-footer>
       </ha-dialog>
     `;
   }

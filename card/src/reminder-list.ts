@@ -357,10 +357,14 @@ export class ReminderList extends LitElement {
             `,
           )}
         </div>
-        <ha-button slot="primaryAction" @click=${this._snooze}>Snooze</ha-button>
-        <ha-button slot="secondaryAction" @click=${() => (this._snoozeTarget = null)}
-          >Cancel</ha-button
-        >
+        <ha-dialog-footer slot="footer">
+          <ha-button
+            slot="secondaryAction"
+            @click=${() => (this._snoozeTarget = null)}
+            >Cancel</ha-button
+          >
+          <ha-button slot="primaryAction" @click=${this._snooze}>Snooze</ha-button>
+        </ha-dialog-footer>
       </ha-dialog>
 
       <ha-dialog
@@ -369,10 +373,14 @@ export class ReminderList extends LitElement {
         @closed=${() => (this._deleteTarget = null)}
       >
         Delete “${this._deleteTarget?.title ?? ""}”?
-        <ha-button slot="primaryAction" @click=${this._delete}>Delete</ha-button>
-        <ha-button slot="secondaryAction" @click=${() => (this._deleteTarget = null)}
-          >Cancel</ha-button
-        >
+        <ha-dialog-footer slot="footer">
+          <ha-button
+            slot="secondaryAction"
+            @click=${() => (this._deleteTarget = null)}
+            >Cancel</ha-button
+          >
+          <ha-button slot="primaryAction" @click=${this._delete}>Delete</ha-button>
+        </ha-dialog-footer>
       </ha-dialog>
     `;
   }

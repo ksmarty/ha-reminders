@@ -45,3 +45,47 @@ describe("ReminderEditor dialog", () => {
     element.remove();
   });
 });
+
+describe("ReminderEditor footer", () => {
+  it("offers a save affordance in the dialog footer", async () => {
+    const element = editor();
+    await element.updateComplete;
+
+    // ha-dialog only renders a footer slot; buttons placed directly in the
+    // dialog are dropped, which left the editor with no way to save.
+    const footer = element.shadowRoot?.querySelector("ha-dialog-footer");
+    expect(footer).toBeDefined();
+    expect(footer?.getAttribute("slot")).toBe("footer");
+
+    const primary = footer?.querySelector('ha-button[slot="primaryAction"]');
+    expect(primary).toBeDefined();
+    expect(primary?.textContent?.trim()).toBe("Create");
+
+    const secondary = footer?.querySelector('ha-button[slot="secondaryAction"]');
+    expect(secondary?.textContent?.trim()).toBe("Cancel");
+    element.remove();
+  });
+
+  it("labels the primary action Save when editing", async () => {
+    const element = new ReminderEditor();
+    element.hass = { states: {}, callService: async () => ({}) } as never;
+    element.reminder = {
+      id: "abc",
+      title: "Trash",
+      message: "Bins",
+      notify_service: "notify.mobile_app_test",
+      trigger_type: "time",
+      time: "20:00",
+      enabled: true,
+    } as never;
+    element.open = true;
+    document.body.append(element);
+    await element.updateComplete;
+
+    const primary = element.shadowRoot?.querySelector(
+      'ha-button[slot="primaryAction"]',
+    );
+    expect(primary?.textContent?.trim()).toBe("Save");
+    element.remove();
+  });
+});
