@@ -15,9 +15,11 @@ explicitly overrides them.
   coordinator, scheduler (time + zone triggers), notification lifecycle,
   service definitions, Assist intents, config/options flow, sensor platform,
   diagnostics.
-- **`card/`** — Lovelace card frontend (TypeScript + Vite + Lit). Build output
-  is committed at `custom_components/ha_reminders/www/ha-reminders.js` and
-  served/injected by the integration.
+- **`card/`** — frontend (TypeScript + Vite + Lit), two entries: the Lovelace
+  card (`ha-reminders.js`, injected with `add_extra_js_url`) and the sidebar
+  panel (`ha-reminders-panel.js`, registered via `panel_custom`), sharing a
+  hashed chunk. All build output under `custom_components/ha_reminders/www/`
+  is committed and served by the integration.
 - **`custom_sentences/en/reminders.yaml`** — Assist sentence templates users
   copy into their HA config (HACS cannot install these).
 - **`actionnable-task-reminder.yaml`** — the legacy blueprint, kept **verbatim**
@@ -56,7 +58,9 @@ explicitly overrides them.
   behavior and update them.
 - When a coordinator/service/etc. change affects the sensor attributes or
   service payloads, keep `card/src` and `services.yaml` consistent with it.
-- Rebuild the card bundle when `card/src` changes and commit the output.
+- Rebuild the frontend when `card/src` changes and commit the whole
+  `custom_components/ha_reminders/www/` directory (the build emits a shared
+  hashed chunk, so stale files must be removed — `emptyOutDir` handles it).
 
 ### Ask first
 
@@ -141,6 +145,11 @@ Release steps (after user approval):
   empty forms. Keep field names aligned with the voluptuous schemas and
   validate against `homeassistant.helpers.service._SERVICES_SCHEMA`
   (`tests/test_services_yaml.py`).
+- **Frontend element churn** — use `ha-form`/`ha-selector` and `ha-button`
+  rather than raw Polymer/mwc elements: `ha-textfield` and `mwc-button` were
+  removed or deprecated upstream and silently rendered nothing. Custom
+  elements are registered guarded (`customElements.get(...)`) because the card
+  and panel bundles can both load on one page.
 - **Sensor-to-card contract** — the card renders by scanning
   `sensor.ha_reminder_*` states; the `reminder_id` attribute is the key, so
   sensor attributes must always include it.

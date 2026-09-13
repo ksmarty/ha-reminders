@@ -19,6 +19,7 @@ import homeassistant.components.frontend as frontend  # noqa: E402
 
 from custom_components.ha_reminders import (  # noqa: E402
     CARD_FILENAME,
+    PANEL_FILENAME,
     CARD_URL,
     DOMAIN,
     _async_setup_frontend,
@@ -45,8 +46,9 @@ async def _run(tmp_path, monkeypatch, *, with_bundle: bool = True):
     www = os.path.join(config_dir, "custom_components", DOMAIN, "www")
     os.makedirs(www, exist_ok=True)
     if with_bundle:
-        with open(os.path.join(www, CARD_FILENAME), "w") as handle:
-            handle.write("// bundle")
+        for name in (CARD_FILENAME, PANEL_FILENAME):
+            with open(os.path.join(www, name), "w") as handle:
+                handle.write("// bundle")
 
     injected: list[str] = []
     monkeypatch.setattr(
@@ -80,8 +82,9 @@ def test_missing_http_does_not_raise(tmp_path, monkeypatch) -> None:
     config_dir = str(tmp_path)
     www = os.path.join(config_dir, "custom_components", DOMAIN, "www")
     os.makedirs(www, exist_ok=True)
-    with open(os.path.join(www, CARD_FILENAME), "w") as handle:
-        handle.write("// bundle")
+    for name in (CARD_FILENAME, PANEL_FILENAME):
+        with open(os.path.join(www, name), "w") as handle:
+            handle.write("// bundle")
 
     injected: list[str] = []
     monkeypatch.setattr(

@@ -62,14 +62,15 @@ or copy `custom_sentences/en/reminders.yaml` from this repository to
 `<config>/custom_sentences/en/reminders.yaml` and restart Home Assistant.
 </details>
 
-### 2. Add the dashboard card
+### 2. Use the sidebar panel or the dashboard card
 
-1. Create a reminder first (otherwise the card shows an empty state).
-2. Edit your dashboard → **Add card** → search **"HA Reminders"**
-   (`type: custom:ha-reminders-card`).
+**Sidebar panel** — nothing to configure. After setup a **Reminders** entry
+appears in the sidebar with the full reminder list: create, edit, snooze,
+complete, enable/disable and delete from one page.
 
-The card is served by the integration itself — no manual
-`/ha_reminders/ha-reminders.js` resource URL needed.
+**Dashboard card** — on any dashboard: **Add card** → search **"HA Reminders"**
+(`type: custom:ha-reminders-card`). Both surfaces are served by the
+integration itself, so there is no manual resource URL to add.
 
 ---
 

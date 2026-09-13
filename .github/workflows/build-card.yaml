@@ -32,4 +32,4 @@ jobs:
         run: npm run build
 
       - name: Dist is committed and up to date
-        run: git diff --exit-code -- custom_components/ha_reminders/www/ha-reminders.js
+        run: git diff --exit-code -- custom_components/ha_reminders/www

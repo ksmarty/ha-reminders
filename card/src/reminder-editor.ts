@@ -1,5 +1,5 @@
 import { LitElement, css, html, nothing } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 import { createReminder, updateReminder } from "./api";
 import type { HomeAssistant, Reminder, TriggerType } from "./types";
 
@@ -61,7 +61,6 @@ const LABELS: Record<string, string> = {
 
 type FormData = Record<string, unknown>;
 
-@customElement("ha-reminders-editor")
 export class ReminderEditor extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
 
@@ -373,4 +372,9 @@ export class ReminderEditor extends LitElement {
       </ha-dialog>
     `;
   }
+}
+
+// Guarded: the card and panel bundles can both be present on one page.
+if (!customElements.get("ha-reminders-editor")) {
+  customElements.define("ha-reminders-editor", ReminderEditor);
 }

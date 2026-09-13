@@ -27,6 +27,12 @@ _LOGGER = logging.getLogger(__name__)
 
 CARD_FILENAME = "ha-reminders.js"
 CARD_URL = f"/{DOMAIN}/{CARD_FILENAME}"
+PANEL_FILENAME = "ha-reminders-panel.js"
+PANEL_URL = f"/{DOMAIN}/{PANEL_FILENAME}"
+PANEL_ELEMENT = "ha-reminders-panel"
+PANEL_URL_PATH = DOMAIN.replace("_", "-")
+PANEL_TITLE = "Reminders"
+PANEL_ICON = "mdi:bell-ring-outline"
 
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
@@ -87,11 +93,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN].pop("coordinator", None)
 
     try:
-        from homeassistant.components.frontend import remove_extra_js_url
+        from homeassistant.components.frontend import async_remove_panel, remove_extra_js_url
 
         remove_extra_js_url(hass, CARD_URL)
+        async_remove_panel(hass, PANEL_URL_PATH, warn_if_unknown=False)
     except Exception:  # noqa: BLE001 - best effort on unload
-        _LOGGER.debug("Could not remove extra JS URL %s", CARD_URL)
+        _LOGGER.debug("Could not remove the card/panel frontend assets")
 
     return True
 
@@ -99,7 +106,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def _async_setup_frontend(hass: HomeAssistant) -> None:
     """Serve the bundled card and inject it into the frontend."""
     www_path = os.path.join(hass.config.path("custom_components"), DOMAIN, "www")
-    if not os.path.isfile(os.path.join(www_path, CARD_FILENAME)):
+    if not os.path.isfile(os.path.join(www_path, CARD_FILENAME)) or not os.path.isfile(
+        os.path.join(www_path, PANEL_FILENAME)
+    ):
         _LOGGER.warning(
             "Card bundle %s not found; the dashboard card will not be "
             "available. Rebuild it with the card/ frontend toolchain",
@@ -131,3 +140,29 @@ async def _async_setup_frontend(hass: HomeAssistant) -> None:
         _LOGGER.debug("Serving reminder card at %s", CARD_URL)
     except Exception as err:  # noqa: BLE001
         _LOGGER.error("Could not inject the reminder card into the frontend: %s", err)
+
+    await _async_setup_panel(hass)
+
+
+async def _async_setup_panel(hass: HomeAssistant) -> None:
+    """Add the reminders sidebar panel."""
+    try:
+        from homeassistant.components import panel_custom
+        from homeassistant.components.frontend import async_remove_panel
+
+        # Re-registering on reload would otherwise leave the old entry behind.
+        async_remove_panel(hass, PANEL_URL_PATH, warn_if_unknown=False)
+
+        panel_custom.async_register_panel(
+            hass,
+            frontend_url_path=PANEL_URL_PATH,
+            webcomponent_name=PANEL_ELEMENT,
+            sidebar_title=PANEL_TITLE,
+            sidebar_icon=PANEL_ICON,
+            module_url=PANEL_URL,
+            embed_iframe=False,
+            require_admin=False,
+        )
+        _LOGGER.debug("Registered reminders panel at /%s", PANEL_URL_PATH)
+    except Exception as err:  # noqa: BLE001 - the card still works without it
+        _LOGGER.error("Could not register the reminders panel: %s", err)
