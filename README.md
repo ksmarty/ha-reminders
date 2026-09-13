@@ -81,7 +81,7 @@ service: ha_reminders.create
 data:
   title: Take out the trash
   message: The bins go out tonight!
-  notify_service: mobile_app_pixel_8
+  notify_service: notify.mobile_app_pixel_8
   user_name: Kyle
   trigger_type: time          # time | zone_enter | zone_leave
   # time trigger
@@ -122,19 +122,24 @@ actions:
     data:
       title: Unpack the groceries
       message: Put the cold stuff away first!
-      notify_service: mobile_app_pixel_8
+      notify_service: notify.mobile_app_pixel_8
       trigger_type: zone_enter
       zone_entity_id: zone.home
       person_entity_ids: [person.kyle]
       one_shot: true
 ```
 
-> Note for `user_name` and `notify_service`: `user_name` is who the reminder
-> is for — it is embedded in the notification action strings and shown in the
-> message the rest of a notification group receives when someone acknowledges
-> (e.g. `Kyle acknowledged: Take out the trash`). `notify_service` accepts the
-> blueprint convention (`mobile_app_pixel_8`) or an explicit `notify.*`
-> reference.
+> **`notify_service`** — use the service id exactly as Home Assistant lists it
+> under **Developer Tools → Actions**, e.g. `notify.mobile_app_pixel_8`. A bare
+> device name (`mobile_app_pixel_8`) is also accepted and resolved against the
+> `notify` domain, as is the legacy blueprint form where the device was its own
+> domain. The dropdowns in the card editor and integration options offer the
+> correct values.
+>
+> **`user_name`** is who the reminder is for — it is embedded in the
+> notification action strings and shown in the message the rest of a
+> notification group receives when someone acknowledges
+> (e.g. `Kyle acknowledged: Take out the trash`).
 
 ### Global defaults (config entry)
 

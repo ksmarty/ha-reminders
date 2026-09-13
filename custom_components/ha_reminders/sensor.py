@@ -11,7 +11,7 @@ from typing import Any
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -105,5 +105,11 @@ class ReminderSensor(CoordinatorEntity, SensorEntity):
         reminder = self._live_reminder()
         return self.coordinator.describe(reminder)
 
-    async def _handle_coordinator_update(self) -> None:
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Write state when the coordinator publishes new data.
+
+        Must stay a sync callback: HA calls this (it does not await it), so an
+        async implementation is never executed and entity states freeze.
+        """
         self.async_write_ha_state()

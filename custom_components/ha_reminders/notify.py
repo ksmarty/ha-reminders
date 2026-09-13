@@ -6,9 +6,10 @@ the legacy blueprint so existing notification actions keep working.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
     ACKNOWLEDGE_MINUTES,
@@ -52,16 +53,58 @@ def parse_action(action: str) -> tuple[str, str, str, int, str] | None:
     return parts[0], parts[1], parts[2], minutes, parts[4]
 
 
-def split_service(notify_service: str) -> tuple[str, str]:
-    """Split a notify service reference into (domain, service).
+def resolve_notify_target(
+    notify_service: str, has_service: Callable[[str, str], bool]
+) -> tuple[str, str]:
+    """Resolve a stored notify target into a (domain, service) pair.
 
-    Accepts `mobile_app_pixel_8` (the blueprint convention, service is always
-    `notify`) or an explicit `domain.service` reference.
+    Accepted forms:
+    - explicit `domain.service` — what the HA UI lists, e.g.
+      `notify.mobile_app_pixel_8`
+    - bare modern service name — `mobile_app_pixel_8` (resolved against the
+      `notify` domain, which is how HA registers it today)
+    - legacy blueprint form — a per-device domain offering a `notify` service
     """
-    if "." in str(notify_service):
-        domain, service = str(notify_service).split(".", 1)
+    value = str(notify_service or "").strip()
+    if not value:
+        return "notify", "notify"
+    if "." in value:
+        domain, service = value.split(".", 1)
         return domain, service
-    return str(notify_service), "notify"
+    if has_service("notify", value):
+        return "notify", value
+    if has_service(value, "notify"):
+        return value, "notify"
+    # Unknown: assume the modern form so the error message names something
+    # the user can compare against their service list.
+    return "notify", value
+
+
+def _resolve(hass: HomeAssistant, reminder: Reminder) -> tuple[str, str]:
+    """Resolve and validate the notify target for a reminder."""
+    domain, service = resolve_notify_target(
+        reminder.notify_service, hass.services.has_service
+    )
+    if not hass.services.has_service(domain, service):
+        raise HomeAssistantError(
+            f"notify service '{domain}.{service}' does not exist "
+            f"(reminder uses '{reminder.notify_service}')"
+        )
+    return domain, service
+
+
+async def async_send_reminder(hass: HomeAssistant, reminder: Reminder) -> None:
+    """Send (or resend) the reminder notification."""
+    domain, service = _resolve(hass, reminder)
+    await hass.services.async_call(
+        domain,
+        service,
+        {
+            "title": reminder.title,
+            "message": reminder.message,
+            "data": build_reminder_data(reminder),
+        },
+    )
 
 
 def build_reminder_data(reminder: Reminder) -> dict[str, Any]:
@@ -100,25 +143,11 @@ def build_reminder_data(reminder: Reminder) -> dict[str, Any]:
     return {key: value for key, value in data.items() if value}
 
 
-async def async_send_reminder(hass: HomeAssistant, reminder: Reminder) -> None:
-    """Send (or resend) the reminder notification."""
-    domain, service = split_service(reminder.notify_service)
-    await hass.services.async_call(
-        domain,
-        service,
-        {
-            "title": reminder.title,
-            "message": reminder.message,
-            "data": build_reminder_data(reminder),
-        },
-    )
-
-
 async def async_send_acknowledged(
     hass: HomeAssistant, reminder: Reminder, acknowledged_by: str
 ) -> None:
     """Notify the other members of a notification group that a task is done."""
-    domain, service = split_service(reminder.notify_service)
+    domain, service = _resolve(hass, reminder)
     data: dict[str, Any] = {
         "subtitle": reminder.subtitle or "",
         "subject": reminder.subtitle or "",

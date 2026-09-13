@@ -236,11 +236,17 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
             runtime["cycle_active"] = True
             runtime["notified_count"] = 0
 
+        # Deliver first — a failed send must not consume the cycle.
+        try:
+            await notify.async_send_reminder(self.hass, reminder)
+        except Exception as err:  # noqa: BLE001 - surfaced to the user via log
+            await self._handle_delivery_failure(reminder, runtime, err)
+            return
+
         runtime["notified_count"] = int(runtime.get("notified_count", 0)) + 1
 
         if reminder.one_shot:
             # Single delivery: send once, then close the cycle.
-            await notify.async_send_reminder(self.hass, reminder)
             runtime["one_shot_fired"] = True
             runtime["completed"] = True
             runtime["cycle_active"] = False
@@ -248,8 +254,6 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
             runtime.pop("next_resend", None)
             await self._persist_and_refresh()
             return
-
-        await notify.async_send_reminder(self.hass, reminder)
 
         if runtime["notified_count"] < reminder.notification_count:
             runtime["next_resend"] = _naive_now() + timedelta(
@@ -260,6 +264,26 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
             runtime["cycle_active"] = False
             runtime["next_fire"] = None
             runtime.pop("next_resend", None)
+        await self._persist_and_refresh()
+
+    async def _handle_delivery_failure(
+        self, reminder: Reminder, runtime: dict[str, Any], err: Exception
+    ) -> None:
+        """Log a failed notification and leave the reminder armed.
+
+        Retrying immediately is pointless (a wrong notify service stays wrong),
+        so the cycle is closed and the reminder stays scheduled for its next
+        occurrence.
+        """
+        _LOGGER.error(
+            "Reminder '%s' could not be delivered via '%s': %s",
+            reminder.title,
+            reminder.notify_service,
+            err,
+        )
+        runtime["cycle_active"] = False
+        runtime["next_fire"] = None
+        runtime.pop("next_resend", None)
         await self._persist_and_refresh()
 
     async def async_handle_action_event(self, event: Event) -> None:

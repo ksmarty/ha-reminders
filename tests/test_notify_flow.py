@@ -55,12 +55,14 @@ async def _run(tmp_path) -> None:
         coordinator.async_set_updated_data(loaded)
 
         # A reminder the user would create for Test A: a couple of minutes out.
+        # The bare form is what a user reported: it used to resolve to a
+        # non-existent `mobile_app_*` domain and the send failed.
         fire_at = dt_util.now().replace(tzinfo=None) + timedelta(minutes=2)
         reminder_id = await coordinator.async_create(
             {
                 "title": "Plumbing test",
                 "message": "If this arrives, notifications work.",
-                "notify_service": "notify.mobile_app_zoom_zoom",
+                "notify_service": "mobile_app_zoom_zoom",
                 "trigger_type": "time",
                 "time": fire_at.strftime("%H:%M"),
                 "one_shot": True,

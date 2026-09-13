@@ -35,6 +35,9 @@ from .const import (
 from .util import as_list
 
 
+_GENERIC_NOTIFY_SERVICES = {"notify", "persistent_notification", "send_message"}
+
+
 def _parse_snooze_delays(value: str) -> list[int]:
     """Validate a comma separated snooze delay string."""
     try:
@@ -67,14 +70,22 @@ def _default_options() -> dict[str, Any]:
 class _DefaultsForm:
     """Shared defaults-form schema building for the config and options flows."""
 
-    def _notify_services(self) -> list[str]:
-        """Return every domain that offers a `notify` service."""
+    def _notify_targets(self) -> list[str]:
+        """Return selectable notify targets, in the form they are stored.
+
+        Modern HA registers notify targets as services under the `notify`
+        domain (e.g. `notify.mobile_app_pixel`); legacy notify platforms
+        register a per-device domain that offers a `notify` service.
+        """
         services = self.hass.services.async_services()
-        return sorted(
-            domain
-            for domain, domain_services in services.items()
-            if "notify" in domain_services
-        )
+        targets: set[str] = set()
+        for name in services.get("notify", {}):
+            if name not in _GENERIC_NOTIFY_SERVICES:
+                targets.add(f"notify.{name}")
+        for domain, domain_services in services.items():
+            if domain != "notify" and "notify" in domain_services:
+                targets.add(domain)
+        return sorted(targets)
 
     def _person_options(self) -> dict[str, str]:
         """Return {entity_id: label} for every person entity."""
@@ -87,7 +98,7 @@ class _DefaultsForm:
 
     def _options_schema(self, options: dict[str, Any]) -> vol.Schema:
         """Build the defaults form with entity dropdowns where applicable."""
-        notify_services = self._notify_services()
+        notify_services = self._notify_targets()
         current_notify = str(options.get(CONF_DEFAULT_NOTIFY_SERVICE, ""))
         if current_notify and current_notify not in notify_services:
             # Keep an already-configured value selectable even if the service

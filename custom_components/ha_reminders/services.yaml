@@ -27,7 +27,7 @@ create:
       selector:
         boolean: {}
     notify_service:
-      example: mobile_app_pixel_8
+      example: notify.mobile_app_pixel_8
       selector:
         text: {}
     user_name:

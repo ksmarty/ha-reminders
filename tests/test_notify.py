@@ -19,10 +19,11 @@ if importlib.util.find_spec("homeassistant") is None:
     sys.modules.setdefault("homeassistant", _ha)
     sys.modules["homeassistant.core"] = _ha_core
 
-import pytest  # noqa: E402
-
 from custom_components.ha_reminders import notify  # noqa: E402
 from custom_components.ha_reminders.models import Reminder  # noqa: E402
+from custom_components.ha_reminders.notify import (  # noqa: E402
+    resolve_notify_target,
+)
 
 
 def make_reminder(**overrides) -> Reminder:
@@ -60,16 +61,39 @@ class TestActionProtocol:
         assert notify.notification_tag("r1") == "taskReminder╡r1"
 
 
-class TestSplitService:
-    @pytest.mark.parametrize(
-        ("value", "expected"),
-        [
-            ("mobile_app_pixel", ("mobile_app_pixel", "notify")),
-            ("notify.mobile_app_pixel", ("notify", "mobile_app_pixel")),
-        ],
-    )
-    def test_split(self, value, expected):
-        assert notify.split_service(value) == expected
+class TestResolveNotifyTarget:
+    """Resolution of stored notify targets to (domain, service)."""
+
+    @staticmethod
+    def _has_service(*services: tuple[str, str]):
+        return lambda domain, service: (domain, service) in set(services)
+
+    def test_explicit_domain_service(self):
+        assert resolve_notify_target(
+            "notify.mobile_app_pixel", self._has_service()
+        ) == ("notify", "mobile_app_pixel")
+
+    def test_bare_name_resolves_against_notify_domain(self):
+        """HA registers notify targets as services under the notify domain."""
+        has = self._has_service(("notify", "mobile_app_pixel"))
+        assert resolve_notify_target("mobile_app_pixel", has) == (
+            "notify",
+            "mobile_app_pixel",
+        )
+
+    def test_legacy_per_device_domain_still_works(self):
+        has = self._has_service(("mobile_app_pixel", "notify"))
+        assert resolve_notify_target("mobile_app_pixel", has) == (
+            "mobile_app_pixel",
+            "notify",
+        )
+
+    def test_unknown_bare_name_defaults_to_notify_domain(self):
+        """Prefer the modern interpretation so errors name the right service."""
+        assert resolve_notify_target("nope", self._has_service()) == ("notify", "nope")
+
+    def test_empty_value(self):
+        assert resolve_notify_target("", self._has_service()) == ("notify", "notify")
 
 
 class TestNotificationData:

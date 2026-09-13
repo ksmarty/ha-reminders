@@ -622,10 +622,12 @@ let u = class extends z {
   }
   async _loadNotifyServices() {
     try {
-      const i = await this.hass.callWS({ type: "get_services" }), e = Object.keys(i).filter(
-        (t) => i[t]?.notify
-      );
-      this._notifyServices = e.sort();
+      const i = await this.hass.callWS({ type: "get_services" }), e = /* @__PURE__ */ new Set(["notify", "persistent_notification", "send_message"]), t = /* @__PURE__ */ new Set();
+      Object.keys(i).forEach((s) => {
+        s === "notify" ? Object.keys(i[s] ?? {}).forEach((o) => {
+          e.has(o) || t.add(`notify.${o}`);
+        }) : i[s]?.notify && t.add(s);
+      }), this._notifyServices = [...t].sort();
     } catch {
       this._notifyServices = [];
     }

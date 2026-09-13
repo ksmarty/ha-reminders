@@ -105,10 +105,20 @@ export class ReminderEditor extends LitElement {
   private async _loadNotifyServices(): Promise<void> {
     try {
       const services = await this.hass.callWS({ type: "get_services" });
-      const domains = Object.keys(services).filter(
-        (domain) => services[domain]?.notify,
-      );
-      this._notifyServices = domains.sort();
+      const generic = new Set(["notify", "persistent_notification", "send_message"]);
+      const targets = new Set<string>();
+      Object.keys(services).forEach((domain) => {
+        if (domain === "notify") {
+          Object.keys(services[domain] ?? {}).forEach((name) => {
+            if (!generic.has(name)) {
+              targets.add(`notify.${name}`);
+            }
+          });
+        } else if (services[domain]?.notify) {
+          targets.add(domain);
+        }
+      });
+      this._notifyServices = [...targets].sort();
     } catch {
       this._notifyServices = [];
     }

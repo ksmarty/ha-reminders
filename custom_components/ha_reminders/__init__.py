@@ -87,9 +87,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN].pop("coordinator", None)
 
     try:
-        from homeassistant.components.frontend import async_remove_extra_js_url
+        from homeassistant.components.frontend import remove_extra_js_url
 
-        async_remove_extra_js_url(hass, CARD_URL)
+        remove_extra_js_url(hass, CARD_URL)
     except Exception:  # noqa: BLE001 - best effort on unload
         _LOGGER.debug("Could not remove extra JS URL %s", CARD_URL)
 
@@ -98,9 +98,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def _async_setup_frontend(hass: HomeAssistant) -> None:
     """Serve the bundled card and inject it into the frontend."""
-    www_path = os.path.join(
-        hass.config.path("custom_components"), DOMAIN, "www"
-    )
+    www_path = os.path.join(hass.config.path("custom_components"), DOMAIN, "www")
     if not os.path.isfile(os.path.join(www_path, CARD_FILENAME)):
         _LOGGER.warning(
             "Card bundle %s not found; the dashboard card will not be "
@@ -109,32 +107,27 @@ async def _async_setup_frontend(hass: HomeAssistant) -> None:
         )
         return
 
-    registered = False
-    try:
-        from homeassistant.components.http.static import (
-            StaticPathConfig,
-            async_register_static_paths,
-        )
-
-        async_register_static_paths(
-            hass, [StaticPathConfig(www_path, f"/{DOMAIN}")]
-        )
-        registered = True
-    except (ImportError, ValueError):
-        registered = False
-
-    if not registered:
-        try:
-            # Fallback for HA < 2024.6 (deprecated there; kept for robustness)
-            hass.http.register_static_path(f"/{DOMAIN}", www_path)  # type: ignore[attr-defined]
-        except (AttributeError, ValueError) as err:
-            _LOGGER.warning("Could not register static path for the card: %s", err)
-            return
+    http = getattr(hass, "http", None)
+    if http is None:
+        _LOGGER.warning("HTTP is not set up; the reminder card will not be served")
+        return
 
     try:
-        from homeassistant.components.frontend import async_add_extra_js_url
+        from homeassistant.components.http import StaticPathConfig
 
-        async_add_extra_js_url(hass, CARD_URL)
-        _LOGGER.debug("Serving card at %s", CARD_URL)
+        await http.async_register_static_paths(
+            # (url_path, path, cache_headers) — no caching so a HACS update is
+            # picked up instead of a stale bundle being served.
+            [StaticPathConfig(f"/{DOMAIN}", www_path, False)]
+        )
+    except Exception as err:  # noqa: BLE001 - never block entry setup
+        _LOGGER.error("Could not serve the reminder card at %s: %s", CARD_URL, err)
+        return
+
+    try:
+        from homeassistant.components.frontend import add_extra_js_url
+
+        add_extra_js_url(hass, CARD_URL)
+        _LOGGER.debug("Serving reminder card at %s", CARD_URL)
     except Exception as err:  # noqa: BLE001
-        _LOGGER.warning("Could not inject card JS into the frontend: %s", err)
+        _LOGGER.error("Could not inject the reminder card into the frontend: %s", err)
