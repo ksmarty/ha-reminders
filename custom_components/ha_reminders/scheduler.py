@@ -277,10 +277,7 @@ class ReminderScheduler:
                     dt_util.now().replace(tzinfo=None)
                 ):
                     await self._coordinator.async_notify_fired(reminder.id)
-            elif (reminder.trigger_type == TRIGGER_ZONE_ENTER and left) or (
-                reminder.trigger_type == TRIGGER_ZONE_LEAVE and entered
-            ):
-                # Opposite transition: re-arm a completed cycle.
-                runtime["completed"] = False
+            # Acknowledged zone reminders stay done: they are re-armed by
+            # enabling them again or editing them, not by the next transition.
 
             self._coordinator.async_refresh()

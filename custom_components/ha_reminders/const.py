@@ -83,7 +83,9 @@ DEFAULT_SNOOZE_DELAYS = [5, 15, 30, 45, 60]
 DEFAULT_SNOOZE_TEXT = "Snooze for ${time}"
 DEFAULT_ACKNOWLEDGE_ACTION_TITLE = "Mark as done"
 DEFAULT_WAIT_TIME_IF_NO_ACTION = 15
-DEFAULT_NOTIFICATION_COUNT = 100
+# Reminders notify once by default; set notification_count > 1 to nag
+# with `wait_time_if_no_action` between repeats.
+DEFAULT_NOTIFICATION_COUNT = 1
 DEFAULT_ACKNOWLEDGE_NOTIFICATION_TITLE = "Someone acknowledged the notification"
 DEFAULT_ACKNOWLEDGE_NOTIFICATION_BODY = ""
 

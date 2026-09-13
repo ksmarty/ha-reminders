@@ -681,7 +681,7 @@ const he = [
       snooze_delays: (e?.snooze_delays ?? [5, 15, 30, 45, 60]).join(","),
       snooze_text: e?.snooze_text ?? "Snooze for ${time}",
       wait_time_if_no_action: e?.wait_time_if_no_action ?? 15,
-      notification_count: e?.notification_count ?? 100,
+      notification_count: e?.notification_count ?? 1,
       color: e?.color ?? "",
       channel: e?.channel ?? "",
       channel_importance: e?.channel_importance ?? "",

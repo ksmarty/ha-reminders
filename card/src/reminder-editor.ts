@@ -123,7 +123,7 @@ export class ReminderEditor extends LitElement {
       snooze_delays: (reminder?.snooze_delays ?? [5, 15, 30, 45, 60]).join(","),
       snooze_text: reminder?.snooze_text ?? "Snooze for ${time}",
       wait_time_if_no_action: reminder?.wait_time_if_no_action ?? 15,
-      notification_count: reminder?.notification_count ?? 100,
+      notification_count: reminder?.notification_count ?? 1,
       color: reminder?.color ?? "",
       channel: reminder?.channel ?? "",
       channel_importance: reminder?.channel_importance ?? "",

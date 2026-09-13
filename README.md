@@ -184,8 +184,12 @@ and every value can still be overridden per reminder:
   ones of the same reminder.
 - Action buttons: **acknowledge** plus one **snooze** per `snooze_delays`
   entry. Snooze titles format delays as `5m`, `1h`, `1h30m`.
-- Ignored notifications are resent after `wait_time_if_no_action` minutes, up
-  to `notification_count` times.
+- **Ignored notifications are not repeated by default** — a reminder notifies
+  once. Set `notification_count` above 1 to nag, with
+  `wait_time_if_no_action` minutes between repeats.
+- **Location reminders repeat on every arrival** until they are acknowledged;
+  once marked done they stay done. To use one again, re-enable it (toggle) or
+  edit it — both re-arm it. Time reminders recur on their schedule.
 - Notification groups: when anyone acknowledges, every other reminder with the
   same `notification_group` stops and its devices receive a
   "someone acknowledged" notification.

@@ -152,6 +152,10 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
             raise HomeAssistantError(str(err)) from err
         index = self._reminders.index(reminder)
         self._reminders[index] = updated
+        if updated.is_zone_trigger():
+            # Editing a completed zone reminder re-arms it, so it fires again
+            # on the next arrival (the documented way to reuse it).
+            self.runtime_of(reminder_id)["completed"] = False
         self._warn_if_broadcast_target(updated)
         await self._persist_and_refresh()
 

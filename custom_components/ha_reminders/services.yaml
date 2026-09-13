@@ -117,7 +117,7 @@ create:
           min: 1
           mode: box
     notification_count:
-      default: 100
+      default: 1
       selector:
         number:
           min: 1

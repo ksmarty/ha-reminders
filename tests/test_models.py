@@ -44,7 +44,7 @@ class TestSerialization:
         assert reminder.snooze_text == "Snooze for ${time}"
         assert reminder.acknowledge_action_title == "Mark as done"
         assert reminder.wait_time_if_no_action == 15
-        assert reminder.notification_count == 100
+        assert reminder.notification_count == 1  # no nag loop by default
         assert reminder.enabled is True
         assert reminder.one_shot is False
 

@@ -67,7 +67,10 @@ async def _run_zone_snooze(tmp_path) -> tuple[bool, bool, object]:
     scheduler = ReminderScheduler(hass, coordinator)
     coordinator.set_scheduler(scheduler)
     try:
-        reminder_id = await _zone_reminder(coordinator)
+        # Nagging is opt-in now, so ask for repeats to exercise the resend loop.
+        reminder_id = await _zone_reminder(
+            coordinator, notification_count=3, wait_time_if_no_action=2
+        )
         await scheduler.async_reschedule()
         assert reminder_id not in scheduler._timers  # no occurrence to wait for
 
