@@ -32,15 +32,32 @@ export class HaRemindersPanel extends LitElement {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 12px;
       margin-bottom: 12px;
     }
     .heading {
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-size: 24px;
+      gap: 8px;
+      font-size: 22px;
       font-weight: 400;
+      min-width: 0;
+    }
+    .heading span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    @media (max-width: 600px) {
+      :host {
+        padding: 12px 8px;
+      }
+      .heading {
+        font-size: 18px;
+      }
+      .new-label {
+        display: none;
+      }
     }
     .content {
       max-width: 900px;
@@ -61,12 +78,13 @@ export class HaRemindersPanel extends LitElement {
       <div class="content">
         <div class="toolbar">
           <div class="heading">
+            <ha-menu-button></ha-menu-button>
             <ha-icon icon="mdi:bell-ring-outline"></ha-icon>
             <span>Reminders</span>
           </div>
           <ha-button @click=${() => this._list?.openNew()}>
             <ha-icon icon="mdi:plus"></ha-icon>
-            New reminder
+            <span class="new-label">New reminder</span>
           </ha-button>
         </div>
         <div class="list">

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   collectReminders,
+  menuItemsFor,
+  snippetOf,
   statusOf,
   triggerText,
 } from "../src/reminder-list";
@@ -101,5 +103,77 @@ describe("triggerText", () => {
 describe("statusOf", () => {
   it("defaults to scheduled", () => {
     expect(statusOf({ ...REMINDER, status: undefined } as never)).toBe("scheduled");
+  });
+});
+
+describe("snippetOf", () => {
+  it("shows the reminder text when it differs from the title", () => {
+    expect(
+      snippetOf({
+        ...REMINDER,
+        title: "Trash",
+        message: "Bins go out tonight, recycling too",
+      } as never),
+    ).toBe("Bins go out tonight, recycling too");
+  });
+
+  it("falls back to the subtitle when it repeats the title", () => {
+    expect(
+      snippetOf({ ...REMINDER, title: "Trash", message: "Trash", subtitle: "Weekly" } as never),
+    ).toBe("Weekly");
+  });
+
+  it("is empty when there is nothing extra", () => {
+    expect(
+      snippetOf({ ...REMINDER, title: "Trash", message: "Trash", subtitle: "" } as never),
+    ).toBe("");
+  });
+});
+
+describe("menuItemsFor", () => {
+  const handlers = {
+    complete: () => undefined,
+    snooze: () => undefined,
+    toggleEnabled: () => undefined,
+    edit: () => undefined,
+    remove: () => undefined,
+  };
+
+  it("offers the full set for an armed reminder", () => {
+    const labels = menuItemsFor(REMINDER as never, handlers).map((i) => i.label);
+    expect(labels).toEqual(["Mark done", "Snooze", "Disable", "Edit", "Delete"]);
+  });
+
+  it("hides completion once done", () => {
+    const labels = menuItemsFor(
+      { ...REMINDER, status: "completed" } as never,
+      handlers,
+    ).map((i) => i.label);
+    expect(labels).toEqual(["Disable", "Edit", "Delete"]);
+  });
+
+  it("offers Enable for a disabled reminder", () => {
+    const labels = menuItemsFor(
+      { ...REMINDER, enabled: false, status: "disabled" } as never,
+      handlers,
+    ).map((i) => i.label);
+    expect(labels).toEqual(["Enable", "Edit", "Delete"]);
+  });
+
+  it("marks delete as a warning action", () => {
+    const remove = menuItemsFor(REMINDER as never, handlers).at(-1);
+    expect(remove?.warning).toBe(true);
+  });
+
+  it("wires actions to the handlers", () => {
+    let called = "";
+    const items = menuItemsFor(REMINDER as never, {
+      ...handlers,
+      snooze: () => {
+        called = "snooze";
+      },
+    });
+    items.find((i) => i.label === "Snooze")?.action();
+    expect(called).toBe("snooze");
   });
 });

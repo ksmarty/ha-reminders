@@ -1,34 +1,35 @@
-import { a as c, i as h, b as p, n as r, e as b } from "./reminder-list-DPOtfzxD.js";
-var u = Object.defineProperty, i = (o, n, d, m) => {
-  for (var t = void 0, a = o.length - 1, l; a >= 0; a--)
-    (l = o[a]) && (t = l(n, d, t) || t);
-  return t && u(n, d, t), t;
+import { a as h, i as c, b as l, n as i, e as b } from "./reminder-list-Xok8ZuzB.js";
+var u = Object.defineProperty, a = (r, o, d, m) => {
+  for (var t = void 0, s = r.length - 1, p; s >= 0; s--)
+    (p = r[s]) && (t = p(o, d, t) || t);
+  return t && u(o, d, t), t;
 };
-const s = class s extends c {
+const n = class n extends h {
   constructor() {
     super(...arguments), this.narrow = !1;
   }
   render() {
-    return this.hass ? p`
+    return this.hass ? l`
       <div class="content">
         <div class="toolbar">
           <div class="heading">
+            <ha-menu-button></ha-menu-button>
             <ha-icon icon="mdi:bell-ring-outline"></ha-icon>
             <span>Reminders</span>
           </div>
           <ha-button @click=${() => this._list?.openNew()}>
             <ha-icon icon="mdi:plus"></ha-icon>
-            New reminder
+            <span class="new-label">New reminder</span>
           </ha-button>
         </div>
         <div class="list">
           <ha-reminders-list .hass=${this.hass}></ha-reminders-list>
         </div>
       </div>
-    ` : p``;
+    ` : l``;
   }
 };
-s.styles = h`
+n.styles = c`
     :host {
       display: block;
       padding: 16px;
@@ -39,15 +40,32 @@ s.styles = h`
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 12px;
       margin-bottom: 12px;
     }
     .heading {
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-size: 24px;
+      gap: 8px;
+      font-size: 22px;
       font-weight: 400;
+      min-width: 0;
+    }
+    .heading span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    @media (max-width: 600px) {
+      :host {
+        padding: 12px 8px;
+      }
+      .heading {
+        font-size: 18px;
+      }
+      .new-label {
+        display: none;
+      }
     }
     .content {
       max-width: 900px;
@@ -61,20 +79,20 @@ s.styles = h`
       padding: 4px 12px;
     }
   `;
-let e = s;
-i([
-  r({ attribute: !1 })
+let e = n;
+a([
+  i({ attribute: !1 })
 ], e.prototype, "hass");
-i([
-  r({ type: Boolean })
+a([
+  i({ type: Boolean })
 ], e.prototype, "narrow");
-i([
-  r({ attribute: !1 })
+a([
+  i({ attribute: !1 })
 ], e.prototype, "route");
-i([
-  r({ attribute: !1 })
+a([
+  i({ attribute: !1 })
 ], e.prototype, "panel");
-i([
+a([
   b("ha-reminders-list")
 ], e.prototype, "_list");
 customElements.get("ha-reminders-panel") || customElements.define("ha-reminders-panel", e);
