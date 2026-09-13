@@ -68,6 +68,20 @@ class TestResolveNotifyTarget:
     def _has_service(*services: tuple[str, str]):
         return lambda domain, service: (domain, service) in set(services)
 
+    def test_generic_notify_target_is_flagged(self):
+        """`notify.notify` broadcasts to every device, so it is flagged."""
+        assert notify.is_generic_notify_target("notify", "notify")
+        assert notify.is_generic_notify_target("notify", "send_message")
+        assert not notify.is_generic_notify_target("notify", "mobile_app_pixel")
+        assert not notify.is_generic_notify_target("mobile_app_pixel", "notify")
+
+    def test_bare_generic_name_is_the_broadcast_target(self):
+        """Documents the footgun: a bare 'notify' means 'notify everyone'."""
+        has = self._has_service(("notify", "notify"))
+        resolved = resolve_notify_target("notify", has)
+        assert resolved == ("notify", "notify")
+        assert notify.is_generic_notify_target(*resolved)
+
     def test_explicit_domain_service(self):
         assert resolve_notify_target(
             "notify.mobile_app_pixel", self._has_service()

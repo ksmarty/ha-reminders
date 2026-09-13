@@ -129,6 +129,11 @@ actions:
       one_shot: true
 ```
 
+> ⚠️ **Never use the generic `notify` service** (`notify_service: notify`). It
+> is not tied to a device: with no target it broadcasts to **every** notify
+> target, so one reminder notifies the whole household. Always target a device,
+> e.g. `notify.mobile_app_pixel_8`.
+>
 > **`notify_service`** — use the service id exactly as Home Assistant lists it
 > under **Developer Tools → Actions**, e.g. `notify.mobile_app_pixel_8`. A bare
 > device name (`mobile_app_pixel_8`) is also accepted and resolved against the

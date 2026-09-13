@@ -6,6 +6,7 @@ the legacy blueprint so existing notification actions keep working.
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Callable
 
 from homeassistant.core import HomeAssistant
@@ -18,6 +19,18 @@ from .const import (
 )
 from .models import Reminder
 from .util import format_delay
+
+_LOGGER = logging.getLogger(__name__)
+
+# Generic notify services are not device specific: `notify.notify` broadcasts to
+# every notify target when no target is given (components/notify/legacy.py),
+# and `notify.send_message` requires an entity target.
+_GENERIC_NOTIFY_TARGETS = {("notify", "notify"), ("notify", "send_message")}
+
+
+def is_generic_notify_target(domain: str, service: str) -> bool:
+    """Return True for notify targets that are not tied to a single device."""
+    return (domain, service) in _GENERIC_NOTIFY_TARGETS
 
 
 def action_string(
@@ -89,6 +102,16 @@ def _resolve(hass: HomeAssistant, reminder: Reminder) -> tuple[str, str]:
         raise HomeAssistantError(
             f"notify service '{domain}.{service}' does not exist "
             f"(reminder uses '{reminder.notify_service}')"
+        )
+    if is_generic_notify_target(domain, service):
+        _LOGGER.warning(
+            "Reminder '%s' uses the generic notify service '%s.%s', which is "
+            "not tied to a device — 'notify.notify' notifies every device. Set "
+            "notify_service to a specific service such as "
+            "'notify.mobile_app_pixel_8' to reach one device only.",
+            reminder.title,
+            domain,
+            service,
         )
     return domain, service
 
