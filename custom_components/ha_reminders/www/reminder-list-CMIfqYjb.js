@@ -717,10 +717,16 @@ function ut(i) {
 }
 const se = class se extends E {
   constructor() {
-    super(...arguments), this.reminder = null, this.open = !1, this._data = {}, this._saving = !1, this._error = "", this._notifyServices = [], this._advancedOpen = !1, this._customised = !1;
+    super(...arguments), this.reminder = null, this.open = !1, this._data = {}, this._saving = !1, this._error = "", this._notifyServices = [], this._advancedOpen = !1, this._customised = !1, this._collapseAdvanced = !1;
   }
   willUpdate(e) {
-    e.has("open") && this.open && (this._customised = ut(this.reminder), this._data = this._dataFrom(this.reminder), this._error = "", this._saving = !1, this._advancedOpen = !1, this._loadNotifyServices());
+    e.has("open") && this.open && (this._customised = ut(this.reminder), this._data = this._dataFrom(this.reminder), this._error = "", this._saving = !1, this._advancedOpen = !1, this._collapseAdvanced = !0, this._loadNotifyServices());
+  }
+  updated() {
+    if (!this._collapseAdvanced) return;
+    this._collapseAdvanced = !1;
+    const e = this.renderRoot.querySelector("ha-expansion-panel");
+    e && (e.expanded = !1);
   }
   _time(e) {
     return e ? e.length === 5 ? `${e}:00` : e : "";

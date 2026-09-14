@@ -213,6 +213,18 @@ export class ReminderEditor extends LitElement {
 
   @state() private _customised = false;
 
+  /**
+   * Set when the dialog opens so the advanced panel is forced shut once the
+   * render lands.
+   *
+   * `ha-expansion-panel` keeps its expanded state as a plain property, and the
+   * dialog is never torn down between opens — Lit reuses the same panel node
+   * and skips a binding whose value has not changed, so a section the user
+   * expanded once stayed open for every reminder edited afterwards. Writing
+   * the property directly is what actually closes it again.
+   */
+  private _collapseAdvanced = false;
+
   static styles = css`
     .editor {
       display: block;
@@ -238,8 +250,18 @@ export class ReminderEditor extends LitElement {
       // Always collapsed: a reminder carrying non-default values used to
       // force this open, which buried the simple fields again.
       this._advancedOpen = false;
+      this._collapseAdvanced = true;
       void this._loadNotifyServices();
     }
+  }
+
+  protected updated(): void {
+    if (!this._collapseAdvanced) return;
+    this._collapseAdvanced = false;
+    const panel = this.renderRoot.querySelector("ha-expansion-panel") as
+      | (HTMLElement & { expanded: boolean })
+      | null;
+    if (panel) panel.expanded = false;
   }
 
   private _time(value: string | null | undefined): string {

@@ -202,4 +202,40 @@ describe("editor dialog layout", () => {
     expect(panel?.secondary).toBe("customised");
     element.remove();
   });
+
+  it("collapses the advanced section again when the dialog is reopened", async () => {
+    const element = new ReminderEditor();
+    element.hass = { states: {}, callService: async () => ({}) } as never;
+    element.reminder = {
+      id: "abc",
+      title: "Trash",
+      message: "Bins",
+      notify_service: "notify.mobile_app_test",
+      trigger_type: "time",
+      time: "20:00",
+      enabled: true,
+    } as never;
+    element.open = true;
+    document.body.append(element);
+    await element.updateComplete;
+
+    const panel = () =>
+      element.shadowRoot?.querySelector("ha-expansion-panel") as
+        | (HTMLElement & { expanded: boolean })
+        | null;
+
+    // The user opens the section to look at it. The dialog is not destroyed
+    // when it closes, so the panel node keeps this state...
+    (panel() as HTMLElement & { expanded: boolean }).expanded = true;
+    element.open = false;
+    await element.updateComplete;
+
+    // ...and editing a reminder must still start from a collapsed section.
+    element.reminder = { ...element.reminder, id: "def", title: "Bins" } as never;
+    element.open = true;
+    await element.updateComplete;
+
+    expect(panel()?.expanded).toBe(false);
+    element.remove();
+  });
 });
