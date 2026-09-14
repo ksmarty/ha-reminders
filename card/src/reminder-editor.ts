@@ -156,8 +156,8 @@ export const DEFAULT_WAIT_TIME = 15;
 export const DEFAULT_NOTIFICATION_COUNT = 1;
 
 /**
- * Whether a stored reminder uses any advanced setting — if so the advanced
- * section opens by default so nothing stays hidden from the user.
+ * Whether a stored reminder uses any advanced setting. The section stays
+ * collapsed regardless; this only adds a "customised" hint next to it.
  */
 export function hasAdvancedValues(reminder: Reminder | null): boolean {
   if (!reminder) return false;
@@ -211,6 +211,8 @@ export class ReminderEditor extends LitElement {
 
   @state() private _advancedOpen = false;
 
+  @state() private _customised = false;
+
   static styles = css`
     .editor {
       display: block;
@@ -229,10 +231,13 @@ export class ReminderEditor extends LitElement {
 
   protected willUpdate(changed: Map<string, unknown>): void {
     if (changed.has("open") && this.open) {
+      this._customised = hasAdvancedValues(this.reminder);
       this._data = this._dataFrom(this.reminder);
       this._error = "";
       this._saving = false;
-      this._advancedOpen = hasAdvancedValues(this.reminder);
+      // Always collapsed: a reminder carrying non-default values used to
+      // force this open, which buried the simple fields again.
+      this._advancedOpen = false;
       void this._loadNotifyServices();
     }
   }
@@ -426,7 +431,7 @@ export class ReminderEditor extends LitElement {
 
           <ha-expansion-panel
             .header=${"Advanced settings"}
-            .secondary=${this._advancedOpen ? "shown" : "optional"}
+            .secondary=${this._customised ? "customised" : nothing}
             .expanded=${this._advancedOpen}
           >
             <ha-form

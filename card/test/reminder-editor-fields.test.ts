@@ -174,4 +174,32 @@ describe("editor dialog layout", () => {
     expect(forms.length).toBe(2); // basic + advanced
     element.remove();
   });
+
+  it("stays collapsed even when the reminder is customised", async () => {
+    const element = new ReminderEditor();
+    element.hass = { states: {}, callService: async () => ({}) } as never;
+    element.reminder = {
+      id: "abc",
+      title: "Trash",
+      message: "Bins",
+      notify_service: "notify.mobile_app_test",
+      trigger_type: "time",
+      time: "20:00",
+      enabled: true,
+      notification_count: 100, // non-default: used to force the panel open
+      snooze_delays: [5, 15, 30, 45, 60],
+    } as never;
+    element.open = true;
+    document.body.append(element);
+    await element.updateComplete;
+
+    const panel = element.shadowRoot?.querySelector("ha-expansion-panel") as
+      | (HTMLElement & { expanded: boolean; secondary?: string })
+      | null;
+    expect(panel?.expanded).toBe(false);
+    // ...but the user is told there is something in there (bound as a
+    // property, so it is read from the element rather than an attribute)
+    expect(panel?.secondary).toBe("customised");
+    element.remove();
+  });
 });
