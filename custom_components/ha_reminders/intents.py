@@ -13,7 +13,7 @@ from __future__ import annotations
 import difflib
 import logging
 from datetime import timedelta
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Any
 
 import voluptuous as vol
@@ -37,6 +37,11 @@ from .util import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+#: Jaccard overlap between two titles above which they are treated as the same
+#: task. "pack a work sweater" vs "pack a work sludder" scores 0.75; two
+#: genuinely different tasks sharing one word score far lower.
+SIMILAR_TITLE_THRESHOLD = 0.6
 
 
 def async_setup_intents(hass: HomeAssistant) -> None:
@@ -177,6 +182,54 @@ def _slot_text(slots: Mapping[str, Any], name: str) -> str:
     return "" if value is None else str(value).strip()
 
 
+def _title_key(title: str) -> str:
+    """Reduce a title to a comparable key: lowercase, single-spaced, no punctuation.
+
+    Speech recognition mangles the odd word ("sweater" heard as "sludder"), so
+    exact matching would miss the duplicates this is meant to catch.
+    """
+    return " ".join("".join(c if c.isalnum() else " " for c in title.lower()).split())
+
+
+def _title_tokens(title: str) -> set[str]:
+    return set(_title_key(title).split())
+
+
+def find_similar_reminder(
+    reminders: Iterable[Any], title: str
+) -> Any | None:
+    """Return an existing enabled reminder that looks like ``title``, if any.
+
+    Only *similar* titles count — two different tasks that happen to share a
+    word ("pack a sweater" / "pack a lunch") are not duplicates, so a match
+    needs either identical keys or a clear overlap between the titles. Zone and
+    time reminders are both considered: asking for the same task twice is the
+    signal, however it is triggered.
+    """
+    key = _title_key(title)
+    if not key:
+        return None
+    wanted = _title_tokens(title)
+
+    best = None
+    best_score = 0.0
+    for reminder in reminders:
+        if not getattr(reminder, "enabled", True):
+            continue
+        existing_key = _title_key(getattr(reminder, "title", "") or "")
+        if not existing_key:
+            continue
+        if existing_key == key:
+            return reminder
+        existing = _title_tokens(existing_key)
+        if not wanted or not existing:
+            continue
+        score = len(wanted & existing) / len(wanted | existing)
+        if score >= SIMILAR_TITLE_THRESHOLD and score > best_score:
+            best, best_score = reminder, score
+    return best
+
+
 class ReminderCreateIntent(_ReminderIntent):
     """Create a time or zone based reminder."""
 
@@ -279,6 +332,24 @@ class ReminderCreateIntent(_ReminderIntent):
                 "\"remind me to ... in 30 minutes\", \"... at 8 pm\", or "
                 "\"... when I get home\"."
             )
+
+        # Asking for the same task twice used to silently create a second
+        # reminder — speech recognition made it near-impossible to spot, since
+        # the two titles differed by a misheard word. Update the existing one
+        # instead, which is what the follow-up request means in practice.
+        existing = find_similar_reminder(coordinator.data, title)
+        if existing is not None:
+            updates = {k: v for k, v in payload.items() if k != "title"}
+            if existing.title != title:
+                updates["title"] = title
+                updates["message"] = title
+            await coordinator.async_update(existing.id, updates)
+            response = intent_obj.create_response()
+            response.async_set_speech(
+                f"{existing.title} is already on your list, so I updated it "
+                "instead of adding a second reminder."
+            )
+            return response
 
         reminder_id = await coordinator.async_create(payload)
         created = coordinator.get(reminder_id)

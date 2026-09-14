@@ -177,3 +177,52 @@ describe("menuItemsFor", () => {
     expect(called).toBe("snooze");
   });
 });
+
+/**
+ * A rejected service call must reach the user. Row actions used to `await`
+ * without a catch, so failures vanished into an unhandled rejection.
+ */
+describe("ReminderList failure reporting", () => {
+  async function listWithFailingService() {
+    const { ReminderList } = await import("../src/reminder-list");
+    const element = new ReminderList();
+    element.hass = {
+      states: {
+        "sensor.ha_reminders_trash_abc12345": {
+          entity_id: "sensor.ha_reminders_trash_abc12345",
+          state: "scheduled",
+          attributes: REMINDER,
+        },
+      },
+      callService: async () => {
+        throw new Error("Service call failed");
+      },
+    } as unknown as HomeAssistant;
+    document.body.append(element);
+    await element.updateComplete;
+    return element;
+  }
+
+  it("emits a hass-notification when completing fails", async () => {
+    const element = await listWithFailingService();
+    const seen: string[] = [];
+    element.addEventListener("hass-notification", (ev) => {
+      seen.push((ev as CustomEvent).detail.message);
+    });
+
+    const complete = menuItemsFor(REMINDER as never, {
+      complete: () => void (element as never as { _complete(r: unknown): Promise<void> })["_complete"](REMINDER),
+      snooze: () => undefined,
+      toggleEnabled: () => undefined,
+      edit: () => undefined,
+      remove: () => undefined,
+    }).find((item) => item.label === "Mark done");
+    complete?.action();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toContain("Take out the trash");
+    expect(seen[0]).toContain("Service call failed");
+    element.remove();
+  });
+});

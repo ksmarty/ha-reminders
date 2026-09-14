@@ -157,10 +157,33 @@ Release steps (after user approval):
   rather than raw Polymer/mwc elements: `ha-textfield` and `mwc-button` were
   removed or deprecated upstream and silently rendered nothing. Custom
   elements are registered guarded (`customElements.get(...)`) because the card
-  and panel bundles can both load on one page.
+  and panel bundles can both load on one page. Note this guard has a known
+  failure mode that is *not yet reproduced* — see the "Unresolved: element
+  registration during an upgrade" entry before changing it.
+- **Frontend failure reporting** — a rejected service call must reach the
+  user via `card/src/toast.ts` (`showToast` + `errorMessage`); never `await` a
+  service call with no catch. Row actions used to fail silently, visible only
+  as an unhandled rejection in the browser console.
+- **Editor target is latched, not read live** — `reminder` is a live binding
+  that a coordinator update can replace while the dialog is open. Deciding
+  create-vs-update from it at click time turned an edit into a create (a
+  duplicate). The editor latches the target id when the dialog opens; keep it
+  that way.
 - **Sensor-to-card contract** — the card renders by scanning
   `sensor.ha_reminder_*` states; the `reminder_id` attribute is the key, so
   sensor attributes must always include it.
+- **Voice duplicates** — `find_similar_reminder` (in `intents.py`) refuses a
+  second reminder whose title matches an existing enabled one, because speech
+  recognition means a repeat often arrives with a misheard word ("sweater" →
+  "sludder"). The threshold and the reasons for it are documented there.
+- **Unresolved: element registration during an upgrade** — `TypeError: Illegal
+  constructor (custom element class must be registered with global
+  customElements registry to be newable)` was seen once, on the first page load
+  after installing a new version. The `customElements.get(...)` guard in
+  `card/src/*.ts` is a plausible contributor (a second copy of the bundle skips
+  `define`, leaving its class registered nowhere) but it is **not reproduced**,
+  so the guard is deliberately unchanged. See the note at the top of the
+  "Frontend element churn" entry before touching it.
 - **Blueprint action encoding** — notification actions keep the
   `taskReminder╡<id>╡<group>╡<minutes>╡<user>` format; don't change it
   (existing automations may parse it).

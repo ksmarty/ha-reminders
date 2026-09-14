@@ -2,6 +2,7 @@ import { LitElement, css, html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import { createReminder, updateReminder } from "./api";
 import type { HomeAssistant, Reminder, TriggerType } from "./types";
+import { errorMessage, showToast } from "./toast";
 
 /**
  * Editor dialog for creating/updating a reminder.
@@ -225,6 +226,20 @@ export class ReminderEditor extends LitElement {
    */
   private _collapseAdvanced = false;
 
+  /**
+   * The reminder this dialog is currently editing, or null when creating.
+   *
+   * `reminder` is a live binding: the list re-renders on every coordinator
+   * update and could hand us a different target (or null) while the dialog is
+   * still up. Deciding create-vs-update from that at click time meant a save
+   * could land as a *create* of the reminder being edited, so this is latched
+   * once when the dialog opens and only changes when it reopens.
+   */
+  private _targetId: string | null = null;
+
+  /** Tracks the `open` property so the opening transition can be detected. */
+  private _wasOpen = false;
+
   static styles = css`
     .editor {
       display: block;
@@ -241,18 +256,23 @@ export class ReminderEditor extends LitElement {
     }
   `;
 
-  protected willUpdate(changed: Map<string, unknown>): void {
-    if (changed.has("open") && this.open) {
-      this._customised = hasAdvancedValues(this.reminder);
-      this._data = this._dataFrom(this.reminder);
-      this._error = "";
-      this._saving = false;
-      // Always collapsed: a reminder carrying non-default values used to
-      // force this open, which buried the simple fields again.
-      this._advancedOpen = false;
-      this._collapseAdvanced = true;
-      void this._loadNotifyServices();
-    }
+  protected willUpdate(): void {
+    // Not `changed.has("open")`: reopening an already-open dialog produces no
+    // property transition, and the form still has to be re-initialised.
+    const opening = this.open && !this._wasOpen;
+    this._wasOpen = this.open;
+    if (!opening) return;
+
+    this._targetId = this.reminder?.id ?? null;
+    this._customised = hasAdvancedValues(this.reminder);
+    this._data = this._dataFrom(this.reminder);
+    this._error = "";
+    this._saving = false;
+    // Always collapsed: a reminder carrying non-default values used to
+    // force this open, which buried the simple fields again.
+    this._advancedOpen = false;
+    this._collapseAdvanced = true;
+    void this._loadNotifyServices();
   }
 
   protected updated(): void {
@@ -413,16 +433,23 @@ export class ReminderEditor extends LitElement {
     };
 
     try {
-      if (this.reminder) {
-        await updateReminder(this.hass, this.reminder.id, payload);
+      if (this._targetId) {
+        await updateReminder(this.hass, this._targetId, payload);
       } else {
         await createReminder(this.hass, payload);
       }
       this.dispatchEvent(new CustomEvent("saved"));
       this.open = false;
     } catch (err) {
-      this._error =
-        err instanceof Error ? err.message : "Failed to save the reminder.";
+      // Shown inline (the dialog stays open so the user can retry) and as a
+      // toast, so a failure is visible even if the dialog is tall.
+      this._error = errorMessage(
+        err,
+        this._targetId
+          ? "Could not save the reminder."
+          : "Could not create the reminder.",
+      );
+      showToast(this, this._error, true);
     } finally {
       this._saving = false;
     }
@@ -432,7 +459,7 @@ export class ReminderEditor extends LitElement {
     return html`
       <ha-dialog
         .open=${this.open}
-        .heading=${this.reminder ? "Edit reminder" : "New reminder"}
+        .heading=${this._targetId ? "Edit reminder" : "New reminder"}
         @closed=${() => {
           this.open = false;
           this.dispatchEvent(new CustomEvent("closed"));
@@ -480,7 +507,7 @@ export class ReminderEditor extends LitElement {
             .disabled=${this._saving}
             @click=${this._save}
           >
-            ${this.reminder ? "Save" : "Create"}
+            ${this._targetId ? "Save" : "Create"}
           </ha-button>
         </ha-dialog-footer>
       </ha-dialog>

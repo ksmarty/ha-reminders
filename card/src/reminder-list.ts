@@ -15,6 +15,7 @@ import {
   snoozeReminder,
 } from "./api";
 import type { HomeAssistant, Reminder, ReminderStatus } from "./types";
+import { errorMessage, showToast } from "./toast";
 import "./reminder-editor";
 
 /**
@@ -253,24 +254,73 @@ export class ReminderList extends LitElement {
     this._editorOpen = true;
   }
 
+  /**
+   * Close the editor without clearing the target.
+   *
+   * The editor latches its own target when it opens, so clearing `_editing`
+   * here would only blank the row behind a dialog that is still up (`ha-dialog`
+   * does not apply `open` synchronously), leaving the form pointing at a null
+   * target mid-save. `_editing` is replaced on the next open.
+   */
+  private _closeEditor(): void {
+    this._editorOpen = false;
+  }
+
+  /**
+   * Run a row action, reporting a failure instead of swallowing it.
+   *
+   * These used to `await` a service call with nothing to catch the rejection:
+   * a failed snooze/complete/delete left the row unchanged with no feedback.
+   */
+  private async _run(
+    action: () => Promise<void>,
+    failure: string,
+  ): Promise<boolean> {
+    try {
+      await action();
+      return true;
+    } catch (err) {
+      // Keep the action context *and* the underlying reason: the detail is
+      // what makes the failure diagnosable, the context says which row.
+      const detail = errorMessage(err, "");
+      showToast(this, detail ? `${failure} ${detail}` : failure, true);
+      return false;
+    }
+  }
+
   private async _complete(reminder: Reminder): Promise<void> {
-    await completeReminder(this.hass, reminder.id);
+    await this._run(
+      () => completeReminder(this.hass, reminder.id),
+      `Could not complete “${reminder.title}”.`,
+    );
   }
 
   private async _toggleEnabled(reminder: Reminder): Promise<void> {
-    await setReminderEnabled(this.hass, reminder.id, !reminder.enabled);
+    await this._run(
+      () => setReminderEnabled(this.hass, reminder.id, !reminder.enabled),
+      `Could not ${reminder.enabled ? "disable" : "enable"} “${reminder.title}”.`,
+    );
   }
 
   private async _snooze(): Promise<void> {
     if (!this._snoozeTarget) return;
-    await snoozeReminder(this.hass, this._snoozeTarget.id, this._snoozeMinutes);
-    this._snoozeTarget = null;
+    const target = this._snoozeTarget;
+    const ok = await this._run(
+      () => snoozeReminder(this.hass, target.id, this._snoozeMinutes),
+      `Could not snooze “${target.title}”.`,
+    );
+    // Leave the dialog up on failure so the user can retry.
+    if (ok) this._snoozeTarget = null;
   }
 
   private async _delete(): Promise<void> {
     if (!this._deleteTarget) return;
-    await deleteReminder(this.hass, this._deleteTarget.id);
-    this._deleteTarget = null;
+    const target = this._deleteTarget;
+    const ok = await this._run(
+      () => deleteReminder(this.hass, target.id),
+      `Could not delete “${target.title}”.`,
+    );
+    if (ok) this._deleteTarget = null;
   }
 
   private _itemsFor(reminder: Reminder): MenuItem[] {
@@ -329,8 +379,8 @@ export class ReminderList extends LitElement {
         .hass=${this.hass}
         .reminder=${this._editing}
         .open=${this._editorOpen}
-        @saved=${() => (this._editorOpen = false)}
-        @closed=${() => (this._editorOpen = false)}
+        @saved=${() => this._closeEditor()}
+        @closed=${() => this._closeEditor()}
       ></ha-reminders-editor>
 
       <ha-dialog
