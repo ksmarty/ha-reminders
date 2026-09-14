@@ -181,13 +181,19 @@ class ReminderCreateIntent(_ReminderIntent):
     """Create a time or zone based reminder."""
 
     intent_type = "ReminderCreate"
+    description = (
+        "Create a reminder for the user. Put the task in 'title'. For a "
+        "location reminder, set 'direction' to enter or leave and name the "
+        "zone (for example home or work) in 'zone'. For a relative reminder, "
+        "set 'minutes'. For a daily reminder, set 'time' (for example 8 pm)."
+    )
 
     @property
     def slot_schema(self) -> dict:
         """Slot schema (HA wraps each value as {"value": ..., "text": ...})."""
         return {
             vol.Required("title"): vol.Any(str, int, float),
-            vol.Optional("direction"): str,
+            vol.Optional("direction"): vol.In(["enter", "leave"]),
             vol.Optional("zone"): str,
             vol.Optional("minutes"): vol.Any(str, int, float),
             vol.Optional("time"): vol.Any(str, int, float),
@@ -292,6 +298,7 @@ class ReminderListIntent(_ReminderIntent):
     """Read back the pending reminders."""
 
     intent_type = "ReminderList"
+    description = "List the user's reminders and their current status."
 
     async def async_handle(self, intent_obj: intent.Intent) -> intent.IntentResponse:
         self.async_validate_slots(intent_obj.slots)
@@ -313,6 +320,7 @@ class ReminderCompleteIntent(_ReminderIntent):
     """Mark a reminder as done."""
 
     intent_type = "ReminderComplete"
+    description = "Mark one of the user's reminders as done, by its title."
 
     @property
     def slot_schema(self) -> dict:
@@ -333,6 +341,10 @@ class ReminderDeleteIntent(_ReminderIntent):
     """Delete a reminder."""
 
     intent_type = "ReminderDelete"
+    description = (
+        "Delete one of the user's reminders, either by its title or by the "
+        "number it has in the reminder list."
+    )
 
     @property
     def slot_schema(self) -> dict:
@@ -365,6 +377,9 @@ class ReminderSnoozeIntent(_ReminderIntent):
     """Snooze a reminder."""
 
     intent_type = "ReminderSnooze"
+    description = (
+        "Snooze a reminder's notification for a number of minutes, by title."
+    )
 
     @property
     def slot_schema(self) -> dict:

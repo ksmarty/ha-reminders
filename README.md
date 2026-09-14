@@ -161,6 +161,25 @@ actions:
 > notification group receives when someone acknowledges
 > (e.g. `Kyle acknowledged: Take out the trash`).
 
+### LLM-based assistants
+
+Conversational agents that run on an LLM (the OpenAI/Anthropic integrations, or
+any custom agent such as an OpenRouter preset) don't match sentences — they
+call **tools**. The integration exposes its reminder intents as tools, so those
+agents can manage reminders directly:
+
+| Tool | Purpose |
+| --- | --- |
+| `ha_reminders__ReminderCreate` | create one (zone + direction for location, minutes for relative, time for daily) |
+| `ha_reminders__ReminderList` | read them back |
+| `ha_reminders__ReminderComplete` | mark one done |
+| `ha_reminders__ReminderSnooze` | snooze a notification |
+| `ha_reminders__ReminderDelete` | delete one |
+
+Nothing to configure — the tools are offered to whichever agent you talk to, so
+"remind me to take out the trash when I get home" works through an LLM agent
+too.
+
 ### Global defaults (config entry)
 
 The **Settings → Devices & Services → HA Reminders** entry holds defaults
