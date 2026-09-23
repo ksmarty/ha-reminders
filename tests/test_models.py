@@ -33,6 +33,7 @@ class TestSerialization:
             exclude_days_of_week=[0, 6],
             snooze_delays=[5, 15, 30],
             color="#ff0000",
+            icon="mdi:bell-ring",
         )
         restored = Reminder.from_dict(reminder.to_dict())
         assert restored == reminder

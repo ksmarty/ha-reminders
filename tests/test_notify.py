@@ -134,3 +134,46 @@ class TestNotificationData:
         reminder = make_reminder(snooze_text="Later in ${time}", snooze_delays=[90])
         actions = notify.build_reminder_data(reminder)["actions"]
         assert actions[1]["title"] == "Later in 1h30m"
+
+
+class TestIconPayload:
+    """The companion app takes MDI slugs and images through different keys.
+
+    See the "Notification icon and color" docs: `notification_icon` is a
+    Material Design Icon slug, `icon_url` an image.
+    """
+
+    def test_no_icon_adds_no_key(self):
+        assert notify.icon_payload("") == {}
+        assert notify.icon_payload(None) == {}
+        assert notify.icon_payload("   ") == {}
+
+    def test_mdi_slug_uses_notification_icon(self):
+        assert notify.icon_payload("mdi:bell-ring") == {
+            "notification_icon": "mdi:bell-ring"
+        }
+
+    def test_url_uses_icon_url(self):
+        url = "https://example.com/reminder.png"
+        assert notify.icon_payload(url) == {"icon_url": url}
+
+    def test_relative_path_is_an_image(self):
+        """`/local/...` is a path, not an MDI slug."""
+        assert notify.icon_payload("/local/reminder.png") == {
+            "icon_url": "/local/reminder.png"
+        }
+
+    def test_reminder_icon_wins_over_the_integration_default(self):
+        reminder = make_reminder(icon="mdi:alarm")
+        data = notify.build_reminder_data(reminder, "mdi:bell-ring")
+        assert data["notification_icon"] == "mdi:alarm"
+        assert "icon_url" not in data
+
+    def test_integration_default_is_used_when_the_reminder_has_none(self):
+        data = notify.build_reminder_data(make_reminder(), "mdi:bell-ring")
+        assert data["notification_icon"] == "mdi:bell-ring"
+
+    def test_no_icon_anywhere_leaves_the_payload_alone(self):
+        data = notify.build_reminder_data(make_reminder())
+        assert "notification_icon" not in data
+        assert "icon_url" not in data

@@ -126,6 +126,10 @@ create:
       example: "#ff0000"
       selector:
         text: {}
+    icon:
+      example: mdi:bell-ring
+      selector:
+        text: {}
     channel:
       selector:
         text: {}
@@ -270,6 +274,10 @@ update:
           min: 1
           mode: box
     color:
+      selector:
+        text: {}
+    icon:
+      example: mdi:bell-ring
       selector:
         text: {}
     channel:

@@ -17,6 +17,7 @@ from homeassistant.helpers import config_validation as cv
 
 from .const import (
     CONF_DEFAULT_ACKNOWLEDGE_ACTION_TITLE,
+    CONF_DEFAULT_ICON,
     CONF_DEFAULT_NOTIFICATION_COUNT,
     CONF_DEFAULT_NOTIFY_SERVICE,
     CONF_DEFAULT_PERSON_ENTITY_IDS,
@@ -25,6 +26,7 @@ from .const import (
     CONF_DEFAULT_USER_NAME,
     CONF_DEFAULT_WAIT_TIME_IF_NO_ACTION,
     DEFAULT_ACKNOWLEDGE_ACTION_TITLE,
+    DEFAULT_ICON,
     DEFAULT_NOTIFICATION_COUNT,
     DEFAULT_SNOOZE_DELAYS,
     DEFAULT_SNOOZE_TEXT,
@@ -63,6 +65,7 @@ def _default_options() -> dict[str, Any]:
         CONF_DEFAULT_NOTIFICATION_COUNT: DEFAULT_NOTIFICATION_COUNT,
         CONF_DEFAULT_SNOOZE_TEXT: DEFAULT_SNOOZE_TEXT,
         CONF_DEFAULT_ACKNOWLEDGE_ACTION_TITLE: DEFAULT_ACKNOWLEDGE_ACTION_TITLE,
+        CONF_DEFAULT_ICON: DEFAULT_ICON,
         CONF_DEFAULT_PERSON_ENTITY_IDS: "",
     }
 
@@ -154,6 +157,12 @@ class _DefaultsForm:
                     CONF_DEFAULT_ACKNOWLEDGE_ACTION_TITLE,
                     DEFAULT_ACKNOWLEDGE_ACTION_TITLE,
                 ),
+            ): str,
+            # Applied at send time, so it also reaches reminders that were
+            # created before the option existed. Empty disables the icon.
+            vol.Optional(
+                CONF_DEFAULT_ICON,
+                default=options.get(CONF_DEFAULT_ICON, DEFAULT_ICON),
             ): str,
         }
         if persons:

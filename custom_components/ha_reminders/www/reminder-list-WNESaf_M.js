@@ -45,10 +45,10 @@ const Ct = (i) => new $t(typeof i == "string" ? i : i + "", void 0, tt), vt = (i
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Tt, defineProperty: kt, getOwnPropertyDescriptor: Ot, getOwnPropertyNames: Ut, getOwnPropertySymbols: Mt, getPrototypeOf: Pt } = Object, v = globalThis, at = v.trustedTypes, Nt = at ? at.emptyScript : "", Lt = v.reactiveElementPolyfillSupport, U = (i, t) => i, B = { toAttribute(i, t) {
+const { is: Tt, defineProperty: kt, getOwnPropertyDescriptor: Ot, getOwnPropertyNames: Ut, getOwnPropertySymbols: Mt, getPrototypeOf: Pt } = Object, v = globalThis, at = v.trustedTypes, Lt = at ? at.emptyScript : "", Nt = v.reactiveElementPolyfillSupport, U = (i, t) => i, B = { toAttribute(i, t) {
   switch (t) {
     case Boolean:
-      i = i ? Nt : null;
+      i = i ? Lt : null;
       break;
     case Object:
     case Array:
@@ -256,13 +256,13 @@ let E = class extends HTMLElement {
   firstUpdated(t) {
   }
 };
-E.elementStyles = [], E.shadowRootOptions = { mode: "open" }, E[U("elementProperties")] = /* @__PURE__ */ new Map(), E[U("finalized")] = /* @__PURE__ */ new Map(), Lt?.({ ReactiveElement: E }), (v.reactiveElementVersions ?? (v.reactiveElementVersions = [])).push("2.1.2");
+E.elementStyles = [], E.shadowRootOptions = { mode: "open" }, E[U("elementProperties")] = /* @__PURE__ */ new Map(), E[U("finalized")] = /* @__PURE__ */ new Map(), Nt?.({ ReactiveElement: E }), (v.reactiveElementVersions ?? (v.reactiveElementVersions = [])).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const M = globalThis, ct = (i) => i, F = M.trustedTypes, ht = F ? F.createPolicy("lit-html", { createHTML: (i) => i }) : void 0, wt = "$lit$", $ = `lit$${Math.random().toFixed(9).slice(2)}$`, bt = "?" + $, Ht = `<${bt}>`, S = document, N = () => S.createComment(""), L = (i) => i === null || typeof i != "object" && typeof i != "function", it = Array.isArray, Dt = (i) => it(i) || typeof i?.[Symbol.iterator] == "function", q = `[ 	
+const M = globalThis, ct = (i) => i, F = M.trustedTypes, ht = F ? F.createPolicy("lit-html", { createHTML: (i) => i }) : void 0, wt = "$lit$", $ = `lit$${Math.random().toFixed(9).slice(2)}$`, bt = "?" + $, Ht = `<${bt}>`, S = document, L = () => S.createComment(""), N = (i) => i === null || typeof i != "object" && typeof i != "function", it = Array.isArray, Dt = (i) => it(i) || typeof i?.[Symbol.iterator] == "function", q = `[ 	
 \f\r]`, O = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, dt = /-->/g, _t = />/g, w = RegExp(`>|${q}(?:([^\\s"'>=/]+)(${q}*=${q}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), ut = /'/g, pt = /"/g, At = /^(?:script|style|textarea|title)$/i, Rt = (i) => (t, ...e) => ({ _$litType$: i, strings: t, values: e }), b = Rt(1), C = Symbol.for("lit-noChange"), h = Symbol.for("lit-nothing"), ft = /* @__PURE__ */ new WeakMap(), A = S.createTreeWalker(S, 129);
 function St(i, t) {
@@ -301,8 +301,8 @@ class H {
           const c = o.textContent.split($), f = c.length - 1;
           if (f > 0) {
             o.textContent = F ? F.emptyScript : "";
-            for (let y = 0; y < f; y++) o.append(c[y], N()), A.nextNode(), a.push({ type: 2, index: ++n });
-            o.append(c[f], N());
+            for (let y = 0; y < f; y++) o.append(c[y], L()), A.nextNode(), a.push({ type: 2, index: ++n });
+            o.append(c[f], L());
           }
         }
       } else if (o.nodeType === 8) if (o.data === bt) a.push({ type: 2, index: n });
@@ -321,7 +321,7 @@ class H {
 function z(i, t, e = i, s) {
   if (t === C) return t;
   let o = s !== void 0 ? e._$Co?.[s] : e._$Cl;
-  const n = L(t) ? void 0 : t._$litDirective$;
+  const n = N(t) ? void 0 : t._$litDirective$;
   return o?.constructor !== n && (o?._$AO?.(!1), n === void 0 ? o = void 0 : (o = new n(i), o._$AT(i, e, s)), s !== void 0 ? (e._$Co ?? (e._$Co = []))[s] = o : e._$Cl = o), o !== void 0 && (t = z(i, o._$AS(i, t.values), o, s)), t;
 }
 class Vt {
@@ -371,7 +371,7 @@ class R {
     return this._$AB;
   }
   _$AI(t, e = this) {
-    t = z(this, t, e), L(t) ? t === h || t == null || t === "" ? (this._$AH !== h && this._$AR(), this._$AH = h) : t !== this._$AH && t !== C && this._(t) : t._$litType$ !== void 0 ? this.$(t) : t.nodeType !== void 0 ? this.T(t) : Dt(t) ? this.k(t) : this._(t);
+    t = z(this, t, e), N(t) ? t === h || t == null || t === "" ? (this._$AH !== h && this._$AR(), this._$AH = h) : t !== this._$AH && t !== C && this._(t) : t._$litType$ !== void 0 ? this.$(t) : t.nodeType !== void 0 ? this.T(t) : Dt(t) ? this.k(t) : this._(t);
   }
   O(t) {
     return this._$AA.parentNode.insertBefore(t, this._$AB);
@@ -380,7 +380,7 @@ class R {
     this._$AH !== t && (this._$AR(), this._$AH = this.O(t));
   }
   _(t) {
-    this._$AH !== h && L(this._$AH) ? this._$AA.nextSibling.data = t : this.T(S.createTextNode(t)), this._$AH = t;
+    this._$AH !== h && N(this._$AH) ? this._$AA.nextSibling.data = t : this.T(S.createTextNode(t)), this._$AH = t;
   }
   $(t) {
     const { values: e, _$litType$: s } = t, o = typeof s == "number" ? this._$AC(t) : (s.el === void 0 && (s.el = H.createElement(St(s.h, s.h[0]), this.options)), s);
@@ -398,7 +398,7 @@ class R {
     it(this._$AH) || (this._$AH = [], this._$AR());
     const e = this._$AH;
     let s, o = 0;
-    for (const n of t) o === e.length ? e.push(s = new R(this.O(N()), this.O(N()), this, this.options)) : s = e[o], s._$AI(n), o++;
+    for (const n of t) o === e.length ? e.push(s = new R(this.O(L()), this.O(L()), this, this.options)) : s = e[o], s._$AI(n), o++;
     o < e.length && (this._$AR(s && s._$AB.nextSibling, o), e.length = o);
   }
   _$AR(t = this._$AA.nextSibling, e) {
@@ -424,11 +424,11 @@ class W {
   _$AI(t, e = this, s, o) {
     const n = this.strings;
     let r = !1;
-    if (n === void 0) t = z(this, t, e, 0), r = !L(t) || t !== this._$AH && t !== C, r && (this._$AH = t);
+    if (n === void 0) t = z(this, t, e, 0), r = !N(t) || t !== this._$AH && t !== C, r && (this._$AH = t);
     else {
       const l = t;
       let a, d;
-      for (t = n[0], a = 0; a < n.length - 1; a++) d = z(this, l[s + a], e, a), d === C && (d = this._$AH[a]), r || (r = !L(d) || d !== this._$AH[a]), d === h ? t = h : t !== h && (t += (d ?? "") + n[a + 1]), this._$AH[a] = d;
+      for (t = n[0], a = 0; a < n.length - 1; a++) d = z(this, l[s + a], e, a), d === C && (d = this._$AH[a]), r || (r = !N(d) || d !== this._$AH[a]), d === h ? t = h : t !== h && (t += (d ?? "") + n[a + 1]), this._$AH[a] = d;
     }
     r && !o && this.j(t);
   }
@@ -483,7 +483,7 @@ const Zt = (i, t, e) => {
   let o = s._$litPart$;
   if (o === void 0) {
     const n = e?.renderBefore ?? null;
-    s._$litPart$ = o = new R(t.insertBefore(N(), n), n, void 0, e ?? {});
+    s._$litPart$ = o = new R(t.insertBefore(L(), n), n, void 0, e ?? {});
   }
   return o._$AI(i), o;
 };
@@ -657,6 +657,7 @@ const de = [
   snooze_text: "Snooze action text",
   wait_time_if_no_action: "Resend after (minutes)",
   notification_count: "Maximum notifications",
+  icon: "Icon (mdi:name or image URL; empty = default)",
   color: "Color (Android)",
   channel: "Channel (Android)",
   channel_importance: "Channel importance",
@@ -716,6 +717,7 @@ function pe(i) {
       }
     },
     { name: "channel", selector: { text: {} } },
+    { name: "icon", selector: { text: {} } },
     { name: "color", selector: { text: {} } },
     { name: "notification_group", selector: { text: {} } },
     { name: "acknowledge_notification_title", selector: { text: {} } },
@@ -726,7 +728,7 @@ const Z = [5, 15, 30, 45, 60], fe = "Someone", K = "Snooze for ${time}", G = "Ma
 function ge(i) {
   if (!i) return !1;
   const t = i.snooze_delays?.length ? i.snooze_delays : Z, e = (i.user_name ?? "").trim();
-  return !!((i.subtitle ?? "").trim() || e && e !== fe || i.one_shot || (i.every_x_days ?? 1) !== 1 || i.start_date || i.stop_date || (i.exclude_days_of_week ?? []).length > 0 || i.time_window_start || i.time_window_end || t.join(",") !== Z.join(",") || (i.snooze_text ?? K) !== K || (i.acknowledge_action_title ?? G) !== G || (i.wait_time_if_no_action ?? Y) !== Y || (i.notification_count ?? X) !== X || (i.channel_importance ?? "") || (i.channel ?? "") || (i.color ?? "") || (i.notification_group ?? "") || (i.acknowledge_notification_title ?? J) !== J || (i.acknowledge_notification_body ?? "").trim());
+  return !!((i.subtitle ?? "").trim() || e && e !== fe || i.one_shot || (i.every_x_days ?? 1) !== 1 || i.start_date || i.stop_date || (i.exclude_days_of_week ?? []).length > 0 || i.time_window_start || i.time_window_end || t.join(",") !== Z.join(",") || (i.snooze_text ?? K) !== K || (i.acknowledge_action_title ?? G) !== G || (i.wait_time_if_no_action ?? Y) !== Y || (i.notification_count ?? X) !== X || (i.channel_importance ?? "") || (i.channel ?? "") || (i.icon ?? "") || (i.color ?? "") || (i.notification_group ?? "") || (i.acknowledge_notification_title ?? J) !== J || (i.acknowledge_notification_body ?? "").trim());
 }
 const st = class st extends x {
   constructor() {
@@ -768,6 +770,7 @@ const st = class st extends x {
       snooze_text: t?.snooze_text ?? K,
       wait_time_if_no_action: t?.wait_time_if_no_action ?? Y,
       notification_count: t?.notification_count ?? X,
+      icon: t?.icon ?? "",
       color: t?.color ?? "",
       channel: t?.channel ?? "",
       channel_importance: t?.channel_importance ?? "",
@@ -846,6 +849,7 @@ const st = class st extends x {
       wait_time_if_no_action: e.wait_time_if_no_action,
       notification_count: e.notification_count,
       color: this._orUndefined(e.color),
+      icon: this._orUndefined(e.icon),
       channel: this._orUndefined(e.channel),
       channel_importance: this._orUndefined(e.channel_importance),
       notification_group: this._orUndefined(e.notification_group),

@@ -26,6 +26,7 @@ from custom_components.ha_reminders.config_flow import (  # noqa: E402
     _parse_snooze_delays,
     RemindersConfigFlow,
 )
+from custom_components.ha_reminders.const import DEFAULT_ICON  # noqa: E402
 
 
 class _FakeServices:
@@ -70,6 +71,9 @@ def test_defaults_form_serializes() -> None:
     assert by_name["default_snooze_delays"]["type"] == "string"
     assert by_name["default_notify_service"]["type"] == "select"
     assert by_name["default_person_entity_ids"]["type"] == "multi_select"
+    # Ships a default icon, so notifications get one without any setup.
+    assert by_name["default_icon"]["type"] == "string"
+    assert by_name["default_icon"]["default"] == DEFAULT_ICON
 
     # The empty default must be labeled, not rendered as a blank entry.
     notify_options = by_name["default_notify_service"]["options"]

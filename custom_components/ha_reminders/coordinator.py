@@ -24,6 +24,7 @@ from .const import (
     ATTR_SNOOZE_UNTIL,
     ATTR_STATUS,
     CONF_DEFAULT_ACKNOWLEDGE_ACTION_TITLE,
+    CONF_DEFAULT_ICON,
     CONF_DEFAULT_NOTIFICATION_COUNT,
     CONF_DEFAULT_NOTIFY_SERVICE,
     CONF_DEFAULT_PERSON_ENTITY_IDS,
@@ -31,6 +32,7 @@ from .const import (
     CONF_DEFAULT_SNOOZE_TEXT,
     CONF_DEFAULT_USER_NAME,
     CONF_DEFAULT_WAIT_TIME_IF_NO_ACTION,
+    DEFAULT_ICON,
     DOMAIN,
     TRIGGER_ZONE_ENTER,
     TRIGGER_ZONE_LEAVE,
@@ -76,6 +78,17 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
     @property
     def options(self) -> dict[str, Any]:
         return dict(self._options)
+
+    @property
+    def default_icon(self) -> str:
+        """Icon used for reminders that do not carry one of their own.
+
+        Read at send time, so changing the option restyles every reminder that
+        does not override it — including ones created before it existed. An
+        explicitly empty option means "no icon"; only a missing option falls
+        back to the built-in default.
+        """
+        return str(self._options.get(CONF_DEFAULT_ICON, DEFAULT_ICON) or "")
 
     def get(self, reminder_id: str) -> Reminder | None:
         """Return a reminder by id (also accepts its sensor entity id)."""
@@ -244,7 +257,7 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
 
         # Deliver first — a failed send must not consume the cycle.
         try:
-            await notify.async_send_reminder(self.hass, reminder)
+            await notify.async_send_reminder(self.hass, reminder, self.default_icon)
         except Exception as err:  # noqa: BLE001 - surfaced to the user via log
             await self._handle_delivery_failure(reminder, runtime, err)
             return
@@ -430,7 +443,7 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
                 continue
             try:
                 await notify.async_send_acknowledged(
-                    self.hass, other, acknowledged_by
+                    self.hass, other, acknowledged_by, self.default_icon
                 )
             except Exception:  # noqa: BLE001
                 _LOGGER.exception(

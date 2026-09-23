@@ -193,6 +193,12 @@ and every value can still be overridden per reminder:
   notification-group acknowledgement messages).
 - **Default snooze delays / resend delay / max repeats / snooze text /
   acknowledge action title** — notification behavior defaults.
+- **Default notification icon** — shown on every reminder notification.
+  Either a Material Design Icon slug or an image URL (public, or a relative
+  path such as `/local/reminder.png`); it ships as `mdi:bell-ring`. Reminders
+  can override it individually, and clearing the option turns the icon off.
+  Because it is resolved when the notification is sent, changing it restyles
+  reminders that already exist.
 - **Persons watched by voice-created zone reminders** — when you create a
   zone reminder via Assist ("remind me to … when I leave work"), the persons
   to watch; empty falls back to all `person.*` entities.
@@ -201,6 +207,9 @@ and every value can still be overridden per reminder:
 
 - One notification per reminder: the tag `taskReminder╡<id>` replaces earlier
   ones of the same reminder.
+- **Custom notification icon**: the integration default icon (see above), or
+  the reminder's own `icon`. An `mdi:` value sets the status-bar/sender icon
+  (`notification_icon`), anything else is passed as `icon_url`.
 - Action buttons: **acknowledge** plus one **snooze** per `snooze_delays`
   entry. Snooze titles format delays as `5m`, `1h`, `1h30m`.
 - **Ignored notifications are not repeated by default** — a reminder notifies

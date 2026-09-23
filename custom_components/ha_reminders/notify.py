@@ -16,6 +16,7 @@ from .const import (
     ACKNOWLEDGE_MINUTES,
     ACTION_PREFIX,
     ACTION_SEPARATOR,
+    MDI_ICON_PREFIX,
 )
 from .models import Reminder
 from .util import format_delay
@@ -116,7 +117,27 @@ def _resolve(hass: HomeAssistant, reminder: Reminder) -> tuple[str, str]:
     return domain, service
 
 
-async def async_send_reminder(hass: HomeAssistant, reminder: Reminder) -> None:
+def icon_payload(icon: str) -> dict[str, str]:
+    """Map a configured icon to the companion-app notification data keys.
+
+    The companion app takes a Material Design Icon slug through
+    `notification_icon` and an image through `icon_url` (documented under
+    "Notification icon and color"). Anything without the `mdi:` prefix is
+    treated as an image URL, which also covers relative paths such as
+    `/local/icon.png`. An empty value adds no key at all, so the app keeps its
+    own default.
+    """
+    value = str(icon or "").strip()
+    if not value:
+        return {}
+    if value.startswith(MDI_ICON_PREFIX):
+        return {"notification_icon": value}
+    return {"icon_url": value}
+
+
+async def async_send_reminder(
+    hass: HomeAssistant, reminder: Reminder, default_icon: str = ""
+) -> None:
     """Send (or resend) the reminder notification."""
     domain, service = _resolve(hass, reminder)
     await hass.services.async_call(
@@ -125,13 +146,17 @@ async def async_send_reminder(hass: HomeAssistant, reminder: Reminder) -> None:
         {
             "title": reminder.title,
             "message": reminder.message,
-            "data": build_reminder_data(reminder),
+            "data": build_reminder_data(reminder, default_icon),
         },
     )
 
 
-def build_reminder_data(reminder: Reminder) -> dict[str, Any]:
-    """Build the service data for a reminder notification."""
+def build_reminder_data(reminder: Reminder, default_icon: str = "") -> dict[str, Any]:
+    """Build the service data for a reminder notification.
+
+    `default_icon` is the integration-wide icon, used when the reminder does
+    not carry one of its own.
+    """
     actions = [
         {
             "action": action_string(
@@ -160,6 +185,7 @@ def build_reminder_data(reminder: Reminder) -> dict[str, Any]:
         "color": reminder.color or "",
         "tag": notification_tag(reminder.id),
         "actions": actions,
+        **icon_payload(reminder.icon or default_icon),
     }
     # Only include keys that carry a value; some platforms treat empty strings
     # as meaningful values.
@@ -167,7 +193,10 @@ def build_reminder_data(reminder: Reminder) -> dict[str, Any]:
 
 
 async def async_send_acknowledged(
-    hass: HomeAssistant, reminder: Reminder, acknowledged_by: str
+    hass: HomeAssistant,
+    reminder: Reminder,
+    acknowledged_by: str,
+    default_icon: str = "",
 ) -> None:
     """Notify the other members of a notification group that a task is done."""
     domain, service = _resolve(hass, reminder)
@@ -176,6 +205,7 @@ async def async_send_acknowledged(
         "subject": reminder.subtitle or "",
         "channel": reminder.channel or "",
         "tag": notification_tag(reminder.id),
+        **icon_payload(reminder.icon or default_icon),
     }
     await hass.services.async_call(
         domain,

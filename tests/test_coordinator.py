@@ -18,6 +18,10 @@ pytest.importorskip("homeassistant")
 
 from homeassistant.core import HomeAssistant  # noqa: E402
 
+from custom_components.ha_reminders.const import (  # noqa: E402
+    CONF_DEFAULT_ICON,
+    DEFAULT_ICON,
+)
 from custom_components.ha_reminders.coordinator import (  # noqa: E402
     ReminderCoordinator,
 )
@@ -44,6 +48,17 @@ async def _run(tmp_path) -> None:
         # Regression (v1.0.4): constructing the coordinator must not crash —
         # DataUpdateCoordinator assigns self.data in __init__ (needs a setter).
         assert coordinator.data is None
+
+        # The notification icon is resolved when a reminder is sent, not when
+        # it is created: a missing option falls back to the shipped default
+        # (so reminders that predate the option get an icon too), while an
+        # explicitly cleared option turns the icon off.
+        assert coordinator.default_icon == DEFAULT_ICON
+        assert ReminderCoordinator(hass, {CONF_DEFAULT_ICON: ""}).default_icon == ""
+        assert (
+            ReminderCoordinator(hass, {CONF_DEFAULT_ICON: "mdi:alarm"}).default_icon
+            == "mdi:alarm"
+        )
 
         loaded = await coordinator._async_update_data()  # noqa: SLF001
         assert loaded == []

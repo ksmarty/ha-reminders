@@ -20,6 +20,7 @@ pytest.importorskip("homeassistant")
 from homeassistant.core import HomeAssistant  # noqa: E402
 from homeassistant.util import dt as dt_util  # noqa: E402
 
+from custom_components.ha_reminders.const import DEFAULT_ICON  # noqa: E402
 from custom_components.ha_reminders.coordinator import (  # noqa: E402
     ReminderCoordinator,
 )
@@ -97,6 +98,10 @@ async def _run(tmp_path) -> None:
             f"taskReminder╡{reminder_id}╡╡1╡Someone",
         ]
         assert data["data"]["tag"] == f"taskReminder╡{reminder_id}"
+        # The reminder carries no icon of its own, so the icon shipped by the
+        # integration is applied when the notification is sent. It is an MDI
+        # slug, which the companion app takes through `notification_icon`.
+        assert data["data"]["notification_icon"] == DEFAULT_ICON
 
         # One-shot reminders close their cycle after a single delivery.
         described = coordinator.describe(coordinator.get(reminder_id))

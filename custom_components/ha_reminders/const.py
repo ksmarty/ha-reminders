@@ -60,6 +60,7 @@ FIELD_SNOOZE_DELAYS = "snooze_delays"
 FIELD_SNOOZE_TEXT = "snooze_text"
 FIELD_WAIT_TIME = "wait_time_if_no_action"
 FIELD_NOTIFICATION_COUNT = "notification_count"
+FIELD_ICON = "icon"
 FIELD_COLOR = "color"
 FIELD_CHANNEL = "channel"
 FIELD_CHANNEL_IMPORTANCE = "channel_importance"
@@ -89,6 +90,12 @@ DEFAULT_NOTIFICATION_COUNT = 1
 DEFAULT_ACKNOWLEDGE_NOTIFICATION_TITLE = "Someone acknowledged the notification"
 DEFAULT_ACKNOWLEDGE_NOTIFICATION_BODY = ""
 
+# Notification icon shown by the companion app. Accepts a Material Design Icon
+# slug (`mdi:bell-ring`) or an image URL — the app takes those through two
+# different payload keys, see `notify.icon_payload`.
+DEFAULT_ICON = "mdi:bell-ring"
+MDI_ICON_PREFIX = "mdi:"
+
 # ---------------------------------------------------------------------------
 # Config entry options
 # ---------------------------------------------------------------------------
@@ -99,6 +106,7 @@ CONF_DEFAULT_WAIT_TIME_IF_NO_ACTION = "default_wait_time_if_no_action"
 CONF_DEFAULT_NOTIFICATION_COUNT = "default_notification_count"
 CONF_DEFAULT_SNOOZE_TEXT = "default_snooze_text"
 CONF_DEFAULT_ACKNOWLEDGE_ACTION_TITLE = "default_acknowledge_action_title"
+CONF_DEFAULT_ICON = "default_icon"
 CONF_DEFAULT_PERSON_ENTITY_IDS = "default_person_entity_ids"
 
 # Services

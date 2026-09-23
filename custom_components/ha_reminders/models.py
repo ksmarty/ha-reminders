@@ -123,6 +123,7 @@ class Reminder:
     snooze_text: str = DEFAULT_SNOOZE_TEXT
     wait_time_if_no_action: int = DEFAULT_WAIT_TIME_IF_NO_ACTION
     notification_count: int = DEFAULT_NOTIFICATION_COUNT
+    icon: str = ""
     color: str = ""
     channel: str = ""
     channel_importance: str = ""
@@ -191,6 +192,7 @@ class Reminder:
                     if get("notification_count") is not None
                     else DEFAULT_NOTIFICATION_COUNT
                 ),
+                icon=str(get("icon") or ""),
                 color=str(get("color") or ""),
                 channel=str(get("channel") or ""),
                 channel_importance=str(get("channel_importance") or ""),
@@ -242,6 +244,7 @@ class Reminder:
             "snooze_text": self.snooze_text,
             "wait_time_if_no_action": self.wait_time_if_no_action,
             "notification_count": self.notification_count,
+            "icon": self.icon,
             "color": self.color,
             "channel": self.channel,
             "channel_importance": self.channel_importance,

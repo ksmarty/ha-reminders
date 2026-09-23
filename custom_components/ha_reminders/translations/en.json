@@ -12,6 +12,7 @@
           "default_notification_count": "Maximum number of notification repeats",
           "default_snooze_text": "Snooze action text ($'{time}' is replaced)",
           "default_acknowledge_action_title": "Acknowledge action title",
+          "default_icon": "Default notification icon (mdi:name or image URL)",
           "default_person_entity_ids": "Persons watched by voice-created zone reminders"
         }
       }
@@ -36,6 +37,7 @@
           "default_notification_count": "Maximum number of notification repeats",
           "default_snooze_text": "Snooze action text ($'{time}' is replaced)",
           "default_acknowledge_action_title": "Acknowledge action title",
+          "default_icon": "Default notification icon (mdi:name or image URL)",
           "default_person_entity_ids": "Persons watched by voice-created zone reminders"
         }
       }

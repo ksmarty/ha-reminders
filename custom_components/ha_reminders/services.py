@@ -26,6 +26,7 @@ from .const import (
     FIELD_ENABLED,
     FIELD_EVERY_X_DAYS,
     FIELD_EXCLUDE_DAYS_OF_WEEK,
+    FIELD_ICON,
     FIELD_MESSAGE,
     FIELD_NOTIFICATION_COUNT,
     FIELD_NOTIFICATION_GROUP,
@@ -93,6 +94,7 @@ _REMINDER_FIELDS = {
     vol.Optional(FIELD_NOTIFICATION_COUNT): vol.All(
         vol.Coerce(int), vol.Range(min=1)
     ),
+    vol.Optional(FIELD_ICON): str,
     vol.Optional(FIELD_COLOR): str,
     vol.Optional(FIELD_CHANNEL): str,
     vol.Optional(FIELD_CHANNEL_IMPORTANCE): str,
