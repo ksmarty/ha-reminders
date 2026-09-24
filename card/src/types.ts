@@ -39,11 +39,14 @@ export interface Reminder {
   one_shot?: boolean;
   acknowledge_notification_title?: string | null;
   acknowledge_notification_body?: string | null;
+  // Metadata (stamped by the integration)
+  created_at?: string | null;
   // Runtime (merged by the integration)
   status?: ReminderStatus;
   next_fire?: string | null;
   snooze_until?: string | null;
   notified_count?: number;
+  completed_at?: string | null;
 }
 
 export interface HassEntity {

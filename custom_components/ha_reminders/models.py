@@ -103,6 +103,10 @@ class Reminder:
     subtitle: str = ""
     user_name: str = DEFAULT_USER_NAME
 
+    # Metadata: when the reminder was added (ISO 8601, stamped by the
+    # coordinator). The sidebar panel orders location reminders by it.
+    created_at: str = ""
+
     # Time trigger fields
     start_date: date | None = None
     stop_date: date | None = None
@@ -156,6 +160,7 @@ class Reminder:
                 enabled=coerce_bool(get("enabled") if "enabled" in payload else True),
                 notify_service=str(get("notify_service") or ""),
                 user_name=str(get("user_name") or DEFAULT_USER_NAME),
+                created_at=str(get("created_at") or ""),
                 trigger_type=trigger_type,
                 start_date=_parse_date(get("start_date")),
                 stop_date=_parse_date(get("stop_date")),
@@ -222,6 +227,7 @@ class Reminder:
             "enabled": self.enabled,
             "notify_service": self.notify_service,
             "user_name": self.user_name,
+            "created_at": self.created_at,
             "trigger_type": self.trigger_type,
             "start_date": self.start_date.isoformat() if self.start_date else None,
             "stop_date": self.stop_date.isoformat() if self.stop_date else None,

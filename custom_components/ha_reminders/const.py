@@ -4,8 +4,23 @@ from __future__ import annotations
 
 DOMAIN = "ha_reminders"
 
-STORAGE_VERSION = 1
+# v1 stored a bare list of reminder records; v2 also stores the durable part
+# of the runtime state (see `DURABLE_RUNTIME_KEYS`). `store.ReminderStore`
+# migrates a v1 payload on load.
+STORAGE_VERSION = 2
 STORAGE_KEY = DOMAIN
+
+# ---------------------------------------------------------------------------
+# Per-reminder runtime state
+# ---------------------------------------------------------------------------
+# The coordinator keeps the reminder lifecycle in memory and only these keys
+# are written to storage. `completed` is the "task is done" flag: losing it
+# makes an acknowledged location reminder fire again on the next arrival (and
+# a one-shot reminder fire again) after any reload. `completed_at` is *when* it
+# was marked done — the sidebar panel orders its completed group by it, so it
+# has to survive a reload as well. The rest of the runtime dict is a pending
+# timer or a derived snapshot, and is rebuilt on load.
+DURABLE_RUNTIME_KEYS = ("completed", "completed_at")
 
 # ---------------------------------------------------------------------------
 # Notification action protocol (kept compatible with the legacy blueprint)
@@ -75,6 +90,7 @@ ATTR_STATUS = "status"
 ATTR_NEXT_FIRE = "next_fire"
 ATTR_SNOOZE_UNTIL = "snooze_until"
 ATTR_NOTIFIED_COUNT = "notified_count"
+ATTR_COMPLETED_AT = "completed_at"
 
 # ---------------------------------------------------------------------------
 # Defaults (overridable through the config entry options flow)

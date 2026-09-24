@@ -23,17 +23,39 @@ export class HaRemindersPanel extends LitElement {
 
   static styles = css`
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      box-sizing: border-box;
+    }
+    .content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
       padding: 16px;
       box-sizing: border-box;
-      height: 100%;
     }
+    /*
+     * The header bar. It sits outside the scroll container, so it never moves;
+     * sticky positioning (with an opaque background) is a fallback for the
+     * case where HA hands the panel an auto height instead of a fixed one.
+     */
     .toolbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 12px;
+      flex: 0 0 auto;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: var(--primary-background-color);
     }
     .heading {
       display: flex;
@@ -49,7 +71,7 @@ export class HaRemindersPanel extends LitElement {
       text-overflow: ellipsis;
     }
     @media (max-width: 600px) {
-      :host {
+      .content {
         padding: 12px 8px;
       }
       .heading {
@@ -59,9 +81,12 @@ export class HaRemindersPanel extends LitElement {
         display: none;
       }
     }
-    .content {
-      max-width: 900px;
-      margin: 0 auto;
+    /* Only the reminders scroll. */
+    .scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
     .list {
       background: var(--card-background-color);
@@ -87,8 +112,13 @@ export class HaRemindersPanel extends LitElement {
             <span class="new-label">New reminder</span>
           </ha-button>
         </div>
-        <div class="list">
-          <ha-reminders-list .hass=${this.hass}></ha-reminders-list>
+        <div class="scroll">
+          <div class="list">
+            <ha-reminders-list
+              .hass=${this.hass}
+              .grouped=${true}
+            ></ha-reminders-list>
+          </div>
         </div>
       </div>
     `;

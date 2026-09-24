@@ -1,9 +1,10 @@
 """Coordinator for HA Reminders.
 
-Holds the in-memory reminder list, persists it through the store, computes the
-runtime state exposed to the sensor entities, and drives the notification
-lifecycle (fire -> resend -> acknowledge/snooze) in cooperation with the
-scheduler.
+Holds the in-memory reminder list, persists it — together with the durable
+part of the runtime state, so an acknowledged reminder stays acknowledged
+across a reload — computes the runtime state exposed to the sensor entities,
+and drives the notification lifecycle (fire -> resend ->
+acknowledge/snooze) in cooperation with the scheduler.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from . import notify
 from .const import (
+    ATTR_COMPLETED_AT,
     ATTR_NEXT_FIRE,
     ATTR_NOTIFIED_COUNT,
     ATTR_REMINDER_ID,
@@ -34,6 +36,7 @@ from .const import (
     CONF_DEFAULT_WAIT_TIME_IF_NO_ACTION,
     DEFAULT_ICON,
     DOMAIN,
+    DURABLE_RUNTIME_KEYS,
     TRIGGER_ZONE_ENTER,
     TRIGGER_ZONE_LEAVE,
 )
@@ -65,10 +68,19 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
     # DataUpdateCoordinator
     # ------------------------------------------------------------------
     async def _async_update_data(self) -> list[Reminder]:
-        """Load persisted reminders (called once at first refresh)."""
-        self._reminders = await self._store.async_load()
+        """Load persisted reminders and their durable runtime state."""
+        self._reminders, saved_runtime = await self._store.async_load()
         for reminder in self._reminders:
             self._runtime.setdefault(reminder.id, {})
+        # Restore only the durable keys, and only for reminders that still
+        # exist — a reminder deleted while we were down leaves nothing behind.
+        for reminder_id, saved in saved_runtime.items():
+            state = self._runtime.get(reminder_id)
+            if state is None:
+                continue
+            for key in DURABLE_RUNTIME_KEYS:
+                if key in saved:
+                    state[key] = saved[key]
         self._rebuild_person_map()
         return self._reminders
 
@@ -128,6 +140,7 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
             else None
         )
         data[ATTR_NOTIFIED_COUNT] = int(runtime.get("notified_count", 0))
+        data[ATTR_COMPLETED_AT] = runtime.get("completed_at")
         return data
 
     # ------------------------------------------------------------------
@@ -137,6 +150,9 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         """Create a reminder applying global defaults; returns its id."""
         data = dict(self._defaults_for(payload))
         data.update(payload)
+        # Metadata for ordering ("time added"); stamped once and never edited.
+        if not data.get("created_at"):
+            data["created_at"] = _naive_now().isoformat()
         try:
             reminder = Reminder.from_dict(data)
         except (TypeError, ValueError) as err:
@@ -168,7 +184,7 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         if updated.is_zone_trigger():
             # Editing a completed zone reminder re-arms it, so it fires again
             # on the next arrival (the documented way to reuse it).
-            self.runtime_of(reminder_id)["completed"] = False
+            self._clear_completed(self.runtime_of(reminder_id))
         self._warn_if_broadcast_target(updated)
         await self._persist_and_refresh()
 
@@ -189,7 +205,7 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         reminder.enabled = bool(enabled)
         if enabled:
             # Re-arm a completed cycle when re-enabled.
-            self.runtime_of(reminder_id)["completed"] = False
+            self._clear_completed(self.runtime_of(reminder_id))
         await self._persist_and_refresh()
 
     async def async_snooze(self, reminder_id: str, minutes: int) -> None:
@@ -218,6 +234,7 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         await self._notify_group_completed(reminder, acknowledged_by)
 
         runtime["completed"] = True
+        runtime["completed_at"] = _naive_now().isoformat()
         runtime["cycle_active"] = False
         runtime["snooze_until"] = None
         runtime["next_fire"] = None
@@ -240,7 +257,7 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
 
         runtime.pop("snooze_until", None)
         if kind == KIND_OCCURRENCE:
-            runtime["completed"] = False
+            self._clear_completed(runtime)
             runtime["one_shot_fired"] = False
 
         if runtime.get("cycle_active") and runtime.get("notified_count", 0) >= (
@@ -452,6 +469,25 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
 
     async def _persist_and_refresh(self) -> None:
         """Persist the list and push the new state to all listeners."""
-        await self._store.async_save(self._reminders)
+        await self._store.async_save(self._reminders, self._durable_runtime())
         self._rebuild_person_map()
         self.async_refresh()
+
+    @staticmethod
+    def _clear_completed(runtime: dict[str, Any]) -> None:
+        """Re-arm a reminder: the flag and its timestamp always move together."""
+        runtime["completed"] = False
+        runtime.pop("completed_at", None)
+
+    def _durable_runtime(self) -> dict[str, dict[str, Any]]:
+        """The part of the runtime state that is written to storage.
+
+        Only `DURABLE_RUNTIME_KEYS` are kept: the rest is a pending timer or a
+        derived snapshot that is rebuilt from the current data on load.
+        """
+        snapshot: dict[str, dict[str, Any]] = {}
+        for reminder_id, state in self._runtime.items():
+            saved = {key: state[key] for key in DURABLE_RUNTIME_KEYS if key in state}
+            if saved:
+                snapshot[reminder_id] = saved
+        return snapshot

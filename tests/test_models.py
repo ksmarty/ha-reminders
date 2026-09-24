@@ -34,6 +34,7 @@ class TestSerialization:
             snooze_delays=[5, 15, 30],
             color="#ff0000",
             icon="mdi:bell-ring",
+            created_at="2026-09-01T10:00:00",
         )
         restored = Reminder.from_dict(reminder.to_dict())
         assert restored == reminder

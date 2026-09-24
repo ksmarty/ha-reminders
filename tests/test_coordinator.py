@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+from datetime import datetime
 
 import pytest
 
@@ -77,6 +78,16 @@ async def _run(tmp_path) -> None:
         assert coordinator.get(reminder_id) is not None
         described = coordinator.describe(coordinator.get(reminder_id))
         assert described["title"] == "Take out the trash"
+        # "Time added", used to order the sidebar's location section. It is
+        # stamped once, so it must not move when the reminder is edited.
+        added_at = described["created_at"]
+        assert added_at, described
+        assert datetime.fromisoformat(added_at)
+        await coordinator.async_update(reminder_id, {"message": "Bins, nightly"})
+        assert (
+            coordinator.describe(coordinator.get(reminder_id))["created_at"]
+            == added_at
+        )
         assert described["status"] in {
             "scheduled",
             "active",

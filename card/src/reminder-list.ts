@@ -112,6 +112,62 @@ export function collectReminders(hass: HomeAssistant | undefined): Reminder[] {
     });
 }
 
+/** The sidebar's sections, each in its own order. */
+export interface ReminderGroups {
+  time: Reminder[];
+  location: Reminder[];
+  completed: Reminder[];
+}
+
+export type ReminderGroupKey = keyof ReminderGroups;
+
+function byTitle(a: Reminder, b: Reminder): number {
+  return String(a.title ?? "").localeCompare(String(b.title ?? ""));
+}
+
+/**
+ * Ascending order for the integration's `HH:MM` times and ISO 8601
+ * timestamps — both sort correctly as plain strings. A missing value (a
+ * reminder created or completed before the field existed) sorts last.
+ * Returns null when the two are equal, so callers can fall back to a title.
+ */
+function compareMissingLast(
+  a: string | null | undefined,
+  b: string | null | undefined,
+): number | null {
+  const left = (a ?? "").trim();
+  const right = (b ?? "").trim();
+  if (left === right) return null;
+  if (!left) return 1;
+  if (!right) return -1;
+  return left < right ? -1 : 1;
+}
+
+/**
+ * Split reminders into the sidebar's sections: time reminders soonest first,
+ * location reminders in the order they were added, and completed ones at the
+ * bottom, most recently marked done first.
+ */
+export function groupReminders(reminders: Reminder[]): ReminderGroups {
+  const groups: ReminderGroups = { time: [], location: [], completed: [] };
+  for (const reminder of reminders) {
+    if (statusOf(reminder) === "completed") groups.completed.push(reminder);
+    else if (reminder.trigger_type === "time") groups.time.push(reminder);
+    else groups.location.push(reminder);
+  }
+  groups.time.sort(
+    (a, b) => compareMissingLast(a.time, b.time) ?? byTitle(a, b),
+  );
+  groups.location.sort(
+    (a, b) => compareMissingLast(a.created_at, b.created_at) ?? byTitle(a, b),
+  );
+  groups.completed.sort((a, b) => {
+    const order = compareMissingLast(a.completed_at, b.completed_at);
+    return order === null ? byTitle(a, b) : -order; // newest first
+  });
+  return groups;
+}
+
 /** Actions offered for a row, in menu order. */
 export function menuItemsFor(
   reminder: Reminder,
@@ -148,6 +204,24 @@ export function menuItemsFor(
 export class ReminderList extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
 
+  /**
+   * Sidebar mode: split the reminders into collapsible sections instead of
+   * one flat list. The dashboard card keeps the flat list — it has no fixed
+   * height to give the sections.
+   */
+  @property({ type: Boolean }) grouped = false;
+
+  /**
+   * Whether each section is open. Held here rather than left to
+   * `ha-expansion-panel` alone because every coordinator update re-renders
+   * the list, and a section the user closed must stay closed.
+   */
+  @state() private _expanded: Record<ReminderGroupKey, boolean> = {
+    time: true,
+    location: true,
+    completed: false,
+  };
+
   @state() private _editorOpen = false;
 
   @state() private _editing: Reminder | null = null;
@@ -161,6 +235,14 @@ export class ReminderList extends LitElement {
   static styles = css`
     :host {
       display: block;
+    }
+    ha-expansion-panel {
+      display: block;
+      --expansion-panel-content-padding: 0;
+    }
+    /* Group headers already read as separators; keep one between sections. */
+    ha-expansion-panel + ha-expansion-panel {
+      border-top: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
     }
     .row {
       display: flex;
@@ -338,42 +420,71 @@ export class ReminderList extends LitElement {
     });
   }
 
+  /** One row: the text block (which opens the editor) plus the overflow menu. */
+  private _renderRow(reminder: Reminder) {
+    const snippet = snippetOf(reminder);
+    const status = statusOf(reminder);
+    return html`
+      <div class="row">
+        <ha-icon
+          icon=${reminder.trigger_type === "time"
+            ? "mdi:clock-outline"
+            : reminder.trigger_type === "zone_enter"
+              ? "mdi:home-import-outline"
+              : "mdi:home-export-outline"}
+        ></ha-icon>
+        <div class="row-text" @click=${() => this.openEdit(reminder)}>
+          <div class="row-title">${reminder.title}</div>
+          ${snippet ? html`<div class="row-snippet">${snippet}</div>` : nothing}
+          <div class="row-meta">
+            <span class="chip ${status}">${STATUS_LABELS[status]}</span>
+            <span class="row-trigger">${triggerText(reminder)}</span>
+          </div>
+        </div>
+        <ha-icon-overflow-menu
+          .narrow=${true}
+          .items=${this._itemsFor(reminder)}
+        ></ha-icon-overflow-menu>
+      </div>
+    `;
+  }
+
+  /** One collapsible section; empty sections are left out entirely. */
+  private _renderGroup(
+    key: ReminderGroupKey,
+    label: string,
+    reminders: Reminder[],
+  ) {
+    if (reminders.length === 0) return nothing;
+    return html`
+      <ha-expansion-panel
+        .header=${label}
+        .secondary=${String(reminders.length)}
+        .expanded=${this._expanded[key]}
+        @expanded-changed=${(ev: CustomEvent<{ expanded?: boolean }>) => {
+          this._expanded = {
+            ...this._expanded,
+            [key]: Boolean(ev.detail?.expanded),
+          };
+        }}
+      >
+        ${reminders.map((reminder) => this._renderRow(reminder))}
+      </ha-expansion-panel>
+    `;
+  }
+
   protected render() {
     const reminders = collectReminders(this.hass);
+    const groups = groupReminders(reminders);
 
     return html`
       ${reminders.length === 0
         ? html`<div class="empty">No reminders yet — use “New reminder”.</div>`
-        : reminders.map((reminder) => {
-            const snippet = snippetOf(reminder);
-            return html`
-              <div class="row">
-                <ha-icon
-                  icon=${reminder.trigger_type === "time"
-                    ? "mdi:clock-outline"
-                    : reminder.trigger_type === "zone_enter"
-                      ? "mdi:home-import-outline"
-                      : "mdi:home-export-outline"}
-                ></ha-icon>
-                <div class="row-text" @click=${() => this.openEdit(reminder)}>
-                  <div class="row-title">${reminder.title}</div>
-                  ${snippet
-                    ? html`<div class="row-snippet">${snippet}</div>`
-                    : nothing}
-                  <div class="row-meta">
-                    <span class="chip ${statusOf(reminder)}"
-                      >${STATUS_LABELS[statusOf(reminder)]}</span
-                    >
-                    <span class="row-trigger">${triggerText(reminder)}</span>
-                  </div>
-                </div>
-                <ha-icon-overflow-menu
-                  .narrow=${true}
-                  .items=${this._itemsFor(reminder)}
-                ></ha-icon-overflow-menu>
-              </div>
-            `;
-          })}
+        : this.grouped
+          ? html`${this._renderGroup("time", "Time", groups.time)}
+              ${this._renderGroup("location", "Location", groups.location)}
+              ${this._renderGroup("completed", "Completed", groups.completed)}`
+          : reminders.map((reminder) => this._renderRow(reminder))}
 
       <ha-reminders-editor
         .hass=${this.hass}
