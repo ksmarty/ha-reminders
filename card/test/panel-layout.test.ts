@@ -52,8 +52,10 @@ describe("sidebar panel layout", () => {
     const element = await panel();
     const scroll = element.shadowRoot?.querySelector(".scroll");
 
-    expect(scroll?.querySelector(".list")).toBeTruthy();
-    expect(scroll?.querySelector("ha-reminders-list")).toBeTruthy();
+    // The list (which renders one card per section) is the scroller's child.
+    expect(scroll?.firstElementChild?.tagName.toLowerCase()).toBe(
+      "ha-reminders-list",
+    );
     element.remove();
   });
 

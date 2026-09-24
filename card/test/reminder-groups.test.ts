@@ -174,9 +174,9 @@ describe("grouped list", () => {
     const [time, location, completed] = panels(element);
 
     expect([time.header, location.header, completed.header]).toEqual([
-      "Time",
-      "Location",
-      "Completed",
+      "Time (1)",
+      "Location (1)",
+      "Completed (1)",
     ]);
     element.remove();
   });
@@ -202,20 +202,49 @@ describe("grouped list", () => {
     element.remove();
   });
 
-  it("leaves out a section with nothing in it", async () => {
+  it("keeps a section visible even when it is empty", async () => {
+    // The Completed section used to be dropped when nothing was in it, which
+    // made it look like the panel had no such section at all.
     const element = await groupedList([TIME]);
     const headers = panels(element).map((panel) => panel.header);
 
-    expect(headers).toEqual(["Time"]);
+    expect(headers).toEqual(["Time (1)", "Location (0)", "Completed (0)"]);
     element.remove();
   });
 
-  it("counts the reminders in each section", async () => {
+  it("renders each section as its own card", async () => {
     const element = await groupedList([TIME, LOCATION, DONE]);
-    const [time, , completed] = panels(element);
+    const cards = [
+      ...(element.shadowRoot?.querySelectorAll(".group") ?? []),
+    ] as HTMLElement[];
 
-    expect(time.secondary).toBe("1");
-    expect(completed.secondary).toBe("1");
+    expect(cards).toHaveLength(3);
+    for (const card of cards) {
+      expect(card.querySelectorAll("ha-expansion-panel")).toHaveLength(1);
+    }
+    element.remove();
+  });
+
+  it("counts the reminders next to the section title", async () => {
+    const element = await groupedList([
+      TIME,
+      reminder({ id: "t2", title: "Water", trigger_type: "time", time: "08:00" }),
+      LOCATION,
+    ]);
+
+    expect(panels(element).map((panel) => panel.header)).toEqual([
+      "Time (2)",
+      "Location (1)",
+      "Completed (0)",
+    ]);
+    element.remove();
+  });
+
+  it("shows the empty message instead of sections when there is nothing", async () => {
+    const element = await groupedList([]);
+
+    expect(panels(element)).toHaveLength(0);
+    expect(element.shadowRoot?.querySelector(".empty")).toBeTruthy();
     element.remove();
   });
 

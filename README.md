@@ -66,11 +66,11 @@ or copy `custom_sentences/en/reminders.yaml` from this repository to
 
 **Sidebar panel** — nothing to configure. After setup a **Reminders** entry
 appears in the sidebar with the full reminder list: create, edit, snooze,
-complete, enable/disable and delete from one page. The page keeps its header
-in place and scrolls only the reminders, split into three sections: **Time**
-(soonest first) and **Location** (in the order they were added), both open,
-and **Completed** at the bottom, closed, most recently completed first. Empty
-sections are left out.
+complete, enable/disable and delete from one page. The header stays put and
+only the reminders scroll, in three collapsible cards labelled with their
+count: **Time** (soonest first) and **Location** (in the order they were
+added), both open, and **Completed** at the bottom, closed, most recently
+completed first. All three cards are always shown, even when one is empty.
 
 **Dashboard card** — on any dashboard: **Add card** → search **"HA Reminders"**
 (`type: custom:ha-reminders-card`). Both surfaces are served by the

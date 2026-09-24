@@ -240,9 +240,16 @@ export class ReminderList extends LitElement {
       display: block;
       --expansion-panel-content-padding: 0;
     }
-    /* Group headers already read as separators; keep one between sections. */
-    ha-expansion-panel + ha-expansion-panel {
-      border-top: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+    /* Each section is its own card in the sidebar. */
+    .group {
+      background: var(--card-background-color);
+      border-radius: var(--ha-card-border-radius, 12px);
+      box-shadow: var(--ha-card-box-shadow, none);
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+      padding: 4px 12px;
+    }
+    .group + .group {
+      margin-top: 12px;
     }
     .row {
       display: flex;
@@ -449,27 +456,31 @@ export class ReminderList extends LitElement {
     `;
   }
 
-  /** One collapsible section; empty sections are left out entirely. */
+  /**
+   * One collapsible section, as its own card. The count sits in the header so
+   * it reads next to the title rather than under it (`secondary` wraps in the
+   * panel's narrow layout).
+   */
   private _renderGroup(
     key: ReminderGroupKey,
     label: string,
     reminders: Reminder[],
   ) {
-    if (reminders.length === 0) return nothing;
     return html`
-      <ha-expansion-panel
-        .header=${label}
-        .secondary=${String(reminders.length)}
-        .expanded=${this._expanded[key]}
-        @expanded-changed=${(ev: CustomEvent<{ expanded?: boolean }>) => {
-          this._expanded = {
-            ...this._expanded,
-            [key]: Boolean(ev.detail?.expanded),
-          };
-        }}
-      >
-        ${reminders.map((reminder) => this._renderRow(reminder))}
-      </ha-expansion-panel>
+      <div class="group">
+        <ha-expansion-panel
+          .header=${`${label} (${reminders.length})`}
+          .expanded=${this._expanded[key]}
+          @expanded-changed=${(ev: CustomEvent<{ expanded?: boolean }>) => {
+            this._expanded = {
+              ...this._expanded,
+              [key]: Boolean(ev.detail?.expanded),
+            };
+          }}
+        >
+          ${reminders.map((reminder) => this._renderRow(reminder))}
+        </ha-expansion-panel>
+      </div>
     `;
   }
 

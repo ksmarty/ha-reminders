@@ -1,10 +1,10 @@
-import { a as h, i as c, b as p, n as a, e as u } from "./reminder-list-CCXm0EC0.js";
-var b = Object.defineProperty, t = (r, s, l, x) => {
-  for (var i = void 0, o = r.length - 1, d; o >= 0; o--)
-    (d = r[o]) && (i = d(s, l, i) || i);
-  return i && b(s, l, i), i;
+import { a as d, i as c, b as p, n as i, e as u } from "./reminder-list-BpA1l021.js";
+var m = Object.defineProperty, a = (n, r, l, g) => {
+  for (var t = void 0, o = n.length - 1, h; o >= 0; o--)
+    (h = n[o]) && (t = h(r, l, t) || t);
+  return t && m(r, l, t), t;
 };
-const n = class n extends h {
+const s = class s extends d {
   constructor() {
     super(...arguments), this.narrow = !1;
   }
@@ -23,24 +23,46 @@ const n = class n extends h {
           </ha-button>
         </div>
         <div class="scroll">
-          <div class="list">
-            <ha-reminders-list
-              .hass=${this.hass}
-              .grouped=${!0}
-            ></ha-reminders-list>
-          </div>
+          <ha-reminders-list
+            .hass=${this.hass}
+            .grouped=${!0}
+          ></ha-reminders-list>
         </div>
       </div>
     ` : p``;
   }
 };
-n.styles = c`
+s.styles = c`
     :host {
       display: flex;
       flex-direction: column;
       height: 100%;
       min-height: 0;
       box-sizing: border-box;
+      overflow: hidden;
+      background-color: var(--primary-background-color);
+      /*
+       * HA's panel container normally sizes us — hass-subpage relies on the
+       * same height: 100% — but that does not hold everywhere, and without a
+       * definite height the toolbar scrolls away with the reminders. Capping
+       * the panel at the room below HA's header bar guarantees one either way.
+       */
+      max-height: calc(
+        100vh - var(--header-height, 56px) - var(--safe-area-inset-top, 0px)
+      );
+      max-height: calc(
+        100dvh - var(--header-height, 56px) - var(--safe-area-inset-top, 0px)
+      );
+    }
+    /*
+     * Narrow layouts are the case HA works around by pinning a full-page view
+     * to the viewport (hass-subpage uses position: fixed here too): with auto
+     * insets the panel keeps its place in the layout but stops scrolling with
+     * the page, so its own reminders are the only thing that moves.
+     */
+    :host([narrow]) {
+      position: fixed;
+      width: 100%;
     }
     .content {
       display: flex;
@@ -53,11 +75,7 @@ n.styles = c`
       padding: 16px;
       box-sizing: border-box;
     }
-    /*
-     * The header bar. It sits outside the scroll container, so it never moves;
-     * sticky positioning (with an opaque background) is a fallback for the
-     * case where HA hands the panel an auto height instead of a fixed one.
-     */
+    /* The header bar: a flex row above the scroller, so it cannot move. */
     .toolbar {
       display: flex;
       align-items: center;
@@ -65,10 +83,6 @@ n.styles = c`
       gap: 12px;
       margin-bottom: 12px;
       flex: 0 0 auto;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      background: var(--primary-background-color);
     }
     .heading {
       display: flex;
@@ -101,28 +115,21 @@ n.styles = c`
       overflow-y: auto;
       overscroll-behavior: contain;
     }
-    .list {
-      background: var(--card-background-color);
-      border-radius: var(--ha-card-border-radius, 12px);
-      box-shadow: var(--ha-card-box-shadow, none);
-      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
-      padding: 4px 12px;
-    }
   `;
-let e = n;
-t([
-  a({ attribute: !1 })
+let e = s;
+a([
+  i({ attribute: !1 })
 ], e.prototype, "hass");
-t([
-  a({ type: Boolean })
+a([
+  i({ type: Boolean, reflect: !0 })
 ], e.prototype, "narrow");
-t([
-  a({ attribute: !1 })
+a([
+  i({ attribute: !1 })
 ], e.prototype, "route");
-t([
-  a({ attribute: !1 })
+a([
+  i({ attribute: !1 })
 ], e.prototype, "panel");
-t([
+a([
   u("ha-reminders-list")
 ], e.prototype, "_list");
 customElements.get("ha-reminders-panel") || customElements.define("ha-reminders-panel", e);

@@ -264,7 +264,7 @@ E.elementStyles = [], E.shadowRootOptions = { mode: "open" }, E[M("elementProper
  */
 const P = globalThis, he = (s) => s, F = P.trustedTypes, _e = F ? F.createPolicy("lit-html", { createHTML: (s) => s }) : void 0, Ae = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, xe = "?" + v, De = `<${xe}>`, S = document, N = () => S.createComment(""), H = (s) => s === null || typeof s != "object" && typeof s != "function", oe = Array.isArray, Ie = (s) => oe(s) || typeof s?.[Symbol.iterator] == "function", q = `[ 	
 \f\r]`, U = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, pe = /-->/g, ue = />/g, A = RegExp(`>|${q}(?:([^\\s"'>=/]+)(${q}*=${q}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), fe = /'/g, me = /"/g, Se = /^(?:script|style|textarea|title)$/i, Ve = (s) => (e, ...t) => ({ _$litType$: s, strings: e, values: t }), g = Ve(1), T = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), ge = /* @__PURE__ */ new WeakMap(), x = S.createTreeWalker(S, 129);
+\f\r"'\`<>=]|("|')|))|$)`, "g"), fe = /'/g, ge = /"/g, Se = /^(?:script|style|textarea|title)$/i, Ve = (s) => (e, ...t) => ({ _$litType$: s, strings: e, values: t }), m = Ve(1), T = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), me = /* @__PURE__ */ new WeakMap(), x = S.createTreeWalker(S, 129);
 function Ee(s, e) {
   if (!oe(s) || !s.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return _e !== void 0 ? _e.createHTML(e) : e;
@@ -274,8 +274,8 @@ const je = (s, e) => {
   let o, n = e === 2 ? "<svg>" : e === 3 ? "<math>" : "", r = U;
   for (let l = 0; l < t; l++) {
     const a = s[l];
-    let h, _, c = -1, m = 0;
-    for (; m < a.length && (r.lastIndex = m, _ = r.exec(a), _ !== null); ) m = r.lastIndex, r === U ? _[1] === "!--" ? r = pe : _[1] !== void 0 ? r = ue : _[2] !== void 0 ? (Se.test(_[2]) && (o = RegExp("</" + _[2], "g")), r = A) : _[3] !== void 0 && (r = A) : r === A ? _[0] === ">" ? (r = o ?? U, c = -1) : _[1] === void 0 ? c = -2 : (c = r.lastIndex - _[2].length, h = _[1], r = _[3] === void 0 ? A : _[3] === '"' ? me : fe) : r === me || r === fe ? r = A : r === pe || r === ue ? r = U : (r = A, o = void 0);
+    let h, _, c = -1, g = 0;
+    for (; g < a.length && (r.lastIndex = g, _ = r.exec(a), _ !== null); ) g = r.lastIndex, r === U ? _[1] === "!--" ? r = pe : _[1] !== void 0 ? r = ue : _[2] !== void 0 ? (Se.test(_[2]) && (o = RegExp("</" + _[2], "g")), r = A) : _[3] !== void 0 && (r = A) : r === A ? _[0] === ">" ? (r = o ?? U, c = -1) : _[1] === void 0 ? c = -2 : (c = r.lastIndex - _[2].length, h = _[1], r = _[3] === void 0 ? A : _[3] === '"' ? ge : fe) : r === ge || r === fe ? r = A : r === pe || r === ue ? r = U : (r = A, o = void 0);
     const $ = r === A && s[l + 1].startsWith("/>") ? " " : "";
     n += r === U ? a + De : c >= 0 ? (i.push(h), a.slice(0, c) + Ae + a.slice(c) + v + $) : a + v + (c === -2 ? l : $);
   }
@@ -294,15 +294,15 @@ class R {
     for (; (o = x.nextNode()) !== null && a.length < l; ) {
       if (o.nodeType === 1) {
         if (o.hasAttributes()) for (const c of o.getAttributeNames()) if (c.endsWith(Ae)) {
-          const m = _[r++], $ = o.getAttribute(c).split(v), V = /([.?@])?(.*)/.exec(m);
+          const g = _[r++], $ = o.getAttribute(c).split(v), V = /([.?@])?(.*)/.exec(g);
           a.push({ type: 1, index: n, name: V[2], strings: $, ctor: V[1] === "." ? Fe : V[1] === "?" ? We : V[1] === "@" ? qe : W }), o.removeAttribute(c);
         } else c.startsWith(v) && (a.push({ type: 6, index: n }), o.removeAttribute(c));
         if (Se.test(o.tagName)) {
-          const c = o.textContent.split(v), m = c.length - 1;
-          if (m > 0) {
+          const c = o.textContent.split(v), g = c.length - 1;
+          if (g > 0) {
             o.textContent = F ? F.emptyScript : "";
-            for (let $ = 0; $ < m; $++) o.append(c[$], N()), x.nextNode(), a.push({ type: 2, index: ++n });
-            o.append(c[m], N());
+            for (let $ = 0; $ < g; $++) o.append(c[$], N()), x.nextNode(), a.push({ type: 2, index: ++n });
+            o.append(c[g], N());
           }
         }
       } else if (o.nodeType === 8) if (o.data === xe) a.push({ type: 2, index: n });
@@ -391,8 +391,8 @@ class I {
     }
   }
   _$AC(e) {
-    let t = ge.get(e.strings);
-    return t === void 0 && ge.set(e.strings, t = new R(e)), t;
+    let t = me.get(e.strings);
+    return t === void 0 && me.set(e.strings, t = new R(e)), t;
   }
   k(e) {
     oe(this._$AH) || (this._$AH = [], this._$AR());
@@ -683,7 +683,7 @@ function ft(s, e) {
     selector: { entity: { domain: "person", multiple: !0 } }
   })), t.push(e), t;
 }
-function mt(s) {
+function gt(s) {
   const e = [
     { name: "subtitle", selector: { text: {} } },
     { name: "user_name", selector: { text: {} } },
@@ -724,11 +724,11 @@ function mt(s) {
     { name: "acknowledge_notification_body", selector: { text: { multiline: !0 } } }
   ), e;
 }
-const K = [5, 15, 30, 45, 60], gt = "Someone", J = "Snooze for ${time}", Y = "Mark as done", X = "Someone acknowledged the notification", Q = 15, ee = 1;
+const K = [5, 15, 30, 45, 60], mt = "Someone", J = "Snooze for ${time}", Y = "Mark as done", X = "Someone acknowledged the notification", Q = 15, ee = 1;
 function yt(s) {
   if (!s) return !1;
   const e = s.snooze_delays?.length ? s.snooze_delays : K, t = (s.user_name ?? "").trim();
-  return !!((s.subtitle ?? "").trim() || t && t !== gt || s.one_shot || (s.every_x_days ?? 1) !== 1 || s.start_date || s.stop_date || (s.exclude_days_of_week ?? []).length > 0 || s.time_window_start || s.time_window_end || e.join(",") !== K.join(",") || (s.snooze_text ?? J) !== J || (s.acknowledge_action_title ?? Y) !== Y || (s.wait_time_if_no_action ?? Q) !== Q || (s.notification_count ?? ee) !== ee || (s.channel_importance ?? "") || (s.channel ?? "") || (s.icon ?? "") || (s.color ?? "") || (s.notification_group ?? "") || (s.acknowledge_notification_title ?? X) !== X || (s.acknowledge_notification_body ?? "").trim());
+  return !!((s.subtitle ?? "").trim() || t && t !== mt || s.one_shot || (s.every_x_days ?? 1) !== 1 || s.start_date || s.stop_date || (s.exclude_days_of_week ?? []).length > 0 || s.time_window_start || s.time_window_end || e.join(",") !== K.join(",") || (s.snooze_text ?? J) !== J || (s.acknowledge_action_title ?? Y) !== Y || (s.wait_time_if_no_action ?? Q) !== Q || (s.notification_count ?? ee) !== ee || (s.channel_importance ?? "") || (s.channel ?? "") || (s.icon ?? "") || (s.color ?? "") || (s.notification_group ?? "") || (s.acknowledge_notification_title ?? X) !== X || (s.acknowledge_notification_body ?? "").trim());
 }
 const ne = class ne extends C {
   constructor() {
@@ -872,7 +872,7 @@ const ne = class ne extends C {
     }
   }
   render() {
-    return g`
+    return m`
       <ha-dialog
         .open=${this.open}
         .heading=${this._targetId ? "Edit reminder" : "New reminder"}
@@ -900,7 +900,7 @@ const ne = class ne extends C {
             <ha-form
               .hass=${this.hass}
               .data=${this._data}
-              .schema=${mt(
+              .schema=${gt(
       this._data.trigger_type ?? "time"
     )}
               .computeLabel=${(e) => ye[e.name] ?? e.name}
@@ -908,7 +908,7 @@ const ne = class ne extends C {
             ></ha-form>
           </ha-expansion-panel>
 
-          ${this._error ? g`<div class="error">${this._error}</div>` : d}
+          ${this._error ? m`<div class="error">${this._error}</div>` : d}
         </div>
 
         <ha-dialog-footer slot="footer">
@@ -1140,14 +1140,14 @@ const re = class re extends C {
   /** One row: the text block (which opens the editor) plus the overflow menu. */
   _renderRow(e) {
     const t = bt(e), i = D(e);
-    return g`
+    return m`
       <div class="row">
         <ha-icon
           icon=${e.trigger_type === "time" ? "mdi:clock-outline" : e.trigger_type === "zone_enter" ? "mdi:home-import-outline" : "mdi:home-export-outline"}
         ></ha-icon>
         <div class="row-text" @click=${() => this.openEdit(e)}>
           <div class="row-title">${e.title}</div>
-          ${t ? g`<div class="row-snippet">${t}</div>` : d}
+          ${t ? m`<div class="row-snippet">${t}</div>` : d}
           <div class="row-meta">
             <span class="chip ${i}">${vt[i]}</span>
             <span class="row-trigger">${At(e)}</span>
@@ -1160,28 +1160,33 @@ const re = class re extends C {
       </div>
     `;
   }
-  /** One collapsible section; empty sections are left out entirely. */
+  /**
+   * One collapsible section, as its own card. The count sits in the header so
+   * it reads next to the title rather than under it (`secondary` wraps in the
+   * panel's narrow layout).
+   */
   _renderGroup(e, t, i) {
-    return i.length === 0 ? d : g`
-      <ha-expansion-panel
-        .header=${t}
-        .secondary=${String(i.length)}
-        .expanded=${this._expanded[e]}
-        @expanded-changed=${(o) => {
+    return m`
+      <div class="group">
+        <ha-expansion-panel
+          .header=${`${t} (${i.length})`}
+          .expanded=${this._expanded[e]}
+          @expanded-changed=${(o) => {
       this._expanded = {
         ...this._expanded,
         [e]: !!o.detail?.expanded
       };
     }}
-      >
-        ${i.map((o) => this._renderRow(o))}
-      </ha-expansion-panel>
+        >
+          ${i.map((o) => this._renderRow(o))}
+        </ha-expansion-panel>
+      </div>
     `;
   }
   render() {
     const e = xt(this.hass), t = St(e);
-    return g`
-      ${e.length === 0 ? g`<div class="empty">No reminders yet — use “New reminder”.</div>` : this.grouped ? g`${this._renderGroup("time", "Time", t.time)}
+    return m`
+      ${e.length === 0 ? m`<div class="empty">No reminders yet — use “New reminder”.</div>` : this.grouped ? m`${this._renderGroup("time", "Time", t.time)}
               ${this._renderGroup("location", "Location", t.location)}
               ${this._renderGroup("completed", "Completed", t.completed)}` : e.map((i) => this._renderRow(i))}
 
@@ -1209,7 +1214,7 @@ const re = class re extends C {
         ></ha-selector>
         <div class="snooze-quick">
           ${[5, 15, 30, 60].map(
-      (i) => g`
+      (i) => m`
               <ha-button @click=${() => this._snoozeMinutes = i}
                 >${i} min</ha-button
               >
@@ -1252,9 +1257,16 @@ re.styles = be`
       display: block;
       --expansion-panel-content-padding: 0;
     }
-    /* Group headers already read as separators; keep one between sections. */
-    ha-expansion-panel + ha-expansion-panel {
-      border-top: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+    /* Each section is its own card in the sidebar. */
+    .group {
+      background: var(--card-background-color);
+      border-radius: var(--ha-card-border-radius, 12px);
+      box-shadow: var(--ha-card-box-shadow, none);
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+      padding: 4px 12px;
+    }
+    .group + .group {
+      margin-top: 12px;
     }
     .row {
       display: flex;
@@ -1365,7 +1377,7 @@ b([
 customElements.get("ha-reminders-list") || customElements.define("ha-reminders-list", f);
 export {
   C as a,
-  g as b,
+  m as b,
   zt as e,
   be as i,
   k as n,
