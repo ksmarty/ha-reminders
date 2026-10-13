@@ -145,7 +145,9 @@ async def async_send_reminder(
         service,
         {
             "title": reminder.title,
-            "message": reminder.message,
+            # A message is optional: without one the notification body repeats
+            # the title rather than sending an empty message.
+            "message": reminder.message or reminder.title,
             "data": build_reminder_data(reminder, default_icon),
         },
     )

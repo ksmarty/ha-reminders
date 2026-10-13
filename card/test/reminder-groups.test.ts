@@ -265,6 +265,52 @@ describe("grouped list", () => {
     element.remove();
   });
 
+  it("offers a button in the Completed header that removes them all", async () => {
+    const calls: string[] = [];
+    const element = new ReminderList();
+    element.grouped = true;
+    element.hass = {
+      ...hassWith([
+        TIME,
+        LOCATION,
+        DONE,
+        reminder({
+          id: "d2",
+          title: "Recycling",
+          status: "completed",
+          completed_at: "2026-09-04T10:00:00",
+        }),
+      ]),
+      callService: async (domain: string, service: string) => {
+        calls.push(`${domain}.${service}`);
+        return {};
+      },
+    } as unknown as HomeAssistant;
+    document.body.append(element);
+    await element.updateComplete;
+
+    const completed = panels(element).at(-1) as Panel;
+    // Still the same header string, with the count in it.
+    expect(completed.header).toBe("Completed (2)");
+
+    const button = completed.querySelector("ha-icon-button");
+    expect(button?.getAttribute("slot")).toBe("icons");
+
+    button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(calls).toEqual(["ha_reminders.delete", "ha_reminders.delete"]);
+    element.remove();
+  });
+
+  it("has no clear button in a section with nothing completed", async () => {
+    const element = await groupedList([TIME, LOCATION]);
+    const completed = panels(element).at(-1) as Panel;
+
+    expect(completed.querySelector("ha-icon-button")).toBeNull();
+    element.remove();
+  });
+
   it("renders a flat list when not grouped", async () => {
     const element = new ReminderList();
     element.hass = hassWith([TIME, DONE]);

@@ -3,7 +3,8 @@
 Actionable, snoozable reminders for Home Assistant — now as a single HACS
 **integration** with three ways to create and manage reminders:
 
-- ⏰ **Scheduled reminders** — recurring (or one-shot) at a fixed time
+- ⏰ **Scheduled reminders** — at a fixed time, one-shot by default (opt in to
+  repeating with `one_shot: false` or by switching **Only once** off)
 - 📍 **Location-based reminders** — fire when you enter or leave a zone
 - 🗣️ **Voice assistant support** — create, list, delete, snooze and complete
   reminders with Assistant
@@ -71,6 +72,13 @@ only the reminders scroll, in three collapsible cards labelled with their
 count: **Time** (soonest first) and **Location** (in the order they were
 added), both open, and **Completed** at the bottom, closed, most recently
 completed first. All three cards are always shown, even when one is empty.
+The **Completed** header carries a bin button that removes everything in the
+section in one go.
+
+Marking a **repeating** reminder done only clears the occurrence that just
+fired. It stays in **Time**, showing its next date and a `· repeats` hint, so
+it is clear it will come back. A one-shot reminder — the default for a timed
+one — moves to **Completed** and stays there.
 
 **Dashboard card** — on any dashboard: **Add card** → search **"HA Reminders"**
 (`type: custom:ha-reminders-card`). Both surfaces are served by the
@@ -84,7 +92,7 @@ integration itself, so there is no manual resource URL to add.
 
 | Service | Description |
 | --- | --- |
-| `ha_reminders.create` | Create a reminder. Required: `title`, `message`. Returns `reminder_id`. |
+| `ha_reminders.create` | Create a reminder. Required: `title` (`message` is optional — without it the notification repeats the title). Returns `reminder_id`. |
 | `ha_reminders.update` | Update a reminder (`reminder_id` + partial payload; listed fields replace the whole value). |
 | `ha_reminders.delete` | Delete a reminder (`reminder_id`). |
 | `ha_reminders.list` | List all reminders with runtime status (no arguments). |
@@ -125,8 +133,16 @@ data:
   wait_time_if_no_action: 15  # resend delay in minutes
   notification_count: 100     # max repeats when ignored
   notification_group: ""      # shared group: ack stops it everywhere
-  one_shot: false             # fire exactly once
+  one_shot: false             # opt in to repeating; omit (or true) to fire once
 ```
+
+`message` is optional: leave it out and the notification body repeats the
+`title`. `one_shot` defaults to `true` for a **time** reminder — `time` +
+`one_shot: true` fires once at that time on `start_date` (default today).
+The sample above sets `one_shot: false`, which is how a reminder repeats:
+every `every_x_days` days, skipping `exclude_days_of_week`. A **zone**
+reminder is a standing rule and defaults to `one_shot: false` (it keeps
+firing until it is acknowledged).
 
 Example automation — a one-shot zone reminder:
 
@@ -174,7 +190,7 @@ agents can manage reminders directly:
 
 | Tool | Purpose |
 | --- | --- |
-| `ha_reminders__ReminderCreate` | create one (zone + direction for location, minutes for relative, time for daily) |
+| `ha_reminders__ReminderCreate` | create one (zone + direction for location, minutes for a one-shot relative reminder, time for one at that time of day) |
 | `ha_reminders__ReminderList` | read them back |
 | `ha_reminders__ReminderComplete` | mark one done |
 | `ha_reminders__ReminderSnooze` | snooze a notification |
@@ -221,7 +237,9 @@ and every value can still be overridden per reminder:
   `wait_time_if_no_action` minutes between repeats.
 - **Location reminders repeat on every arrival** until they are acknowledged;
   once marked done they stay done. To use one again, re-enable it (toggle) or
-  edit it — both re-arm it. Time reminders recur on their schedule.
+  edit it — both re-arm it. A repeating time reminder is only done for the
+  occurrence that just fired: it stays in the list showing its next date. A
+  one-shot reminder (the default) stays done.
 - Notification groups: when anyone acknowledges, every other reminder with the
   same `notification_group` stops and its devices receive a
   "someone acknowledged" notification.

@@ -237,7 +237,13 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         runtime["completed_at"] = _naive_now().isoformat()
         runtime["cycle_active"] = False
         runtime["snooze_until"] = None
-        runtime["next_fire"] = None
+        # A repeating reminder is only done for the cycle that just finished:
+        # it comes back at its next occurrence, so keep that time visible
+        # instead of clearing it and looking finished for good.
+        if reminder.is_time_trigger() and not reminder.one_shot:
+            runtime["next_fire"] = reminder.next_occurrence(_naive_now())
+        else:
+            runtime["next_fire"] = None
         runtime.pop("next_resend", None)
         runtime["notified_count"] = 0
         await self._persist_and_refresh()

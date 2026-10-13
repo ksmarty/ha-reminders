@@ -90,6 +90,18 @@ def _coerce_service_action_list(value: Any) -> list[dict[str, Any]]:
     return result
 
 
+def default_one_shot(trigger_type: str) -> bool:
+    """Return whether a new reminder of this trigger type fires only once.
+
+    A time reminder defaults to firing once. Creating one and having it repeat
+    every day forever is the surprising case ("remind me to take the bins out"
+    means tomorrow, not every day from now on), so repeating is opt-in. A zone
+    reminder is a standing rule ("tell me when I get home"), so it keeps
+    firing until it is acknowledged.
+    """
+    return trigger_type == TRIGGER_TIME
+
+
 @dataclass
 class Reminder:
     """One normalized reminder record."""
@@ -132,7 +144,8 @@ class Reminder:
     channel: str = ""
     channel_importance: str = ""
     notification_group: str = ""
-    one_shot: bool = False
+    # Only-once is the default for a time reminder; see `default_one_shot`.
+    one_shot: bool = True
     acknowledge_notification_title: str = DEFAULT_ACKNOWLEDGE_NOTIFICATION_TITLE
     acknowledge_notification_body: str = DEFAULT_ACKNOWLEDGE_NOTIFICATION_BODY
 
@@ -202,7 +215,11 @@ class Reminder:
                 channel=str(get("channel") or ""),
                 channel_importance=str(get("channel_importance") or ""),
                 notification_group=str(get("notification_group") or ""),
-                one_shot=coerce_bool(get("one_shot") if "one_shot" in payload else False),
+                one_shot=coerce_bool(
+                    get("one_shot")
+                    if "one_shot" in payload
+                    else default_one_shot(str(get("trigger_type") or TRIGGER_TIME))
+                ),
                 acknowledge_notification_title=str(
                     get("acknowledge_notification_title")
                     or DEFAULT_ACKNOWLEDGE_NOTIFICATION_TITLE
@@ -267,8 +284,8 @@ class Reminder:
         """Validate the record, raising ValueError with a friendly message."""
         if not self.title or not str(self.title).strip():
             raise ValueError("title is required")
-        if not self.message or not str(self.message).strip():
-            raise ValueError("message is required")
+        # `message` is optional: the notification falls back to the title
+        # (see `notify.async_send_reminder`).
         if not self.notify_service:
             raise ValueError("notify_service is required")
         if self.trigger_type not in TRIGGER_TYPES:
@@ -375,6 +392,14 @@ def compute_status(reminder: Reminder, runtime: dict[str, Any], now: datetime) -
     if not reminder.enabled:
         return STATUS_DISABLED
     if runtime.get("completed"):
+        if reminder.is_time_trigger() and not reminder.one_shot:
+            # A repeating reminder is only done for the cycle that just
+            # finished. It comes back at its next occurrence, so it must stay
+            # in the list (in the Time group, showing when it fires again)
+            # rather than being filed away under Completed. Only an exhausted
+            # schedule counts as finished.
+            if reminder.next_occurrence(now) is not None:
+                return STATUS_SCHEDULED
         return STATUS_COMPLETED
     snooze_until = runtime.get("snooze_until")
     if snooze_until is not None and snooze_until > now:

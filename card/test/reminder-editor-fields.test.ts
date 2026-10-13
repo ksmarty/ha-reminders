@@ -25,7 +25,6 @@ const ADVANCED_NAMES = [
   "subtitle",
   "user_name",
   "one_shot",
-  "start_date",
   "stop_date",
   "exclude_days_of_week",
   "acknowledge_action_title",
@@ -49,6 +48,8 @@ describe("basicFields", () => {
       "message",
       "trigger_type",
       "time",
+      // the start date sits with the time it applies to, not in advanced
+      "start_date",
       "notify_service",
     ]);
   });
@@ -98,6 +99,7 @@ describe("advancedFields", () => {
         "message",
         "trigger_type",
         "time",
+        "start_date",
         "notify_service",
         "every_x_days",
         ...ADVANCED_NAMES,
@@ -113,6 +115,7 @@ describe("advancedFields", () => {
         "notify_service",
         "time_window_start",
         "time_window_end",
+        "start_date",
         ...ADVANCED_NAMES,
       ]),
     );
@@ -138,9 +141,8 @@ describe("hasAdvancedValues", () => {
   it("detects configured advanced settings", () => {
     for (const patch of [
       { subtitle: "Weekly" },
-      { one_shot: true },
+      { one_shot: false }, // a timed reminder that repeats
       { every_x_days: 7 },
-      { start_date: "2026-01-01" },
       { stop_date: "2026-02-01" },
       { exclude_days_of_week: [0] },
       { time_window_start: "09:00:00" },
@@ -157,6 +159,22 @@ describe("hasAdvancedValues", () => {
     ]) {
       expect(hasAdvancedValues({ ...base, ...patch } as Reminder)).toBe(true);
     }
+  });
+
+  it("does not count the new time defaults as customisation", () => {
+    // A timed reminder is one-shot with no start date by default now, and both
+    // of those live in the basic form, so neither means "advanced" is in use.
+    expect(hasAdvancedValues({ ...base, one_shot: true } as Reminder)).toBe(false);
+    expect(
+      hasAdvancedValues({ ...base, start_date: "2026-01-01" } as Reminder),
+    ).toBe(false);
+
+    // For a zone reminder they are still advanced settings.
+    const zone = { ...base, trigger_type: "zone_enter" } as Reminder;
+    expect(hasAdvancedValues({ ...zone, one_shot: true } as Reminder)).toBe(true);
+    expect(
+      hasAdvancedValues({ ...zone, start_date: "2026-01-01" } as Reminder),
+    ).toBe(true);
   });
 });
 

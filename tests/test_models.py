@@ -48,7 +48,8 @@ class TestSerialization:
         assert reminder.wait_time_if_no_action == 15
         assert reminder.notification_count == 1  # no nag loop by default
         assert reminder.enabled is True
-        assert reminder.one_shot is False
+        # A time reminder fires once by default; repeating is opt-in.
+        assert reminder.one_shot is True
 
     def test_tolerant_coercion(self):
         reminder = make_reminder(
@@ -82,9 +83,18 @@ class TestValidation:
         with pytest.raises(ValueError, match="title"):
             make_reminder(title="")
 
-    def test_message_required(self):
-        with pytest.raises(ValueError, match="message"):
-            make_reminder(message="")
+    def test_message_is_optional(self):
+        reminder = make_reminder(message="")
+        assert reminder.message == ""
+
+    def test_zone_reminder_repeats_by_default(self):
+        reminder = make_reminder(
+            trigger_type="zone_enter",
+            time=None,
+            zone_entity_id="zone.home",
+            person_entity_ids=["person.a"],
+        )
+        assert reminder.one_shot is False
 
     def test_notify_service_required(self):
         with pytest.raises(ValueError, match="notify_service"):

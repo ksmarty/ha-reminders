@@ -35,9 +35,14 @@ PROMPT = (
     "The user can manage reminders through the ha_reminders tools. Use "
     "ha_reminders__ReminderCreate to set one (include 'direction' and 'zone' "
     "for a location reminder, 'minutes' for something relative like in 30 "
-    "minutes, or 'time' for a daily reminder), ha_reminders__ReminderList to "
+    "minutes, or 'time' for a reminder at that time of day), "
+    "ha_reminders__ReminderList to "
     "read them back, and the complete, snooze and delete tools to manage "
-    "them. Reminders notify the user's devices; acknowledge with "
+    "them. Every reminder needs a title, and only a title: the notification "
+    "repeats the title as its message unless the user gives you something "
+    "more to say. Creating a timed reminder makes it fire once, so say so "
+    "when it will not come back. Reminders notify the user's devices; "
+    "acknowledge with "
     "ha_reminders__ReminderComplete when the task is done."
 )
 

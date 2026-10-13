@@ -107,7 +107,8 @@ _REMINDER_FIELDS = {
 SCHEMA_CREATE = vol.Schema(
     {
         vol.Required(FIELD_TITLE): str,
-        vol.Required(FIELD_MESSAGE): str,
+        # `message` is optional: it comes from `_REMINDER_FIELDS`, and the
+        # notification repeats the title when it is left out.
         **_REMINDER_FIELDS,
     },
     extra=vol.PREVENT_EXTRA,

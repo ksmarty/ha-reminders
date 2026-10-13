@@ -6,16 +6,19 @@
 
 create:
   name: Create reminder
-  description: Create a reminder and return its id.
+  description: >-
+    Create a reminder and return its id. Only `title` is required: without a
+    `message` the notification repeats the title.
   fields:
     title:
       required: true
       example: Take out the trash
+      description: Also used as the notification body when `message` is empty.
       selector:
         text: {}
     message:
-      required: true
       example: The bins go out tonight!
+      description: Optional. The notification repeats the title when left empty.
       selector:
         text:
           multiline: true
@@ -152,7 +155,10 @@ create:
       selector:
         text: {}
     one_shot:
-      default: false
+      default: true
+      description: >-
+        Fire exactly once instead of on every occurrence. Defaults to true for
+        a time reminder, and to false for a zone reminder (a standing rule).
       selector:
         boolean: {}
     acknowledge_notification_title:

@@ -8,6 +8,13 @@
 # ...or run:  scripts/install_custom_sentences.sh
 #
 # Then reload Assist (or restart HA) to pick the sentences up.
+#
+# Every reminder needs only a title: the notification repeats the title when
+# no separate message is given.
+#
+# A spoken time of day ("remind me at 8 pm") creates a *repeating* reminder,
+# and the reply says so out loud ("every day at 8 PM"). Every other way of
+# creating one is one-shot by default.
 
 language: en
 
@@ -68,7 +75,7 @@ intents:
           - "remind me in {minutes} minutes to {title}"
           - "create a reminder to {title} in {minutes} minutes"
           - "set a reminder to {title} in {minutes} minutes"
-      # absolute time (daily)
+      # absolute time — repeats daily (see the note at the top of the file)
       - sentences:
           - "remind me to {title} at {time}"
           - "remind me at {time} to {title}"

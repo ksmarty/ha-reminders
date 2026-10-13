@@ -262,7 +262,8 @@ class ReminderCreateIntent(_ReminderIntent):
 
         payload: dict[str, Any] = {
             "title": title,
-            "message": title,
+            # No `message`: it is optional, and the notification repeats the
+            # title (see `notify.async_send_reminder`).
             "trigger_type": TRIGGER_TIME,
         }
         speech = ""
@@ -320,6 +321,11 @@ class ReminderCreateIntent(_ReminderIntent):
                 {
                     "start_date": start_date.isoformat(),
                     "time": fire_time.strftime("%H:%M"),
+                    # Naming a time of day on purpose is a request to be
+                    # reminded then, every day; say it out loud (below) so the
+                    # repeat is never a surprise. Only-once is the default
+                    # everywhere else; here it is asked for explicitly.
+                    "one_shot": False,
                 }
             )
             speech = (
@@ -342,7 +348,6 @@ class ReminderCreateIntent(_ReminderIntent):
             updates = {k: v for k, v in payload.items() if k != "title"}
             if existing.title != title:
                 updates["title"] = title
-                updates["message"] = title
             await coordinator.async_update(existing.id, updates)
             response = intent_obj.create_response()
             response.async_set_speech(

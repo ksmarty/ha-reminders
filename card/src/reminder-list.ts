@@ -95,7 +95,10 @@ export function triggerText(reminder: Reminder): string {
     (reminder.every_x_days ?? 1) > 1
       ? ` · every ${reminder.every_x_days} days`
       : "";
-  return `${at || "Scheduled"}${every}`;
+  // Say whether it comes back. Marking a repeating reminder done only clears
+  // the occurrence that just fired, and this is what tells the user so.
+  const repeat = reminder.one_shot ? " · once" : " · repeats";
+  return `${at || "Scheduled"}${every}${repeat}`;
 }
 
 export function collectReminders(hass: HomeAssistant | undefined): Reminder[] {
@@ -457,6 +460,24 @@ export class ReminderList extends LitElement {
   }
 
   /**
+   * Remove every completed reminder.
+   *
+   * Completed rows accumulate — something finished weeks ago still sits in the
+   * section — so the section header carries a button that deletes them all.
+   * Each delete goes through the same service call as a row's Delete, and a
+   * failure is reported instead of swallowed.
+   */
+  private async _clearCompleted(): Promise<void> {
+    const targets = groupReminders(collectReminders(this.hass)).completed;
+    for (const reminder of targets) {
+      await this._run(
+        () => deleteReminder(this.hass, reminder.id),
+        `Could not delete “${reminder.title}”.`,
+      );
+    }
+  }
+
+  /**
    * One collapsible section, as its own card. The count sits in the header so
    * it reads next to the title rather than under it (`secondary` wraps in the
    * panel's narrow layout).
@@ -466,6 +487,10 @@ export class ReminderList extends LitElement {
     label: string,
     reminders: Reminder[],
   ) {
+    // The clear button goes in the panel's `icons` slot rather than the header
+    // slot: the header string carries the count and stays untouched, and the
+    // slot is already laid out as a trailing action.
+    const clearable = key === "completed" && reminders.length > 0;
     return html`
       <div class="group">
         <ha-expansion-panel
@@ -478,6 +503,20 @@ export class ReminderList extends LitElement {
             };
           }}
         >
+          ${clearable
+            ? html`<ha-icon-button
+                slot="icons"
+                .path=${mdiDelete}
+                .label=${"Remove completed"}
+                title="Remove completed"
+                @click=${(ev: Event) => {
+                  // The panel toggles on a click anywhere in its summary, so a
+                  // header action has to stop the event reaching that handler.
+                  ev.stopPropagation();
+                  void this._clearCompleted();
+                }}
+              ></ha-icon-button>`
+            : nothing}
           ${reminders.map((reminder) => this._renderRow(reminder))}
         </ha-expansion-panel>
       </div>

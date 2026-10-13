@@ -16,7 +16,18 @@ import { errorMessage, showToast } from "./toast";
 interface Field {
   name: string;
   selector: Record<string, unknown>;
+  /**
+   * Deliberately NOT used for our own required fields.
+   *
+   * `ha-form` forwards `required` to the selector, and `ha-input` /
+   * `ha-textarea` keep the hint line reserved while it is set (the `hint-hidden`
+   * class is only applied when `!hint && !required && !invalid`). Marking the
+   * title required that way therefore left a tall empty gap under the field and
+   * let the browser render its own "Fill out this field" bubble. The title rule
+   * is enforced in `_validationError` and reported inline instead.
+   */
   required?: boolean;
+  helper?: string;
   default?: unknown;
 }
 
@@ -31,9 +42,9 @@ const WEEKDAYS = [
 ];
 
 const LABELS: Record<string, string> = {
-  title: "Title",
+  title: "Title (required)",
   subtitle: "Subtitle",
-  message: "Message",
+  message: "Message (optional)",
   notify_service: "Notification service",
   user_name: "User name (who the reminder is for)",
   trigger_type: "Trigger",
@@ -72,8 +83,13 @@ const TRIGGER_OPTIONS = [
 /** Fields shown for every reminder: enough for the common case. */
 export function basicFields(trigger: TriggerType, notifyField: Field): Field[] {
   const fields: Field[] = [
-    { name: "title", selector: { text: {} }, required: true },
-    { name: "message", selector: { text: { multiline: true } }, required: true },
+    // Neither field is flagged `required`: see the note on `Field.required`.
+    { name: "title", selector: { text: {} } },
+    {
+      name: "message",
+      selector: { text: { multiline: true } },
+      helper: "Optional — left empty, the notification repeats the title.",
+    },
     {
       name: "trigger_type",
       selector: { select: { mode: "dropdown", options: TRIGGER_OPTIONS } },
@@ -82,6 +98,10 @@ export function basicFields(trigger: TriggerType, notifyField: Field): Field[] {
 
   if (trigger === "time") {
     fields.push({ name: "time", selector: { time: {} } });
+    // Directly under the time it applies to rather than in the advanced
+    // section, where it was easy to miss: it is what makes a repeating
+    // reminder start on the right day.
+    fields.push({ name: "start_date", selector: { date: {} } });
   } else {
     fields.push({ name: "zone_entity_id", selector: { entity: { domain: "zone" } } });
     fields.push({
@@ -107,10 +127,12 @@ export function advancedFields(trigger: TriggerType): Field[] {
   } else {
     fields.push({ name: "time_window_start", selector: { time: {} } });
     fields.push({ name: "time_window_end", selector: { time: {} } });
+    // A zone reminder keeps its start date here; a time reminder now has it in
+    // the basic form, directly below the time.
+    fields.push({ name: "start_date", selector: { date: {} } });
   }
 
   fields.push(
-    { name: "start_date", selector: { date: {} } },
     { name: "stop_date", selector: { date: {} } },
     {
       name: "exclude_days_of_week",
@@ -170,12 +192,20 @@ export function hasAdvancedValues(reminder: Reminder | null): boolean {
     : DEFAULT_SNOOZE_DELAYS;
   const userName = (reminder.user_name ?? "").trim();
 
+  // `one_shot` and `start_date` are basic fields for a time reminder (that is
+  // where the only-once default and the start day belong); for a zone reminder
+  // they stay advanced. Only a non-default value is a customisation.
+  const defaultOneShot = (reminder.trigger_type ?? "time") === "time";
+  const oneShot = reminder.one_shot ?? defaultOneShot;
+  const zoneStartDate =
+    defaultOneShot ? "" : (reminder.start_date ?? "");
+
   return Boolean(
     (reminder.subtitle ?? "").trim() ||
       (userName && userName !== DEFAULT_USER_NAME) ||
-      reminder.one_shot ||
+      oneShot !== defaultOneShot ||
       (reminder.every_x_days ?? 1) !== 1 ||
-      reminder.start_date ||
+      zoneStartDate ||
       reminder.stop_date ||
       (reminder.exclude_days_of_week ?? []).length > 0 ||
       reminder.time_window_start ||
@@ -293,14 +323,17 @@ export class ReminderEditor extends LitElement {
   }
 
   private _dataFrom(reminder: Reminder | null): FormData {
+    const trigger = reminder?.trigger_type ?? "time";
     return {
       title: reminder?.title ?? "",
       subtitle: reminder?.subtitle ?? "",
       message: reminder?.message ?? "",
       notify_service: reminder?.notify_service ?? "",
       user_name: reminder?.user_name ?? "",
-      trigger_type: reminder?.trigger_type ?? "time",
-      one_shot: reminder?.one_shot ?? false,
+      trigger_type: trigger,
+      // Only-once is the default for a timed reminder, exactly as the
+      // integration defaults it when `one_shot` is absent from the payload.
+      one_shot: reminder?.one_shot ?? trigger === "time",
       time: this._time(reminder?.time),
       every_x_days: reminder?.every_x_days ?? 1,
       start_date: reminder?.start_date ?? "",
@@ -363,13 +396,28 @@ export class ReminderEditor extends LitElement {
 
   private _valueChanged(ev: CustomEvent): void {
     ev.stopPropagation();
-    this._data = { ...ev.detail.value };
+    const value = { ...ev.detail.value };
+
+    // Switching the trigger re-defaults only-once — but only while the user
+    // has not set it themselves: a timed reminder is one-shot by default, a
+    // zone reminder keeps firing until it is acknowledged.
+    const wasTrigger = this._data.trigger_type ?? "time";
+    if (value.trigger_type !== wasTrigger) {
+      const stillDefault = this._data.one_shot === (wasTrigger === "time");
+      if (stillDefault) {
+        value.one_shot = value.trigger_type === "time";
+      }
+    }
+
+    this._data = value;
   }
 
   private _validationError(): string {
     const d = this._data;
+    // The only requirement: `message` is optional and falls back to the title,
+    // and the fields are not flagged `required` on the ha-form either (see the
+    // note on `Field.required`), so this is the single source of truth.
     if (!String(d.title ?? "").trim()) return "A title is required.";
-    if (!String(d.message ?? "").trim()) return "A message is required.";
     if (d.trigger_type === "time") {
       if (!d.time) return "Pick a time for the reminder.";
     } else {
@@ -480,6 +528,7 @@ export class ReminderEditor extends LitElement {
             )}
             .computeLabel=${(schema: Field) =>
               LABELS[schema.name] ?? schema.name}
+            .computeHelper=${(schema: Field) => schema.helper ?? ""}
             @value-changed=${this._valueChanged}
           ></ha-form>
 
@@ -496,6 +545,7 @@ export class ReminderEditor extends LitElement {
               )}
               .computeLabel=${(schema: Field) =>
                 LABELS[schema.name] ?? schema.name}
+              .computeHelper=${(schema: Field) => schema.helper ?? ""}
               @value-changed=${this._valueChanged}
             ></ha-form>
           </ha-expansion-panel>
