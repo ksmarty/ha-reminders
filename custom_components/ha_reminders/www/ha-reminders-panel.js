@@ -1,4 +1,4 @@
-import { a as d, i as c, b as p, n as i, e as u } from "./reminder-list-XXwtaC2R.js";
+import { a as d, i as c, b as p, n as i, e as u } from "./reminder-list-CZGHz_ar.js";
 var m = Object.defineProperty, a = (n, r, l, g) => {
   for (var t = void 0, o = n.length - 1, h; o >= 0; o--)
     (h = n[o]) && (t = h(r, l, t) || t);

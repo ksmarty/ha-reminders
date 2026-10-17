@@ -149,6 +149,11 @@ class Reminder:
     acknowledge_notification_title: str = DEFAULT_ACKNOWLEDGE_NOTIFICATION_TITLE
     acknowledge_notification_body: str = DEFAULT_ACKNOWLEDGE_NOTIFICATION_BODY
 
+    # Optional tap target: the companion app opens this URL when the
+    # notification itself is tapped. Empty means "whatever the app does by
+    # default", so existing reminders are unaffected.
+    click_url: str = ""
+
     # ------------------------------------------------------------------
     # Serialization
     # ------------------------------------------------------------------
@@ -228,6 +233,7 @@ class Reminder:
                     get("acknowledge_notification_body")
                     or DEFAULT_ACKNOWLEDGE_NOTIFICATION_BODY
                 ),
+                click_url=str(get("click_url") or ""),
             )
         except (TypeError, ValueError):
             raise
@@ -275,6 +281,7 @@ class Reminder:
             "one_shot": self.one_shot,
             "acknowledge_notification_title": self.acknowledge_notification_title,
             "acknowledge_notification_body": self.acknowledge_notification_body,
+            "click_url": self.click_url,
         }
 
     # ------------------------------------------------------------------

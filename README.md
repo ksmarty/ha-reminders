@@ -123,6 +123,8 @@ data:
   time_window_start: "09:00"  # optional gate
   time_window_end: "17:00"
   # notification behavior
+  icon: mdi:bell-ring-outline  # optional: mdi:… status-bar icon, or an image URL
+  click_url: "https://tasks.example.com/tasks?task=42"  # optional: tapping opens this
   acknowledge_action_title: Mark as done
   acknowledge_actions:        # optional service calls on acknowledge
     - service: script.trash_reminder_acknowledged
@@ -232,6 +234,10 @@ and every value can still be overridden per reminder:
   (`notification_icon`), anything else is passed as `icon_url`.
 - Action buttons: **acknowledge** plus one **snooze** per `snooze_delays`
   entry. Snooze titles format delays as `5m`, `1h`, `1h30m`.
+- **Tapping the notification**: `click_url` opens that URL when the
+  notification itself is tapped — sent as `url` for iOS and `clickAction` for
+  Android, so both platforms read it. It is independent of the action buttons,
+  which keep their own encoding.
 - **Ignored notifications are not repeated by default** — a reminder notifies
   once. Set `notification_count` above 1 to nag, with
   `wait_time_if_no_action` minutes between repeats.

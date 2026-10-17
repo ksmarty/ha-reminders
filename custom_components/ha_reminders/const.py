@@ -76,6 +76,9 @@ FIELD_SNOOZE_TEXT = "snooze_text"
 FIELD_WAIT_TIME = "wait_time_if_no_action"
 FIELD_NOTIFICATION_COUNT = "notification_count"
 FIELD_ICON = "icon"
+# Tap target: what the companion app opens when the notification itself is
+# tapped (as opposed to an action button).
+FIELD_CLICK_URL = "click_url"
 FIELD_COLOR = "color"
 FIELD_CHANNEL = "channel"
 FIELD_CHANNEL_IMPORTANCE = "channel_importance"

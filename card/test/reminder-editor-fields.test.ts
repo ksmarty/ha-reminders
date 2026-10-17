@@ -35,6 +35,7 @@ const ADVANCED_NAMES = [
   "channel_importance",
   "channel",
   "icon",
+  "click_url",
   "color",
   "notification_group",
   "acknowledge_notification_title",

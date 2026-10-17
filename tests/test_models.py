@@ -34,6 +34,7 @@ class TestSerialization:
             snooze_delays=[5, 15, 30],
             color="#ff0000",
             icon="mdi:bell-ring",
+            click_url="https://tasktick.example.com/tasks?task=abc123",
             created_at="2026-09-01T10:00:00",
         )
         restored = Reminder.from_dict(reminder.to_dict())
@@ -50,6 +51,8 @@ class TestSerialization:
         assert reminder.enabled is True
         # A time reminder fires once by default; repeating is opt-in.
         assert reminder.one_shot is True
+        # No tap target by default: tapping opens the app as before.
+        assert reminder.click_url == ""
 
     def test_tolerant_coercion(self):
         reminder = make_reminder(

@@ -177,3 +177,44 @@ class TestIconPayload:
         data = notify.build_reminder_data(make_reminder())
         assert "notification_icon" not in data
         assert "icon_url" not in data
+
+
+class TestClickPayload:
+    """A tap target opens the app screen the reminder belongs to.
+
+    iOS reads `url` and Android reads `clickAction`, so both keys carry the same
+    value and one reminder behaves the same on either phone. `click_url` is
+    independent of the action buttons.
+    """
+
+    def test_no_click_url_adds_no_key(self):
+        assert notify.click_payload("") == {}
+        assert notify.click_payload(None) == {}
+        assert notify.click_payload("   ") == {}
+        data = notify.build_reminder_data(make_reminder())
+        assert "url" not in data
+        assert "clickAction" not in data
+
+    def test_click_url_sets_both_platform_keys(self):
+        url = "https://tasktick.example.com/tasks?task=abc123"
+        assert notify.click_payload(url) == {"url": url, "clickAction": url}
+        data = notify.build_reminder_data(make_reminder(click_url=url))
+        assert data["url"] == url
+        assert data["clickAction"] == url
+
+    def test_click_url_is_trimmed(self):
+        url = "https://example.com/x"
+        assert notify.click_payload("  " + url + "  ") == {"url": url, "clickAction": url}
+
+    def test_action_buttons_are_unaffected(self):
+        """The tap target must not disturb the acknowledge/snooze actions."""
+        reminder = make_reminder(
+            user_name="Kyle",
+            notification_group="team",
+            snooze_delays=[5],
+            click_url="https://tasktick.example.com/tasks?task=abc123",
+        )
+        data = notify.build_reminder_data(reminder)
+        assert data["tag"] == "taskReminder╡r1"
+        assert len(data["actions"]) == 2  # ack + 1 snooze, unchanged
+        assert data["actions"][0]["action"] == "taskReminder╡r1╡team╡-1╡Kyle"

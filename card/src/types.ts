@@ -32,6 +32,7 @@ export interface Reminder {
   wait_time_if_no_action?: number;
   notification_count?: number;
   icon?: string | null;
+  click_url?: string | null;
   color?: string | null;
   channel?: string | null;
   channel_importance?: string | null;

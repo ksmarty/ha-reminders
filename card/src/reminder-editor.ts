@@ -64,6 +64,7 @@ const LABELS: Record<string, string> = {
   wait_time_if_no_action: "Resend after (minutes)",
   notification_count: "Maximum notifications",
   icon: "Icon (mdi:name or image URL; empty = default)",
+  click_url: "Opens when tapped (URL)",
   color: "Color (Android)",
   channel: "Channel (Android)",
   channel_importance: "Channel importance",
@@ -160,6 +161,7 @@ export function advancedFields(trigger: TriggerType): Field[] {
     },
     { name: "channel", selector: { text: {} } },
     { name: "icon", selector: { text: {} } },
+    { name: "click_url", selector: { text: {} } },
     { name: "color", selector: { text: {} } },
     { name: "notification_group", selector: { text: {} } },
     { name: "acknowledge_notification_title", selector: { text: {} } },
@@ -220,6 +222,7 @@ export function hasAdvancedValues(reminder: Reminder | null): boolean {
       (reminder.channel_importance ?? "") ||
       (reminder.channel ?? "") ||
       (reminder.icon ?? "") ||
+      (reminder.click_url ?? "") ||
       (reminder.color ?? "") ||
       (reminder.notification_group ?? "") ||
       (reminder.acknowledge_notification_title ?? DEFAULT_ACK_NOTIFICATION_TITLE) !==
@@ -351,6 +354,7 @@ export class ReminderEditor extends LitElement {
         reminder?.wait_time_if_no_action ?? DEFAULT_WAIT_TIME,
       notification_count: reminder?.notification_count ?? DEFAULT_NOTIFICATION_COUNT,
       icon: reminder?.icon ?? "",
+      click_url: reminder?.click_url ?? "",
       color: reminder?.color ?? "",
       channel: reminder?.channel ?? "",
       channel_importance: reminder?.channel_importance ?? "",
@@ -474,6 +478,7 @@ export class ReminderEditor extends LitElement {
       notification_count: d.notification_count,
       color: this._orUndefined(d.color),
       icon: this._orUndefined(d.icon),
+      click_url: this._orUndefined(d.click_url),
       channel: this._orUndefined(d.channel),
       channel_importance: this._orUndefined(d.channel_importance),
       notification_group: this._orUndefined(d.notification_group),

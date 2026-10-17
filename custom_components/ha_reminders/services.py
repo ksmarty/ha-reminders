@@ -22,6 +22,7 @@ from .const import (
     FIELD_ACKNOWLEDGE_NOTIFICATION_TITLE,
     FIELD_CHANNEL,
     FIELD_CHANNEL_IMPORTANCE,
+    FIELD_CLICK_URL,
     FIELD_COLOR,
     FIELD_ENABLED,
     FIELD_EVERY_X_DAYS,
@@ -95,6 +96,7 @@ _REMINDER_FIELDS = {
         vol.Coerce(int), vol.Range(min=1)
     ),
     vol.Optional(FIELD_ICON): str,
+    vol.Optional(FIELD_CLICK_URL): str,
     vol.Optional(FIELD_COLOR): str,
     vol.Optional(FIELD_CHANNEL): str,
     vol.Optional(FIELD_CHANNEL_IMPORTANCE): str,

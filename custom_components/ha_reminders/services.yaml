@@ -133,6 +133,14 @@ create:
       example: mdi:bell-ring
       selector:
         text: {}
+    click_url:
+      example: https://tasktick.example.com/tasks?task=abc123
+      description: >-
+        Optional. Tapping the notification itself opens this URL in the
+        companion app (iOS reads `url`, Android reads `clickAction`). The
+        action buttons are unaffected. Leave empty to open the app as usual.
+      selector:
+        text: {}
     channel:
       selector:
         text: {}
@@ -284,6 +292,14 @@ update:
         text: {}
     icon:
       example: mdi:bell-ring
+      selector:
+        text: {}
+    click_url:
+      example: https://tasktick.example.com/tasks?task=abc123
+      description: >-
+        Optional. Tapping the notification itself opens this URL in the
+        companion app (iOS reads `url`, Android reads `clickAction`). The
+        action buttons are unaffected. Leave empty to open the app as usual.
       selector:
         text: {}
     channel:

@@ -2,6 +2,11 @@
 
 Keeps the `taskReminder╡<id>╡<group>╡<minutes>╡<user>` action encoding used by
 the legacy blueprint so existing notification actions keep working.
+
+A reminder may also carry a `click_url`: tapping the notification itself opens
+that URL, which is how a tap lands on the app screen the reminder belongs to.
+It is independent of the action buttons. The companion app reads `url` on iOS
+and `clickAction` on Android, so both keys are sent.
 """
 
 from __future__ import annotations
@@ -135,6 +140,21 @@ def icon_payload(icon: str) -> dict[str, str]:
     return {"icon_url": value}
 
 
+def click_payload(click_url: str) -> dict[str, str]:
+    """Map a configured tap target to the companion-app notification keys.
+
+    iOS opens the `url` key when the notification itself is tapped; Android uses
+    `clickAction` for the same purpose. Both are sent so one reminder behaves
+    the same on either phone, and each app ignores the key it does not read. An
+    empty value adds no key at all, so the app keeps its own default (opening
+    itself on its home screen).
+    """
+    value = str(click_url or "").strip()
+    if not value:
+        return {}
+    return {"url": value, "clickAction": value}
+
+
 async def async_send_reminder(
     hass: HomeAssistant, reminder: Reminder, default_icon: str = ""
 ) -> None:
@@ -188,6 +208,7 @@ def build_reminder_data(reminder: Reminder, default_icon: str = "") -> dict[str,
         "tag": notification_tag(reminder.id),
         "actions": actions,
         **icon_payload(reminder.icon or default_icon),
+        **click_payload(reminder.click_url),
     }
     # Only include keys that carry a value; some platforms treat empty strings
     # as meaningful values.

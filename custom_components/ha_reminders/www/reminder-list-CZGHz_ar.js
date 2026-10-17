@@ -264,8 +264,8 @@ E.elementStyles = [], E.shadowRootOptions = { mode: "open" }, E[M("elementProper
  */
 const P = globalThis, ht = (o) => o, F = P.trustedTypes, _t = F ? F.createPolicy("lit-html", { createHTML: (o) => o }) : void 0, Et = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, Ct = "?" + v, Bt = `<${Ct}>`, S = document, N = () => S.createComment(""), H = (o) => o === null || typeof o != "object" && typeof o != "function", st = Array.isArray, Ft = (o) => st(o) || typeof o?.[Symbol.iterator] == "function", q = `[ 	
 \f\r]`, U = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, pt = /-->/g, ut = />/g, A = RegExp(`>|${q}(?:([^\\s"'>=/]+)(${q}*=${q}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), ft = /'/g, gt = /"/g, Tt = /^(?:script|style|textarea|title)$/i, Wt = (o) => (t, ...e) => ({ _$litType$: o, strings: t, values: e }), g = Wt(1), T = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), mt = /* @__PURE__ */ new WeakMap(), x = S.createTreeWalker(S, 129);
-function zt(o, t) {
+\f\r"'\`<>=]|("|')|))|$)`, "g"), ft = /'/g, gt = /"/g, kt = /^(?:script|style|textarea|title)$/i, Wt = (o) => (t, ...e) => ({ _$litType$: o, strings: t, values: e }), g = Wt(1), k = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), mt = /* @__PURE__ */ new WeakMap(), x = S.createTreeWalker(S, 129);
+function Tt(o, t) {
   if (!st(o) || !o.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return _t !== void 0 ? _t.createHTML(t) : t;
 }
@@ -275,11 +275,11 @@ const qt = (o, t) => {
   for (let l = 0; l < e; l++) {
     const a = o[l];
     let h, _, c = -1, m = 0;
-    for (; m < a.length && (r.lastIndex = m, _ = r.exec(a), _ !== null); ) m = r.lastIndex, r === U ? _[1] === "!--" ? r = pt : _[1] !== void 0 ? r = ut : _[2] !== void 0 ? (Tt.test(_[2]) && (s = RegExp("</" + _[2], "g")), r = A) : _[3] !== void 0 && (r = A) : r === A ? _[0] === ">" ? (r = s ?? U, c = -1) : _[1] === void 0 ? c = -2 : (c = r.lastIndex - _[2].length, h = _[1], r = _[3] === void 0 ? A : _[3] === '"' ? gt : ft) : r === gt || r === ft ? r = A : r === pt || r === ut ? r = U : (r = A, s = void 0);
+    for (; m < a.length && (r.lastIndex = m, _ = r.exec(a), _ !== null); ) m = r.lastIndex, r === U ? _[1] === "!--" ? r = pt : _[1] !== void 0 ? r = ut : _[2] !== void 0 ? (kt.test(_[2]) && (s = RegExp("</" + _[2], "g")), r = A) : _[3] !== void 0 && (r = A) : r === A ? _[0] === ">" ? (r = s ?? U, c = -1) : _[1] === void 0 ? c = -2 : (c = r.lastIndex - _[2].length, h = _[1], r = _[3] === void 0 ? A : _[3] === '"' ? gt : ft) : r === gt || r === ft ? r = A : r === pt || r === ut ? r = U : (r = A, s = void 0);
     const y = r === A && o[l + 1].startsWith("/>") ? " " : "";
     n += r === U ? a + Bt : c >= 0 ? (i.push(h), a.slice(0, c) + Et + a.slice(c) + v + y) : a + v + (c === -2 ? l : y);
   }
-  return [zt(o, n + (o[e] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), i];
+  return [Tt(o, n + (o[e] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), i];
 };
 class R {
   constructor({ strings: t, _$litType$: e }, i) {
@@ -297,7 +297,7 @@ class R {
           const m = _[r++], y = s.getAttribute(c).split(v), V = /([.?@])?(.*)/.exec(m);
           a.push({ type: 1, index: n, name: V[2], strings: y, ctor: V[1] === "." ? Gt : V[1] === "?" ? Kt : V[1] === "@" ? Jt : W }), s.removeAttribute(c);
         } else c.startsWith(v) && (a.push({ type: 6, index: n }), s.removeAttribute(c));
-        if (Tt.test(s.tagName)) {
+        if (kt.test(s.tagName)) {
           const c = s.textContent.split(v), m = c.length - 1;
           if (m > 0) {
             s.textContent = F ? F.emptyScript : "";
@@ -318,11 +318,11 @@ class R {
     return i.innerHTML = t, i;
   }
 }
-function z(o, t, e = o, i) {
-  if (t === T) return t;
+function T(o, t, e = o, i) {
+  if (t === k) return t;
   let s = i !== void 0 ? e._$Co?.[i] : e._$Cl;
   const n = H(t) ? void 0 : t._$litDirective$;
-  return s?.constructor !== n && (s?._$AO?.(!1), n === void 0 ? s = void 0 : (s = new n(o), s._$AT(o, e, i)), i !== void 0 ? (e._$Co ?? (e._$Co = []))[i] = s : e._$Cl = s), s !== void 0 && (t = z(o, s._$AS(o, t.values), s, i)), t;
+  return s?.constructor !== n && (s?._$AO?.(!1), n === void 0 ? s = void 0 : (s = new n(o), s._$AT(o, e, i)), i !== void 0 ? (e._$Co ?? (e._$Co = []))[i] = s : e._$Cl = s), s !== void 0 && (t = T(o, s._$AS(o, t.values), s, i)), t;
 }
 class Zt {
   constructor(t, e) {
@@ -371,7 +371,7 @@ class I {
     return this._$AB;
   }
   _$AI(t, e = this) {
-    t = z(this, t, e), H(t) ? t === d || t == null || t === "" ? (this._$AH !== d && this._$AR(), this._$AH = d) : t !== this._$AH && t !== T && this._(t) : t._$litType$ !== void 0 ? this.$(t) : t.nodeType !== void 0 ? this.T(t) : Ft(t) ? this.k(t) : this._(t);
+    t = T(this, t, e), H(t) ? t === d || t == null || t === "" ? (this._$AH !== d && this._$AR(), this._$AH = d) : t !== this._$AH && t !== k && this._(t) : t._$litType$ !== void 0 ? this.$(t) : t.nodeType !== void 0 ? this.T(t) : Ft(t) ? this.k(t) : this._(t);
   }
   O(t) {
     return this._$AA.parentNode.insertBefore(t, this._$AB);
@@ -383,7 +383,7 @@ class I {
     this._$AH !== d && H(this._$AH) ? this._$AA.nextSibling.data = t : this.T(S.createTextNode(t)), this._$AH = t;
   }
   $(t) {
-    const { values: e, _$litType$: i } = t, s = typeof i == "number" ? this._$AC(t) : (i.el === void 0 && (i.el = R.createElement(zt(i.h, i.h[0]), this.options)), i);
+    const { values: e, _$litType$: i } = t, s = typeof i == "number" ? this._$AC(t) : (i.el === void 0 && (i.el = R.createElement(Tt(i.h, i.h[0]), this.options)), i);
     if (this._$AH?._$AD === s) this._$AH.p(e);
     else {
       const n = new Zt(s, this), r = n.u(this.options);
@@ -424,11 +424,11 @@ class W {
   _$AI(t, e = this, i, s) {
     const n = this.strings;
     let r = !1;
-    if (n === void 0) t = z(this, t, e, 0), r = !H(t) || t !== this._$AH && t !== T, r && (this._$AH = t);
+    if (n === void 0) t = T(this, t, e, 0), r = !H(t) || t !== this._$AH && t !== k, r && (this._$AH = t);
     else {
       const l = t;
       let a, h;
-      for (t = n[0], a = 0; a < n.length - 1; a++) h = z(this, l[i + a], e, a), h === T && (h = this._$AH[a]), r || (r = !H(h) || h !== this._$AH[a]), h === d ? t = d : t !== d && (t += (h ?? "") + n[a + 1]), this._$AH[a] = h;
+      for (t = n[0], a = 0; a < n.length - 1; a++) h = T(this, l[i + a], e, a), h === k && (h = this._$AH[a]), r || (r = !H(h) || h !== this._$AH[a]), h === d ? t = d : t !== d && (t += (h ?? "") + n[a + 1]), this._$AH[a] = h;
     }
     r && !s && this.j(t);
   }
@@ -457,7 +457,7 @@ class Jt extends W {
     super(t, e, i, s, n), this.type = 5;
   }
   _$AI(t, e = this) {
-    if ((t = z(this, t, e, 0) ?? d) === T) return;
+    if ((t = T(this, t, e, 0) ?? d) === k) return;
     const i = this._$AH, s = t === d && i !== d || t.capture !== i.capture || t.once !== i.once || t.passive !== i.passive, n = t !== d && (i === d || s);
     s && this.element.removeEventListener(this.name, this, i), n && this.element.addEventListener(this.name, this, t), this._$AH = t;
   }
@@ -473,7 +473,7 @@ class Yt {
     return this._$AM._$AU;
   }
   _$AI(t) {
-    z(this, t);
+    T(this, t);
   }
 }
 const Xt = P.litHtmlPolyfillSupport;
@@ -513,7 +513,7 @@ class C extends E {
     super.disconnectedCallback(), this._$Do?.setConnected(!1);
   }
   render() {
-    return T;
+    return k;
   }
 }
 C._$litElement$ = !0, C.finalized = !0, L.litElementHydrateSupport?.({ LitElement: C });
@@ -546,7 +546,7 @@ const ee = { attribute: !0, type: String, converter: B, reflect: !1, hasChanged:
   }
   throw Error("Unsupported decorator location: " + i);
 };
-function k(o) {
+function z(o) {
   return (t, e) => typeof e == "object" ? ie(o, t, e) : ((i, s, n) => {
     const r = s.hasOwnProperty(n);
     return s.constructor.createProperty(n, i), r ? Object.getOwnPropertyDescriptor(s, n) : void 0;
@@ -558,7 +558,7 @@ function k(o) {
  * SPDX-License-Identifier: BSD-3-Clause
  */
 function u(o) {
-  return k({ ...o, state: !0, attribute: !1 });
+  return z({ ...o, state: !0, attribute: !1 });
 }
 /**
  * @license
@@ -571,7 +571,7 @@ const oe = (o, t, e) => (e.configurable = !0, e.enumerable = !0, Reflect.decorat
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-function ze(o, t) {
+function Te(o, t) {
   return (e, i, s) => {
     const n = (r) => r.renderRoot?.querySelector(o) ?? null;
     return oe(e, i, { get() {
@@ -579,7 +579,7 @@ function ze(o, t) {
     } });
   };
 }
-var se = "M22.11,21.46L2.39,1.73L1.11,3L5.83,7.72C5.29,8.73 5,9.86 5,11V17L3,19V20H18.11L20.84,22.73L22.11,21.46M7,18V11C7,10.39 7.11,9.79 7.34,9.23L16.11,18H7M10,21H14A2,2 0 0,1 12,23A2,2 0 0,1 10,21M8.29,5.09C8.82,4.75 9.4,4.5 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V15.8L17,13.8V11A5,5 0 0,0 12,6C11.22,6 10.45,6.2 9.76,6.56L8.29,5.09Z", ne = "M10 21H14C14 22.1 13.1 23 12 23S10 22.1 10 21M21 19V20H3V19L5 17V11C5 7.9 7 5.2 10 4.3V4C10 2.9 10.9 2 12 2S14 2.9 14 4V4.3C17 5.2 19 7.9 19 11V17L21 19M17 11C17 8.2 14.8 6 12 6S7 8.2 7 11V18H17V11Z", re = "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z", ae = "M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z", kt = "M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z", le = "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z";
+var se = "M22.11,21.46L2.39,1.73L1.11,3L5.83,7.72C5.29,8.73 5,9.86 5,11V17L3,19V20H18.11L20.84,22.73L22.11,21.46M7,18V11C7,10.39 7.11,9.79 7.34,9.23L16.11,18H7M10,21H14A2,2 0 0,1 12,23A2,2 0 0,1 10,21M8.29,5.09C8.82,4.75 9.4,4.5 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V15.8L17,13.8V11A5,5 0 0,0 12,6C11.22,6 10.45,6.2 9.76,6.56L8.29,5.09Z", ne = "M10 21H14C14 22.1 13.1 23 12 23S10 22.1 10 21M21 19V20H3V19L5 17V11C5 7.9 7 5.2 10 4.3V4C10 2.9 10.9 2 12 2S14 2.9 14 4V4.3C17 5.2 19 7.9 19 11V17L21 19M17 11C17 8.2 14.8 6 12 6S7 8.2 7 11V18H17V11Z", re = "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z", ae = "M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z", zt = "M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z", le = "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z";
 const O = "ha_reminders";
 async function ce(o, t) {
   const e = await o.callService(O, "create", t);
@@ -658,6 +658,7 @@ const fe = [
   wait_time_if_no_action: "Resend after (minutes)",
   notification_count: "Maximum notifications",
   icon: "Icon (mdi:name or image URL; empty = default)",
+  click_url: "Opens when tapped (URL)",
   color: "Color (Android)",
   channel: "Channel (Android)",
   channel_importance: "Channel importance",
@@ -722,6 +723,7 @@ function $e(o) {
     },
     { name: "channel", selector: { text: {} } },
     { name: "icon", selector: { text: {} } },
+    { name: "click_url", selector: { text: {} } },
     { name: "color", selector: { text: {} } },
     { name: "notification_group", selector: { text: {} } },
     { name: "acknowledge_notification_title", selector: { text: {} } },
@@ -732,7 +734,7 @@ const K = [5, 15, 30, 45, 60], ye = "Someone", J = "Snooze for ${time}", Y = "Ma
 function ve(o) {
   if (!o) return !1;
   const t = o.snooze_delays?.length ? o.snooze_delays : K, e = (o.user_name ?? "").trim(), i = (o.trigger_type ?? "time") === "time", s = o.one_shot ?? i, n = i ? "" : o.start_date ?? "";
-  return !!((o.subtitle ?? "").trim() || e && e !== ye || s !== i || (o.every_x_days ?? 1) !== 1 || n || o.stop_date || (o.exclude_days_of_week ?? []).length > 0 || o.time_window_start || o.time_window_end || t.join(",") !== K.join(",") || (o.snooze_text ?? J) !== J || (o.acknowledge_action_title ?? Y) !== Y || (o.wait_time_if_no_action ?? Q) !== Q || (o.notification_count ?? tt) !== tt || (o.channel_importance ?? "") || (o.channel ?? "") || (o.icon ?? "") || (o.color ?? "") || (o.notification_group ?? "") || (o.acknowledge_notification_title ?? X) !== X || (o.acknowledge_notification_body ?? "").trim());
+  return !!((o.subtitle ?? "").trim() || e && e !== ye || s !== i || (o.every_x_days ?? 1) !== 1 || n || o.stop_date || (o.exclude_days_of_week ?? []).length > 0 || o.time_window_start || o.time_window_end || t.join(",") !== K.join(",") || (o.snooze_text ?? J) !== J || (o.acknowledge_action_title ?? Y) !== Y || (o.wait_time_if_no_action ?? Q) !== Q || (o.notification_count ?? tt) !== tt || (o.channel_importance ?? "") || (o.channel ?? "") || (o.icon ?? "") || (o.click_url ?? "") || (o.color ?? "") || (o.notification_group ?? "") || (o.acknowledge_notification_title ?? X) !== X || (o.acknowledge_notification_body ?? "").trim());
 }
 const nt = class nt extends C {
   constructor() {
@@ -778,6 +780,7 @@ const nt = class nt extends C {
       wait_time_if_no_action: t?.wait_time_if_no_action ?? Q,
       notification_count: t?.notification_count ?? tt,
       icon: t?.icon ?? "",
+      click_url: t?.click_url ?? "",
       color: t?.color ?? "",
       channel: t?.channel ?? "",
       channel_importance: t?.channel_importance ?? "",
@@ -858,6 +861,7 @@ const nt = class nt extends C {
       notification_count: e.notification_count,
       color: this._orUndefined(e.color),
       icon: this._orUndefined(e.icon),
+      click_url: this._orUndefined(e.click_url),
       channel: this._orUndefined(e.channel),
       channel_importance: this._orUndefined(e.channel_importance),
       notification_group: this._orUndefined(e.notification_group),
@@ -954,13 +958,13 @@ nt.styles = St`
   `;
 let p = nt;
 $([
-  k({ attribute: !1 })
+  z({ attribute: !1 })
 ], p.prototype, "hass");
 $([
-  k({ attribute: !1 })
+  z({ attribute: !1 })
 ], p.prototype, "reminder");
 $([
-  k({ type: Boolean })
+  z({ type: Boolean })
 ], p.prototype, "open");
 $([
   u()
@@ -1062,7 +1066,7 @@ function Ee(o, t) {
     action: t.toggleEnabled
   }), i.push({ label: "Edit", path: le, action: t.edit }), i.push({
     label: "Delete",
-    path: kt,
+    path: zt,
     action: t.remove,
     warning: !0
   }), i;
@@ -1207,7 +1211,7 @@ const rt = class rt extends C {
         >
           ${s ? g`<ha-icon-button
                 slot="icons"
-                .path=${kt}
+                .path=${zt}
                 .label=${"Remove completed"}
                 title="Remove completed"
                 @click=${(n) => {
@@ -1387,10 +1391,10 @@ rt.styles = St`
   `;
 let f = rt;
 b([
-  k({ attribute: !1 })
+  z({ attribute: !1 })
 ], f.prototype, "hass");
 b([
-  k({ type: Boolean })
+  z({ type: Boolean })
 ], f.prototype, "grouped");
 b([
   u()
@@ -1414,8 +1418,8 @@ customElements.get("ha-reminders-list") || customElements.define("ha-reminders-l
 export {
   C as a,
   g as b,
-  ze as e,
+  Te as e,
   St as i,
-  k as n,
+  z as n,
   u as r
 };
