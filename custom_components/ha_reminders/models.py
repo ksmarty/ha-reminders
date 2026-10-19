@@ -7,6 +7,7 @@ at module level, so this file is unit-testable without an HA runtime.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime, time as dtime, timedelta
 from typing import Any
@@ -83,11 +84,19 @@ def _coerce_delay_list(value: Any) -> list[int]:
 
 
 def _coerce_service_action_list(value: Any) -> list[dict[str, Any]]:
-    result = []
-    for item in as_list(value):
-        if isinstance(item, dict):
-            result.append(dict(item))
-    return result
+    """Return the acknowledge actions as a list of service-call mappings.
+
+    A mapping is one action, not a list of them, so it is wrapped rather than
+    iterated. Everything else has to be a non-string sequence: `as_list` would
+    render a mapping with `str()` first, which is how a single action used to
+    come back as a stringified dict and be dropped on the floor, silently
+    taking every caller's `acknowledge_actions` with it.
+    """
+    if isinstance(value, Mapping):
+        return [dict(value)]
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        return []
+    return [dict(item) for item in value if isinstance(item, Mapping)]
 
 
 def default_one_shot(trigger_type: str) -> bool:

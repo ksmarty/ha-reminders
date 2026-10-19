@@ -283,3 +283,31 @@ class TestFormatDelay:
     )
     def test_formatting(self, minutes, expected):
         assert format_delay(minutes) == expected
+
+class TestAcknowledgeActions:
+    """`acknowledge_actions` must survive the trip through from_dict.
+
+    It reaches the model as a service-call mapping or a list of them, and the
+    reason these tests exist is that it used to reach the notifier empty.
+    """
+
+    ACTION = {"service": "tasktick.complete_task", "data": {"task": "abc"}}
+
+    def test_list_of_actions_is_kept(self):
+        reminder = make_reminder(acknowledge_actions=[self.ACTION])
+        assert reminder.acknowledge_actions == [self.ACTION]
+
+    def test_single_action_mapping_is_kept(self):
+        reminder = make_reminder(acknowledge_actions=self.ACTION)
+        assert reminder.acknowledge_actions == [self.ACTION]
+
+    def test_non_mapping_entries_are_dropped(self):
+        reminder = make_reminder(
+            acknowledge_actions=[self.ACTION, "notify.mobile_app_pixel", 5, None]
+        )
+        assert reminder.acknowledge_actions == [self.ACTION]
+
+    def test_actions_survive_a_roundtrip(self):
+        reminder = make_reminder(acknowledge_actions=[self.ACTION])
+        restored = Reminder.from_dict(reminder.to_dict())
+        assert restored.acknowledge_actions == [self.ACTION]
