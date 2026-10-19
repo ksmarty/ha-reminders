@@ -178,6 +178,99 @@ create:
         text:
           multiline: true
 
+notify:
+  name: Send one-off notification
+  description: >-
+    Send a notification right now and store nothing — no reminder appears in
+    the panel, no sensor entity is created, and the notification is forgotten
+    when Home Assistant restarts. For a caller (an app, an automation, another
+    integration) that wants Home Assistant to deliver the message without
+    taking on a schedule. Only `title` is required: without a `message` the
+    notification repeats the title. The notification is built exactly like a
+    reminder's, so it takes the same icon, colour, channel and action buttons;
+    the id returned in `notification_id` is accepted by `complete` and
+    `snooze` while the notification is still tracked.
+  fields:
+    title:
+      required: true
+      example: Take out the trash
+      selector:
+        text: {}
+    message:
+      example: The bins go out tonight!
+      description: Optional. The notification repeats the title when left empty.
+      selector:
+        text:
+          multiline: true
+    subtitle:
+      selector:
+        text: {}
+    notify_service:
+      example: notify.mobile_app_pixel_8
+      description: >-
+        Optional. Falls back to the configured default notification service.
+      selector:
+        text: {}
+    user_name:
+      example: Kyle
+      selector:
+        text: {}
+    acknowledge_action_title:
+      default: Mark as done
+      selector:
+        text: {}
+    acknowledge_actions:
+      description: >-
+        Optional. Service calls to run when the notification is acknowledged,
+        as `[{service: notify.something, data: {message: hi}}]`.
+      selector:
+        object: {}
+    snooze_delays:
+      example: "5,15,30,45,60"
+      description: >-
+        Optional. Snoozing a one-off notification sends it again after the
+        chosen delay; there is no schedule to move.
+      selector:
+        text: {}
+    snooze_text:
+      default: Snooze for ${time}
+      selector:
+        text: {}
+    color:
+      example: "#ff0000"
+      selector:
+        text: {}
+    icon:
+      example: mdi:bell-ring
+      selector:
+        text: {}
+    click_url:
+      example: https://tasktick.example.com/tasks?task=abc123
+      description: >-
+        Optional. Tapping the notification itself opens this URL in the
+        companion app (iOS reads `url`, Android reads `clickAction`). The action
+        buttons are unaffected. Leave empty to open the app as usual.
+      selector:
+        text: {}
+    channel:
+      selector:
+        text: {}
+    channel_importance:
+      default: ""
+      selector:
+        select:
+          options:
+            - label: Default
+              value: ""
+            - label: Min
+              value: min
+            - label: Low
+              value: low
+            - label: High
+              value: high
+            - label: Max
+              value: max
+
 update:
   name: Update reminder
   description: Update an existing reminder (listed fields are replaced).

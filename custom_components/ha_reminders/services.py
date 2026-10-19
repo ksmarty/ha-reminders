@@ -52,6 +52,7 @@ from .const import (
     SERVICE_INSTALL_SENTENCES,
     SERVICE_DELETE,
     SERVICE_LIST,
+    SERVICE_NOTIFY,
     SERVICE_SET_ENABLED,
     SERVICE_SNOOZE,
     SERVICE_UPDATE,
@@ -63,6 +64,7 @@ from .coordinator import ReminderCoordinator
 _LOGGER = logging.getLogger(__name__)
 
 FIELD_REMINDER_ID = "reminder_id"
+FIELD_NOTIFICATION_ID = "notification_id"
 FIELD_MINUTES = "minutes"
 
 # Full record payload used by create/update
@@ -105,6 +107,32 @@ _REMINDER_FIELDS = {
     vol.Optional(FIELD_ACKNOWLEDGE_NOTIFICATION_TITLE): str,
     vol.Optional(FIELD_ACKNOWLEDGE_NOTIFICATION_BODY): str,
 }
+
+# Notification-only payload used by `notify`: everything a reminder can carry
+# into its notification and none of the scheduling fields. A one-off
+# notification is not stored, so it has no date, repeat or enabled flag to set.
+_NOTIFICATION_FIELDS = {
+    vol.Optional(FIELD_SUBTITLE): str,
+    vol.Optional(FIELD_MESSAGE): str,
+    vol.Optional(FIELD_NOTIFY_SERVICE): str,
+    vol.Optional(FIELD_USER_NAME): str,
+    vol.Optional(FIELD_ACKNOWLEDGE_ACTION_TITLE): str,
+    vol.Optional(FIELD_ACKNOWLEDGE_ACTIONS): vol.Any(list, dict),
+    vol.Optional(FIELD_SNOOZE_DELAYS): vol.Any(
+        [vol.All(vol.Coerce(int), vol.Range(min=1))], str
+    ),
+    vol.Optional(FIELD_SNOOZE_TEXT): str,
+    vol.Optional(FIELD_ICON): str,
+    vol.Optional(FIELD_CLICK_URL): str,
+    vol.Optional(FIELD_COLOR): str,
+    vol.Optional(FIELD_CHANNEL): str,
+    vol.Optional(FIELD_CHANNEL_IMPORTANCE): str,
+}
+
+SCHEMA_NOTIFY = vol.Schema(
+    {vol.Required(FIELD_TITLE): str, **_NOTIFICATION_FIELDS},
+    extra=vol.PREVENT_EXTRA,
+)
 
 SCHEMA_CREATE = vol.Schema(
     {
@@ -173,6 +201,13 @@ async def async_setup_services(
             raise _error(err) from err
         return {FIELD_REMINDER_ID: reminder_id}
 
+    async def _notify(call: ServiceCall) -> dict[str, Any]:
+        try:
+            notification_id = await coordinator.async_notify_once(dict(call.data))
+        except HomeAssistantError as err:
+            raise _error(err) from err
+        return {FIELD_NOTIFICATION_ID: notification_id}
+
     async def _update(call: ServiceCall) -> dict[str, Any]:
         data = dict(call.data)
         reminder_id = data.pop(FIELD_REMINDER_ID)
@@ -215,6 +250,7 @@ async def async_setup_services(
 
     handlers = [
         (SERVICE_CREATE, _create, SCHEMA_CREATE, SupportsResponse.OPTIONAL),
+        (SERVICE_NOTIFY, _notify, SCHEMA_NOTIFY, SupportsResponse.OPTIONAL),
         (SERVICE_UPDATE, _update, SCHEMA_UPDATE, SupportsResponse.NONE),
         (SERVICE_DELETE, _delete, SCHEMA_DELETE, SupportsResponse.NONE),
         (SERVICE_LIST, _list, SCHEMA_LIST, SupportsResponse.OPTIONAL),

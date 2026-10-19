@@ -50,6 +50,9 @@ def test_response_capable_services_declare_support(tmp_path) -> None:
 
     assert registered["create"].supports_response is SupportsResponse.OPTIONAL
     assert registered["list"].supports_response is SupportsResponse.OPTIONAL
+    # `notify` hands back the id its action buttons answer to, so a caller that
+    # wants to complete or snooze the notification needs the response.
+    assert registered["notify"].supports_response is SupportsResponse.OPTIONAL
 
 
 def test_mutating_services_need_no_response(tmp_path) -> None:

@@ -128,7 +128,18 @@ CONF_DEFAULT_ACKNOWLEDGE_ACTION_TITLE = "default_acknowledge_action_title"
 CONF_DEFAULT_ICON = "default_icon"
 CONF_DEFAULT_PERSON_ENTITY_IDS = "default_person_entity_ids"
 
+# ---------------------------------------------------------------------------
+# One-off notifications (the `notify` service)
+# ---------------------------------------------------------------------------
+# A one-off notification is sent and then forgotten: nothing about it is written
+# to storage, so the id it returns is only meaningful while Home Assistant stays
+# up. The notifications that were sent are tracked in memory so their action
+# buttons keep working; the cap stops an unattended sender from growing that map
+# without bound, and past it the oldest notification's buttons do nothing.
+ONE_OFF_TRACKED_LIMIT = 100
+
 # Services
+SERVICE_NOTIFY = "notify"
 SERVICE_CREATE = "create"
 SERVICE_UPDATE = "update"
 SERVICE_DELETE = "delete"

@@ -5,16 +5,22 @@ part of the runtime state, so an acknowledged reminder stays acknowledged
 across a reload — computes the runtime state exposed to the sensor entities,
 and drives the notification lifecycle (fire -> resend ->
 acknowledge/snooze) in cooperation with the scheduler.
+
+It also sends one-off notifications (`async_notify_once`, behind the `notify`
+service): a notification with no reminder behind it, for callers that want Home
+Assistant to deliver a message without adding an entry to the panel.
 """
 
 from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
+from uuid import uuid4
 
 from homeassistant.core import Event, HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from . import notify
@@ -37,6 +43,8 @@ from .const import (
     DEFAULT_ICON,
     DOMAIN,
     DURABLE_RUNTIME_KEYS,
+    ONE_OFF_TRACKED_LIMIT,
+    TRIGGER_TIME,
     TRIGGER_ZONE_ENTER,
     TRIGGER_ZONE_LEAVE,
 )
@@ -63,6 +71,11 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         self._runtime: dict[str, dict[str, Any]] = {}
         self._scheduler: ReminderScheduler | None = None
         self._person_reminder_map: dict[str, list[Reminder]] = {}
+        # Sent one-off notifications, and the pending re-send a snooze armed for
+        # each. Both live in memory only: a one-off notification is not a record,
+        # so a restart forgets it (see `async_notify_once`).
+        self._one_offs: dict[str, Reminder] = {}
+        self._one_off_timers: dict[str, Callable[[], None]] = {}
 
     # ------------------------------------------------------------------
     # DataUpdateCoordinator
@@ -114,6 +127,15 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
                         (r for r in self._reminders if r.id == resolved), None
                     )
         return reminder
+
+    def one_off(self, notification_id: str) -> Reminder | None:
+        """Return a one-off notification that is still tracked, if any.
+
+        `get` deliberately stays about stored reminders; a one-off notification
+        is only reachable through here, and only until it is acknowledged or
+        Home Assistant restarts.
+        """
+        return self._one_offs.get(notification_id)
 
     def runtime_of(self, reminder_id: str) -> dict[str, Any]:
         """Return the mutable runtime state dict for a reminder."""
@@ -209,7 +231,15 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         await self._persist_and_refresh()
 
     async def async_snooze(self, reminder_id: str, minutes: int) -> None:
-        """Snooze a reminder notification for `minutes`."""
+        """Snooze a reminder notification for `minutes`.
+
+        For a one-off notification there is no schedule to move, so snoozing
+        means sending the same notification again after the delay.
+        """
+        one_off = self._one_offs.get(reminder_id)
+        if one_off is not None:
+            self._snooze_one_off(one_off, minutes)
+            return
         reminder = self.get(reminder_id)
         if reminder is None:
             raise HomeAssistantError(f"Unknown reminder id: {reminder_id}")
@@ -223,7 +253,15 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
     async def async_complete(
         self, reminder_id: str, user_name: str | None = None
     ) -> None:
-        """Acknowledge a reminder: run ack actions, notify the group."""
+        """Acknowledge a reminder: run ack actions, notify the group.
+
+        A one-off notification has no group and nothing to complete: its
+        acknowledge actions run and it is forgotten.
+        """
+        one_off = self._one_offs.get(reminder_id)
+        if one_off is not None:
+            await self.async_complete_one_off(one_off)
+            return
         reminder = self.get(reminder_id)
         if reminder is None:
             raise HomeAssistantError(f"Unknown reminder id: {reminder_id}")
@@ -248,6 +286,123 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         runtime["notified_count"] = 0
         await self._persist_and_refresh()
         _LOGGER.debug("Reminder %s completed by %s", reminder.id, acknowledged_by)
+
+    # ------------------------------------------------------------------
+    # One-off notifications (nothing stored, nothing scheduled)
+    # ------------------------------------------------------------------
+    async def async_notify_once(self, payload: dict[str, Any]) -> str:
+        """Send a notification now and keep it only until it is acknowledged.
+
+        The counterpart of `async_create` for a caller that wants Home
+        Assistant to deliver a message without a reminder appearing in the
+        panel: no record is written, no sensor entity is created and the
+        scheduler is never involved. The notification is built by the same code
+        as a reminder's, so it carries the same tag, action buttons, icon,
+        colour and channel — which also means its acknowledge and snooze
+        buttons work (`complete` and `snooze` accept the returned id).
+
+        Returns the notification id. Raises `HomeAssistantError` when the
+        delivery fails, so that a caller can fall back to its own notification
+        path instead of believing the message showed up.
+        """
+        reminder = self._one_off_from_payload(payload)
+        # Deliver before tracking: a failed send must not leave buttons pointing
+        # at a notification nobody ever received.
+        await notify.async_send_reminder(self.hass, reminder, self.default_icon)
+        self._remember_one_off(reminder)
+        _LOGGER.debug("Sent one-off notification '%s' (%s)", reminder.title, reminder.id)
+        return reminder.id
+
+    async def async_complete_one_off(self, reminder: Reminder) -> None:
+        """Acknowledge a one-off notification: run its actions, then forget it."""
+        await self._run_acknowledge_actions(reminder)
+        self._forget_one_off(reminder.id)
+        _LOGGER.debug("One-off notification %s acknowledged", reminder.id)
+
+    def _one_off_from_payload(self, payload: dict[str, Any]) -> Reminder:
+        """Build the transient record behind a one-off notification.
+
+        It is a full `Reminder` because the notification is built from one; the
+        scheduling fields are inert. Nothing is scheduled, so `time` is simply
+        "now" — the record exists to be delivered, not to fire later.
+        """
+        now = _naive_now()
+        data = {**self._defaults_for(payload), **payload}
+        data.update(
+            {
+                "id": uuid4().hex,
+                "trigger_type": TRIGGER_TIME,
+                "time": now.strftime("%H:%M"),
+                "created_at": now.isoformat(),
+                # A one-off is delivered once here, so the resend loop that
+                # `notification_count` drives has nothing to do.
+                "one_shot": True,
+                "notification_count": 1,
+            }
+        )
+        try:
+            return Reminder.from_dict(data)
+        except (TypeError, ValueError) as err:
+            # The caller's payload cannot become a notification (no notify
+            # service to send through, a delay out of range): report it the way
+            # the other services do rather than letting a bare ValueError
+            # escape the service call.
+            raise HomeAssistantError(str(err)) from err
+
+    def _remember_one_off(self, reminder: Reminder) -> None:
+        """Track a sent one-off so its buttons keep working, bounded in size."""
+        self._one_offs[reminder.id] = reminder
+        overflow = len(self._one_offs) - ONE_OFF_TRACKED_LIMIT
+        if overflow <= 0:
+            return
+        # Oldest first: a dict keeps insertion order, and dropping a notification
+        # from the map only means its buttons stop responding.
+        for reminder_id in list(self._one_offs)[:overflow]:
+            self._forget_one_off(reminder_id)
+
+    def _forget_one_off(self, reminder_id: str) -> None:
+        """Drop a one-off notification and cancel the re-send it armed."""
+        self._one_offs.pop(reminder_id, None)
+        cancel = self._one_off_timers.pop(reminder_id, None)
+        if cancel is not None:
+            cancel()
+
+    def _snooze_one_off(self, reminder: Reminder, minutes: int) -> None:
+        """Send a one-off notification again after `minutes`.
+
+        A later snooze replaces an earlier one, so tapping snooze twice brings
+        the notification back once, after the second delay.
+        """
+        if reminder.id not in self._one_offs:
+            return
+        self._forget_one_off_timer(reminder.id)
+
+        async def _resend(_now: datetime) -> None:
+            await self._resend_one_off(reminder)
+
+        self._one_off_timers[reminder.id] = async_call_later(
+            self.hass, int(minutes) * 60, _resend
+        )
+        _LOGGER.debug(
+            "One-off notification %s snoozed for %s minutes", reminder.id, minutes
+        )
+
+    def _forget_one_off_timer(self, reminder_id: str) -> None:
+        """Cancel the pending re-send of a one-off notification, if any."""
+        cancel = self._one_off_timers.pop(reminder_id, None)
+        if cancel is not None:
+            cancel()
+
+    async def _resend_one_off(self, reminder: Reminder) -> None:
+        """Deliver a snoozed one-off notification again."""
+        if reminder.id not in self._one_offs:
+            return
+        try:
+            await notify.async_send_reminder(self.hass, reminder, self.default_icon)
+        except Exception:  # noqa: BLE001 - a failed re-send must not break the loop
+            _LOGGER.exception(
+                "Could not re-send one-off notification %s", reminder.id
+            )
 
     # ------------------------------------------------------------------
     # Notification lifecycle (called by the scheduler)
@@ -337,7 +492,9 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         if parsed is None:
             return
         _, reminder_id, _, minutes, _user = parsed
-        if self.get(reminder_id) is None:
+        # A one-off notification answers to its own id, so the action buttons of
+        # one that is still tracked are handled exactly like a reminder's.
+        if self.get(reminder_id) is None and reminder_id not in self._one_offs:
             return
         if minutes == -1:
             await self.async_complete(reminder_id, user_name=_user or None)
@@ -359,6 +516,8 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
         if self._scheduler is not None:
             self._scheduler.async_shutdown()
             self._scheduler = None
+        for reminder_id in list(self._one_offs):
+            self._forget_one_off(reminder_id)
         await super().async_shutdown()
 
     # ------------------------------------------------------------------

@@ -93,6 +93,7 @@ integration itself, so there is no manual resource URL to add.
 | Service | Description |
 | --- | --- |
 | `ha_reminders.create` | Create a reminder. Required: `title` (`message` is optional — without it the notification repeats the title). Returns `reminder_id`. |
+| `ha_reminders.notify` | Send a one-off notification now, storing nothing — no reminder in the panel, no sensor entity; the notification is forgotten when Home Assistant restarts. Required: `title`. Returns `notification_id`. |
 | `ha_reminders.update` | Update a reminder (`reminder_id` + partial payload; listed fields replace the whole value). |
 | `ha_reminders.delete` | Delete a reminder (`reminder_id`). |
 | `ha_reminders.list` | List all reminders with runtime status (no arguments). |
@@ -182,6 +183,38 @@ actions:
 > notification action strings and shown in the message the rest of a
 > notification group receives when someone acknowledges
 > (e.g. `Kyle acknowledged: Take out the trash`).
+
+### One-off notifications (`ha_reminders.notify`)
+
+`ha_reminders.notify` sends a notification immediately and stores nothing: no
+reminder appears in the panel, no `sensor.ha_reminder_*` entity is created, and
+the notification is forgotten when Home Assistant restarts. Reach for it when
+Home Assistant should deliver the message without taking on a schedule — a task
+app pushing "the bins go out tonight", a doorbell, a build that finished.
+
+```yaml
+service: ha_reminders.notify
+data:
+  title: Take out the trash
+  message: The bins go out tonight!
+  notify_service: notify.mobile_app_pixel_8
+  click_url: "https://tasks.example.com/tasks?task=42"
+  acknowledge_actions:
+    - service: script.bins_taken_out
+```
+
+Only `title` is required. `message` falls back to the title, and the other
+fields are the notification half of `create` (`notify_service` falls back to the
+configured default): the icon, colour, channel and action buttons are the same,
+so a one-off notification looks and behaves like a reminder's. Acknowledging it
+runs its `acknowledge_actions`; snoozing it sends the same notification again
+after the chosen delay.
+
+The service returns `notification_id`, which `ha_reminders.complete` and
+`ha_reminders.snooze` accept for as long as the notification is tracked — the
+most recent 100 are held in memory, and a restart drops them. Nothing being
+stored also means a one-off notification never fires on its own: send it from a
+trigger, or from whatever decides the moment has come.
 
 ### LLM-based assistants
 
