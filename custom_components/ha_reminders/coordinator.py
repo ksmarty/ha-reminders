@@ -520,6 +520,11 @@ class ReminderCoordinator(DataUpdateCoordinator[list[Reminder]]):
             self._forget_one_off(reminder_id)
         await super().async_shutdown()
 
+    @property
+    def default_notify_service(self) -> str:
+        """The notification service a one-off goes through unless it names one."""
+        return str(self._options.get(CONF_DEFAULT_NOTIFY_SERVICE) or "")
+
     # ------------------------------------------------------------------
     # Internals
     # ------------------------------------------------------------------

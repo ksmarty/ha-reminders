@@ -17,6 +17,7 @@ import yaml  # noqa: E402
 from homeassistant.helpers.service import _SERVICES_SCHEMA  # noqa: E402
 
 from custom_components.ha_reminders.const import (  # noqa: E402
+    SERVICE_CLEAR,
     SERVICE_COMPLETE,
     SERVICE_CREATE,
     SERVICE_DELETE,
@@ -47,6 +48,7 @@ def test_services_yaml_validates() -> None:
         SERVICE_SNOOZE,
         SERVICE_COMPLETE,
         SERVICE_SET_ENABLED,
+        SERVICE_CLEAR,
     ):
         assert service in result, f"missing service description: {service}"
 

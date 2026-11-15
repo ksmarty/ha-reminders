@@ -14,6 +14,7 @@ import voluptuous as vol
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.exceptions import HomeAssistantError
 
+from . import notify
 from .const import (
     DOMAIN,
     FIELD_ACKNOWLEDGE_ACTION_TITLE,
@@ -39,6 +40,7 @@ from .const import (
     FIELD_START_DATE,
     FIELD_STOP_DATE,
     FIELD_SUBTITLE,
+    FIELD_TAG,
     FIELD_TIME,
     FIELD_TIME_WINDOW_END,
     FIELD_TIME_WINDOW_START,
@@ -47,6 +49,7 @@ from .const import (
     FIELD_USER_NAME,
     FIELD_WAIT_TIME,
     FIELD_ZONE_ENTITY_ID,
+    SERVICE_CLEAR,
     SERVICE_COMPLETE,
     SERVICE_CREATE,
     SERVICE_INSTALL_SENTENCES,
@@ -127,6 +130,7 @@ _NOTIFICATION_FIELDS = {
     vol.Optional(FIELD_COLOR): str,
     vol.Optional(FIELD_CHANNEL): str,
     vol.Optional(FIELD_CHANNEL_IMPORTANCE): str,
+    vol.Optional(FIELD_TAG): str,
 }
 
 SCHEMA_NOTIFY = vol.Schema(
@@ -151,6 +155,16 @@ SCHEMA_UPDATE = vol.Schema(
 
 SCHEMA_DELETE = vol.Schema(
     {vol.Required(FIELD_REMINDER_ID): str}, extra=vol.PREVENT_EXTRA
+)
+
+SCHEMA_CLEAR = vol.Schema(
+    {
+        # One tag or several: a reminder that fires more than once a day sends
+        # one notification per occurrence, and each carries its own tag.
+        vol.Required(FIELD_TAG): vol.Any(str, [str]),
+        vol.Optional(FIELD_NOTIFY_SERVICE): str,
+    },
+    extra=vol.PREVENT_EXTRA,
 )
 
 SCHEMA_SNOOZE = vol.Schema(
@@ -208,6 +222,21 @@ async def async_setup_services(
             raise _error(err) from err
         return {FIELD_NOTIFICATION_ID: notification_id}
 
+    async def _clear(call: ServiceCall) -> dict[str, Any]:
+        tags = call.data[FIELD_TAG]
+        if isinstance(tags, str):
+            tags = [tags]
+        try:
+            cleared = await notify.async_clear(
+                hass,
+                list(tags),
+                call.data.get(FIELD_NOTIFY_SERVICE)
+                or coordinator.default_notify_service,
+            )
+        except HomeAssistantError as err:
+            raise _error(err) from err
+        return {"cleared": cleared}
+
     async def _update(call: ServiceCall) -> dict[str, Any]:
         data = dict(call.data)
         reminder_id = data.pop(FIELD_REMINDER_ID)
@@ -251,6 +280,7 @@ async def async_setup_services(
     handlers = [
         (SERVICE_CREATE, _create, SCHEMA_CREATE, SupportsResponse.OPTIONAL),
         (SERVICE_NOTIFY, _notify, SCHEMA_NOTIFY, SupportsResponse.OPTIONAL),
+        (SERVICE_CLEAR, _clear, SCHEMA_CLEAR, SupportsResponse.OPTIONAL),
         (SERVICE_UPDATE, _update, SCHEMA_UPDATE, SupportsResponse.NONE),
         (SERVICE_DELETE, _delete, SCHEMA_DELETE, SupportsResponse.NONE),
         (SERVICE_LIST, _list, SCHEMA_LIST, SupportsResponse.OPTIONAL),

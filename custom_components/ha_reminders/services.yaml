@@ -270,6 +270,38 @@ notify:
               value: high
             - label: Max
               value: max
+    tag:
+      example: habit-6f1c-2026-05-04
+      description: >-
+        Optional. The tag the notification carries. Set one when the caller
+        intends to clear the notification later: `clear` removes the
+        notification whose tag matches. Left empty, the tag is derived from the
+        notification id, and the app replaces the previous notification with the
+        same reminder when it is sent again.
+
+clear:
+  name: Clear a notification
+  description: >-
+    Remove the notification carrying a tag, by sending the same tag again with
+    the message `clear_notification` — what the companion app documents under
+    "Clearing". Nothing is stored, and a tag that matches nothing is simply
+    ignored by the device.
+  fields:
+    tag:
+      required: true
+      example: habit-6f1c-2026-05-04
+      description: >-
+        The tag the notification was sent with. A list clears several
+        notifications at once.
+      selector:
+        text: {}
+    notify_service:
+      example: notify.mobile_app_pixel_8
+      description: >-
+        Optional. The service the notification went through. Falls back to the
+        configured default notification service.
+      selector:
+        text: {}
 
 update:
   name: Update reminder

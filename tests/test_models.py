@@ -311,3 +311,15 @@ class TestAcknowledgeActions:
         reminder = make_reminder(acknowledge_actions=[self.ACTION])
         restored = Reminder.from_dict(reminder.to_dict())
         assert restored.acknowledge_actions == [self.ACTION]
+
+
+def test_a_reminder_keeps_a_caller_chosen_tag():
+    """A tag outlives the reminder so the notification can be cleared later."""
+    reminder = make_reminder(tag="habit-h1-2026-05-04")
+
+    assert reminder.tag == "habit-h1-2026-05-04"
+    assert reminder.to_dict()["tag"] == "habit-h1-2026-05-04"
+
+
+def test_a_reminder_without_a_tag_says_so():
+    assert make_reminder().tag == ""

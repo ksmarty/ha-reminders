@@ -7,17 +7,28 @@ that module before importing; with HA installed the real module is used.
 
 from __future__ import annotations
 
+import asyncio
 import importlib.util
 import sys
 import types
+
+import pytest
 
 if importlib.util.find_spec("homeassistant") is None:
     # Fallback for dev machines without a Home Assistant runtime.
     _ha = types.ModuleType("homeassistant")
     _ha_core = types.ModuleType("homeassistant.core")
     _ha_core.HomeAssistant = object  # type: ignore[attr-defined]
+    _ha_exc = types.ModuleType("homeassistant.exceptions")
+
+    class _HomeAssistantError(Exception):  # noqa: D101 - a stand-in, not an API
+        pass
+
+    _ha_exc.HomeAssistantError = _HomeAssistantError  # type: ignore[attr-defined]
+    _ha.__path__ = []  # type: ignore[attr-defined] - so submodules can be found
     sys.modules.setdefault("homeassistant", _ha)
     sys.modules["homeassistant.core"] = _ha_core
+    sys.modules["homeassistant.exceptions"] = _ha_exc
 
 from custom_components.ha_reminders import notify  # noqa: E402
 from custom_components.ha_reminders.models import Reminder  # noqa: E402
@@ -218,3 +229,109 @@ class TestClickPayload:
         assert data["tag"] == "taskReminder╡r1"
         assert len(data["actions"]) == 2  # ack + 1 snooze, unchanged
         assert data["actions"][0]["action"] == "taskReminder╡r1╡team╡-1╡Kyle"
+
+
+class _FakeServices:
+    """Just enough of HA's service registry for `notify.async_clear`."""
+
+    def __init__(self, *available: tuple[str, str], failing: bool = False) -> None:
+        self.available = set(available)
+        self.calls: list[tuple[str, str, dict]] = []
+        self.failing = failing
+
+    def has_service(self, domain: str, service: str) -> bool:
+        return (domain, service) in self.available
+
+    async def async_call(self, domain, service, data, blocking=False):  # noqa: ANN001
+        if self.failing:
+            raise RuntimeError("boom")
+        self.calls.append((domain, service, dict(data)))
+
+
+class _FakeHass:
+    def __init__(self, services: _FakeServices) -> None:
+        self.services = services
+
+
+class TestClear:
+    """The documented way to remove a notification: its tag, with a clear message."""
+
+    def test_a_clear_is_one_call_per_tag(self):
+        services = _FakeServices(("notify", "mobile_app_pixel"))
+
+        cleared = asyncio.run(
+            notify.async_clear(
+                _FakeHass(services), ["habit-h1-2026-05-03", "habit-h1-2026-05-04"],
+                "notify.mobile_app_pixel",
+            )
+        )
+
+        assert cleared == 2
+        assert [call[2] for call in services.calls] == [
+            {"message": "clear_notification", "data": {"tag": "habit-h1-2026-05-03"}},
+            {"message": "clear_notification", "data": {"tag": "habit-h1-2026-05-04"}},
+        ]
+
+    def test_a_clear_goes_through_the_service_the_send_used(self):
+        services = _FakeServices(("notify", "mobile_app_pixel"))
+
+        asyncio.run(notify.async_clear(_FakeHass(services), ["t"], "mobile_app_pixel"))
+
+        assert services.calls[0][0:2] == ("notify", "mobile_app_pixel")
+
+    def test_nothing_to_clear_is_no_call_at_all(self):
+        services = _FakeServices(("notify", "notify"))
+
+        assert asyncio.run(notify.async_clear(_FakeHass(services), [])) == 0
+        assert services.calls == []
+
+    def test_blank_tags_are_ignored(self):
+        services = _FakeServices(("notify", "notify"))
+
+        cleared = asyncio.run(notify.async_clear(_FakeHass(services), ["", "  ", "t"]))
+
+        assert cleared == 1
+        assert [call[2]["data"]["tag"] for call in services.calls] == ["t"]
+
+    def test_a_missing_service_is_an_error_not_a_silent_noop(self):
+        services = _FakeServices()
+
+        with pytest.raises(notify.HomeAssistantError, match="does not exist"):
+            asyncio.run(notify.async_clear(_FakeHass(services), ["t"], "notify.gone"))
+
+
+class TestCallerTag:
+    """A caller that names the tag can clear what it sent afterwards."""
+
+    def test_the_caller_tag_wins_over_the_id(self):
+        data = notify.build_reminder_data(make_reminder(tag="habit-h1-2026-05-04"))
+
+        assert data["tag"] == "habit-h1-2026-05-04"
+        # The action buttons still address the reminder itself.
+        assert data["actions"][0]["action"].startswith("taskReminder╡r1")
+
+    def test_no_caller_tag_falls_back_to_the_id(self):
+        assert notify.build_reminder_data(make_reminder())["tag"] == "taskReminder╡r1"
+
+    def test_an_acknowledgement_reuses_the_caller_tag(self):
+        calls: list = []
+        services = _FakeServices(("notify", "mobile_app_pixel"))
+        services.async_call = _Recorder(calls)
+
+        asyncio.run(
+            notify.async_send_acknowledged(
+                _FakeHass(services),
+                make_reminder(tag="habit-h1-2026-05-04"),
+                "Kyle",
+            )
+        )
+
+        assert calls[0]["data"]["tag"] == "habit-h1-2026-05-04"
+
+
+class _Recorder:
+    def __init__(self, calls: list) -> None:
+        self.calls = calls
+
+    async def __call__(self, domain, service, data, blocking=False):  # noqa: ANN001
+        self.calls.append(dict(data))

@@ -56,6 +56,18 @@ def notification_tag(reminder_id: str) -> str:
     return f"{ACTION_PREFIX}{ACTION_SEPARATOR}{reminder_id}"
 
 
+def reminder_notification_tag(reminder: Reminder) -> str:
+    """The tag a reminder's notification carries.
+
+    A caller that intends to clear the notification later can name the tag
+    itself (the `notify` service's `tag` field), and the same value then appears
+    in `data.tag` so a `clear` with it removes exactly this notification.
+    Reminders that do not name one keep the tag derived from their id, which is
+    what makes a resend replace the previous notification.
+    """
+    return reminder.tag or notification_tag(reminder.id)
+
+
 def parse_action(action: str) -> tuple[str, str, str, int, str] | None:
     """Parse a `taskReminder╡...` action string.
 
@@ -205,7 +217,7 @@ def build_reminder_data(reminder: Reminder, default_icon: str = "") -> dict[str,
         "channel": reminder.channel or "",
         "importance": reminder.channel_importance or "",
         "color": reminder.color or "",
-        "tag": notification_tag(reminder.id),
+        "tag": reminder_notification_tag(reminder),
         "actions": actions,
         **icon_payload(reminder.icon or default_icon),
         **click_payload(reminder.click_url),
@@ -227,7 +239,7 @@ async def async_send_acknowledged(
         "subtitle": reminder.subtitle or "",
         "subject": reminder.subtitle or "",
         "channel": reminder.channel or "",
-        "tag": notification_tag(reminder.id),
+        "tag": reminder_notification_tag(reminder),
         **icon_payload(reminder.icon or default_icon),
     }
     await hass.services.async_call(
@@ -244,3 +256,39 @@ async def async_send_acknowledged(
             "data": {key: value for key, value in data.items() if value},
         },
     )
+
+CLEAR_MESSAGE = "clear_notification"
+
+
+async def async_clear(
+    hass: HomeAssistant, tags: list[str], notify_service: str = ""
+) -> int:
+    """Remove the notifications carrying these tags, returning how many were sent.
+
+    The companion app clears a notification when it receives another one with the
+    same tag and the message `clear_notification` (see "Clearing" in its
+    notification docs), so this is a normal notification call with a body the app
+    reads as an instruction. It goes through the same target resolution as a
+    reminder, because a clear sent to a different service than the original
+    notification would reach the wrong device and remove nothing.
+    """
+    wanted = [str(tag).strip() for tag in tags if str(tag).strip()]
+    if not wanted:
+        return 0
+    # The same resolution the send used, deliberately including a generic target
+    # such as `notify.notify`: that is where the notification went, so that is
+    # where its clear has to go. A device that never held the tag ignores it.
+    domain, service = resolve_notify_target(notify_service, hass.services.has_service)
+    if not hass.services.has_service(domain, service):
+        raise HomeAssistantError(
+            f"notify service '{domain}.{service}' does not exist"
+        )
+    for tag in wanted:
+        await hass.services.async_call(
+            domain,
+            service,
+            {"message": CLEAR_MESSAGE, "data": {"tag": tag}},
+            blocking=True,
+        )
+    _LOGGER.debug("Cleared %s notification(s) on %s.%s", len(wanted), domain, service)
+    return len(wanted)

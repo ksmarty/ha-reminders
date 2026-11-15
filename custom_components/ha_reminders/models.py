@@ -163,6 +163,11 @@ class Reminder:
     # default", so existing reminders are unaffected.
     click_url: str = ""
 
+    # Notification tag. Empty means the tag is derived from the id (see
+    # `notify.notification_tag`); a caller that wants to clear the notification
+    # later sends its own value here and repeats it in `clear`.
+    tag: str = ""
+
     # ------------------------------------------------------------------
     # Serialization
     # ------------------------------------------------------------------
@@ -243,6 +248,7 @@ class Reminder:
                     or DEFAULT_ACKNOWLEDGE_NOTIFICATION_BODY
                 ),
                 click_url=str(get("click_url") or ""),
+                tag=str(get("tag") or ""),
             )
         except (TypeError, ValueError):
             raise
@@ -291,6 +297,7 @@ class Reminder:
             "acknowledge_notification_title": self.acknowledge_notification_title,
             "acknowledge_notification_body": self.acknowledge_notification_body,
             "click_url": self.click_url,
+            "tag": self.tag,
         }
 
     # ------------------------------------------------------------------

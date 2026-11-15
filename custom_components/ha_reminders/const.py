@@ -79,6 +79,10 @@ FIELD_ICON = "icon"
 # Tap target: what the companion app opens when the notification itself is
 # tapped (as opposed to an action button).
 FIELD_CLICK_URL = "click_url"
+# Notification tag: what the companion app uses to replace or clear a
+# notification. A caller that sends one can clear it later with the same value;
+# a reminder without one keeps the tag derived from its id.
+FIELD_TAG = "tag"
 FIELD_COLOR = "color"
 FIELD_CHANNEL = "channel"
 FIELD_CHANNEL_IMPORTANCE = "channel_importance"
@@ -140,6 +144,7 @@ ONE_OFF_TRACKED_LIMIT = 100
 
 # Services
 SERVICE_NOTIFY = "notify"
+SERVICE_CLEAR = "clear"
 SERVICE_CREATE = "create"
 SERVICE_UPDATE = "update"
 SERVICE_DELETE = "delete"

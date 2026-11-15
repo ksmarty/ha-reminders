@@ -53,6 +53,9 @@ def test_response_capable_services_declare_support(tmp_path) -> None:
     # `notify` hands back the id its action buttons answer to, so a caller that
     # wants to complete or snooze the notification needs the response.
     assert registered["notify"].supports_response is SupportsResponse.OPTIONAL
+    # `clear` answers with how many notifications it asked the device to drop, so
+    # a caller can tell a clear that reached nothing from one that worked.
+    assert registered["clear"].supports_response is SupportsResponse.OPTIONAL
 
 
 def test_mutating_services_need_no_response(tmp_path) -> None:

@@ -93,7 +93,8 @@ integration itself, so there is no manual resource URL to add.
 | Service | Description |
 | --- | --- |
 | `ha_reminders.create` | Create a reminder. Required: `title` (`message` is optional — without it the notification repeats the title). Returns `reminder_id`. |
-| `ha_reminders.notify` | Send a one-off notification now, storing nothing — no reminder in the panel, no sensor entity; the notification is forgotten when Home Assistant restarts. Required: `title`. Returns `notification_id`. |
+| `ha_reminders.notify` | Send a one-off notification now, storing nothing — no reminder in the panel, no sensor entity; the notification is forgotten when Home Assistant restarts. Required: `title`. Optional `tag` names the notification so `clear` can remove it. Returns `notification_id`. |
+| `ha_reminders.clear` | Remove a notification by its tag (`tag`, one or a list). Required: `tag`. Returns `cleared`. |
 | `ha_reminders.update` | Update a reminder (`reminder_id` + partial payload; listed fields replace the whole value). |
 | `ha_reminders.delete` | Delete a reminder (`reminder_id`). |
 | `ha_reminders.list` | List all reminders with runtime status (no arguments). |
@@ -215,6 +216,39 @@ The service returns `notification_id`, which `ha_reminders.complete` and
 most recent 100 are held in memory, and a restart drops them. Nothing being
 stored also means a one-off notification never fires on its own: send it from a
 trigger, or from whatever decides the moment has come.
+
+#### Clearing a notification you sent
+
+Name the notification with `tag` when you send it, and take it away later with
+`ha_reminders.clear` and the same tag. This is the companion app's documented
+clearing (`message: clear_notification` under the original tag), so the
+notification disappears from the phone instead of waiting to be swiped away.
+
+```yaml
+# Send it
+service: ha_reminders.notify
+data:
+  title: Stretch
+  message: Ten minutes before bed
+  tag: habit-h1-2026-05-04
+  notify_service: notify.mobile_app_pixel_8
+
+# And, once it is done, take it away
+service: ha_reminders.clear
+data:
+  tag: habit-h1-2026-05-04
+```
+
+`tag` also accepts a list, which clears several notifications in one call — one
+per day, for instance. Without a `tag`, a one-off falls back to a tag derived
+from its `notification_id`; sending the same notification again still replaces
+the previous one, but nothing outside the integration can name it, so it cannot
+be cleared by tag.
+
+The clear goes to the notification service the original sent through — the
+`notify_service` of the clear call, or the configured default. A device that
+never held the tag ignores the message, which is why a clear aimed at the wrong
+device removes nothing rather than something else.
 
 ### LLM-based assistants
 
