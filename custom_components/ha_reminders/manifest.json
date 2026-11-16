@@ -13,5 +13,5 @@
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/ksmarty/ha-reminders/issues",
   "requirements": [],
-  "version": "1.8.0"
+  "version": "1.9.0"
 }
