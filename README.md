@@ -347,6 +347,10 @@ Every reminder is exposed as a sensor:
   carry the full reminder payload plus `status`, `next_fire`, `snooze_until`
   and `notified_count`.
 
+The entity is created with the reminder and deleted with it — no orphan
+entities are left in **Settings → Entities**. Entries earlier versions left
+behind are cleaned up the next time the integration loads.
+
 Useful for automations, e.g. a badge for active reminders:
 
 ```yaml

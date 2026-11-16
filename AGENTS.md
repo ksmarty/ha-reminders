@@ -172,6 +172,14 @@ Release steps (after user approval):
 - **Sensor-to-card contract** — the card renders by scanning
   `sensor.ha_reminder_*` states; the `reminder_id` attribute is the key, so
   sensor attributes must always include it.
+- **Deleting a reminder must delete its entity, registry entry included** —
+  `Entity.async_remove()` alone leaves a non-disabled entity-registry entry,
+  so HA kept the sensor as a restored `unavailable` entity and kept the
+  entity id reserved (the next reminder landed on `..._2`). `sensor.py` now
+  removes the registry entry (`_async_remove_sensor`) and prunes entries whose
+  reminder no longer exists on setup (`_prune_orphan_sensors`, which also
+  heals installs that accumulated them). Keep both paths if the platform is
+  ever reworked: `tests/test_sensor_platform.py` fails without them.
 - **Voice duplicates** — `find_similar_reminder` (in `intents.py`) refuses a
   second reminder whose title matches an existing enabled one, because speech
   recognition means a repeat often arrives with a misheard word ("sweater" →

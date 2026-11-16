@@ -13,6 +13,7 @@ from typing import Any
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -22,6 +23,59 @@ from .coordinator import ReminderCoordinator
 from .util import slugify
 
 _LOGGER = logging.getLogger(__name__)
+
+_ENTITY_DOMAIN = "sensor"
+
+
+def _reminder_id_from_unique_id(unique_id: str) -> str | None:
+    """Return the reminder id inside a sensor's unique id, or None."""
+    prefix = f"{DOMAIN}_"
+    if not unique_id.startswith(prefix):
+        return None
+    return unique_id[len(prefix) :]
+
+
+async def _async_remove_sensor(hass: HomeAssistant, sensor: ReminderSensor) -> None:
+    """Remove a deleted reminder's sensor from HA *and* the entity registry.
+
+    `Entity.async_remove()` on its own leaves a non-disabled registry entry
+    behind: HA then keeps the entity as a restored `unavailable` state and
+    keeps the entity id reserved, so deleted reminders pile up in
+    Settings → Entities and a new reminder that wants the same id gets a `_2`
+    suffix. Dropping the registry entry is what actually deletes the entity.
+    """
+    if sensor.hass is not None:
+        # force_remove: the state must go, not be parked as `unavailable`.
+        await sensor.async_remove(force_remove=True)
+
+    registry = er.async_get(hass)
+    if registry is None:
+        return
+    entity_entry = registry.async_get_entity_id(
+        _ENTITY_DOMAIN, DOMAIN, sensor.unique_id
+    )
+    if entity_entry is not None:
+        registry.async_remove(entity_entry)
+
+
+def _prune_orphan_sensors(hass: HomeAssistant, live_ids: set[str]) -> None:
+    """Drop registry entries whose reminder no longer exists.
+
+    Covers deletions that happened while HA was not running and the entries
+    older versions left behind (they never removed the registry entry).
+    """
+    registry = er.async_get(hass)
+    if registry is None:
+        return
+
+    for entity_entry in list(registry.entities.values()):
+        if entity_entry.platform != DOMAIN:
+            continue
+        if entity_entry.domain != _ENTITY_DOMAIN:
+            continue
+        reminder_id = _reminder_id_from_unique_id(entity_entry.unique_id)
+        if reminder_id is not None and reminder_id not in live_ids:
+            registry.async_remove(entity_entry.entity_id)
 
 
 async def async_setup_entry(
@@ -54,8 +108,9 @@ async def async_setup_entry(
         for reminder_id in list(sensors):
             if reminder_id not in by_id:
                 stale = sensors.pop(reminder_id)
-                hass.async_create_task(stale.async_remove())
+                hass.async_create_task(_async_remove_sensor(hass, stale))
 
+    _prune_orphan_sensors(hass, {reminder.id for reminder in coordinator.data})
     _sync()
     entry.async_on_unload(coordinator.async_add_listener(_sync))
 
